@@ -9,7 +9,7 @@ class Voxel51API:
 
     # SIGN-UP AND AUTHENTICATION
 
-    def getHomePage(self):
+    def get_home_page(self):
         endpoint = 'http://localhost:4000'
         res = requests.get(endpoint)
         self.print_rsp(res)
@@ -34,67 +34,76 @@ class Voxel51API:
 
     # DATA FUNCTIONS
 
-    def getDataPage(self):
+    def get_data_page(self):
         endpoint = self.url + '/data'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def listDataFiles(self):
+    def list_data_files(self):
         endpoint = self.url + '/data/list'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def getDataSpecs(self, fileID):
+    def get_data_specs(self, fileID):
+        fileID = str(fileID)
         endpoint = self.url + '/data/' + fileID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def addDataFiles(self, files, groupName='Not Applicable'):
-        endpoint = self.url + '/data'
+    # TODO returns an error for file.close() (str cannot be closed)
+    def add_data_files(self, files, groupName='Not Applicable'):
+        endpoint = self.url + '/data/upload'
         header = {'Authorization': 'Bearer ' + self.token}
         input_files = []
         for file in files:
-            input_files.add('files', (file, open(file, 'rb')))
-        print(input_files)
-        res = requests.post(endpoint, headers=header, files=input_files)
-        self.print_rsp(res)
-        return res
+            print(file)
+            input_files.append(('files', open(file, 'rb')))
+        try:
+            print(input_files)
+            res = requests.post(endpoint, headers=header, files=input_files)
+            self.print_rsp(res)
+        finally:
+            for file in input_files:
+                # [0] contains files key; [1] contains actual file
+                file[1].close()
+            return res
 
-    def deleteSingleFile(self, fileID):
+    # TODO Fix error on print res.json() for success
+    def delete_file(self, fileID):
         endpoint = self.url + '/data/' + fileID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.delete(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def downloadSingleFile(self, fileID):
+    def download_file(self, fileID):
         endpoint = self.url + '/data/' + fileID + '/download'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def getDataSetNames(self, groupName):
+    def get_data_set(self, groupName):
         endpoint = self.url + '/data/group/' + groupName
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def deleteDataSet(self, groupName):
+    def delete_data_set(self, groupName):
         endpoint = self.url + '/data/group/' + groupName
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.delete(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def downloadDataSet(self, groupName):
+    def download_data_set(self, groupName):
         endpoint = self.url + '/data/group/' + groupName + '/download'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -103,45 +112,45 @@ class Voxel51API:
 
     # TASK FUNCTIONS
 
-    def tasksPage(self):
+    def tasks_page(self):
         endpoint = self.url + '/task'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def createTask(self, file, params):
+    def create_task(self, file, params):
         pass
 
-    def getCurrentTasks(self):
+    def get_current_tasks(self):
         endpoint = self.url + '/task/list'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def runTask(self, taskID):
+    def run_task(self, taskID):
         endpoint = self.url + '/task/' + taskID + '/run'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def pauseTask(self, taskID):
+    def pause_task(self, taskID):
         endpoint = self.url + '/task/' + taskID + '/pause'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def stopTask(self, taskID):
+    def stop_task(self, taskID):
         endpoint = self.url + '/task/' + taskID + '/stop'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def changeTaskStatus(self, taskID, status):
+    def change_task_status(self, taskID, status):
         if status != 'stop' or status != 'pause' or status != 'run':
             return 'IncorrectStatusError'
 
@@ -151,28 +160,28 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    def deleteTask(self, taskID):
+    def delete_task(self, taskID):
         endpoint = self.url + '/task/' + taskID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.delete(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def getTaskStatus(self, taskID):
+    def get_task_status(self, taskID):
         endpoint = self.url + '/task/' + taskID + '/status'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def getTaskDetails(self, taskID):
+    def get_task_details(self, taskID):
         endpoint = self.url + '/task/' + taskID + '/specs'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def getTaskOutput(self, taskID):
+    def get_task_output(self, taskID):
         endpoint = self.url + '/task/' + taskID + '/output'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -181,14 +190,14 @@ class Voxel51API:
 
     # PROCESS/DOC FUNCTIONS
 
-    def docsPage(self):
+    def docs_page(self):
         endpoint = self.url + '/process'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def getMethodDetails(self, methodID):
+    def get_method_details(self, methodID):
         endpoint = self.url + '/process/' + methodID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -198,6 +207,6 @@ class Voxel51API:
     # UTILITY FUNCTIONS
 
     def print_rsp(self, res):
-        pprint.pprintrint(res.url)
-        pprint.pprintrint(res.status_code)
-        pprint.pprintrint(res.json())
+        pprint.pprint(res.url)
+        pprint.pprint(res.status_code)
+        pprint.pprint(res.json())

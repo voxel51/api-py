@@ -6,24 +6,43 @@ api = Voxel51API()
 print('The following example demonstrates a typical user-case\n')
 print('Sign-up')
 api.signup('testCaseUser', 'admin')
-os.system('pause')
+input('Press enter to continue...')
 
 print('\nGet authentication token')
 api.authenticate('testCaseUser', 'admin')
-os.system('pause')
+input('Press enter to continue...')
 
 print('\nCheck data page for available methods')
-api.getDataPage()
+api.get_data_page()
+input('Press enter to continue...')
 
 print('\nList all current data files on record')
-api.listDataFiles()
+api.list_data_files()
+input('Press enter to continue...')
 
 print('\nAs no data files are present, we need to upload some')
-file1 = './use-case-data/ex1.txt'
-file2 = './use-case-data/ex2.mp4'
-file3 = './use-case-data/ex4.jpeg'
+file1 = os.getcwd() + '/use-case-data/ex1.txt'
+file2 = os.getcwd() + '/use-case-data/ex2.mp4'
+file3 = os.getcwd() + '/use-case-data/ex3.jpeg'
 multiple_files = [file1, file2, file3]
 
-api.addDataFiles(multiple_files, 'testData')
+api.add_data_files(multiple_files, 'testData')
+input('Press enter to continue...')
 
 print('\nNow check that the files exist')
+api.list_data_files()
+input('Press enter to continue...')
+
+print('\nTo see specifics on one file, do the following')
+api.get_data_specs('1')
+input('Press enter to continue...')
+
+print('\nCheck to make sure all the data files are there')
+api.list_data_files()
+
+print('\nGet the details of just one file')
+api.get_data_specs('1')
+input('Press enter to continue...')
+
+print('\nDeleting a file you do not want anymore')
+api.delete_file('3')
