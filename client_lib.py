@@ -1,5 +1,6 @@
 import requests
 import pprint
+import json
 
 
 class Voxel51API:
@@ -80,6 +81,7 @@ class Voxel51API:
             return res
 
     def delete_file(self, fileID):
+        fileID = str(fileID)
         endpoint = self.url + '/data/' + fileID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.delete(endpoint, headers=header)
@@ -88,6 +90,7 @@ class Voxel51API:
 
     # TODO Finish testing this function
     def download_file(self, fileID):
+        fileID = str(fileID)
         endpoint = self.url + '/data/' + fileID + '/download'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -118,7 +121,6 @@ class Voxel51API:
 
     # TASK FUNCTIONS
 
-    # TODO Test
     def tasks_page(self):
         endpoint = self.url + '/task'
         header = {'Authorization': 'Bearer ' + self.token}
@@ -127,8 +129,15 @@ class Voxel51API:
         return res
 
     # TODO Test
-    def create_task(self, file, params):
-        pass
+    def create_task(self, filename):
+        endpoint = self.url + '/task'
+        header = {'Authorization': 'Bearer ' + self.token}
+        f = open(filename, 'rb')
+        data = json.load(f)
+        res = requests.post(endpoint, headers=header, data=data)
+        self.print_rsp(res)
+        file.close()
+        return res
 
     # TODO Test
     def get_current_tasks(self):
@@ -140,6 +149,7 @@ class Voxel51API:
 
     # TODO Test
     def run_task(self, taskID):
+        taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/run'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
@@ -148,6 +158,7 @@ class Voxel51API:
 
     # TODO Test
     def pause_task(self, taskID):
+        taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/pause'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
@@ -156,14 +167,16 @@ class Voxel51API:
 
     # TODO Test
     def stop_task(self, taskID):
+        taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/stop'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    # TODO Test
+    # TODO Test Necessary to implement?
     def change_task_status(self, taskID, status):
+        taskID = str(taskID)
         if status != 'stop' or status != 'pause' or status != 'run':
             return 'IncorrectStatusError'
 
@@ -175,14 +188,16 @@ class Voxel51API:
 
     # TODO Test
     def delete_task(self, taskID):
+        taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.delete(endpoint, headers=header)
-        self.print_rsp(res)
+        pprint.pprint(res)
         return res
 
     # TODO Test
     def get_task_status(self, taskID):
+        taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/status'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -191,6 +206,7 @@ class Voxel51API:
 
     # TODO Test
     def get_task_details(self, taskID):
+        taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/specs'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -199,6 +215,7 @@ class Voxel51API:
 
     # TODO Test
     def get_task_output(self, taskID):
+        taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/output'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -214,16 +231,15 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test
     def list_methods(self):
         endpoint = self.url + '/process/list'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
-        self.print_res(res)
+        self.print_rsp(res)
         return res
 
-    # TODO Test
     def get_method_details(self, methodID):
+        methodID = str(methodID)
         endpoint = self.url + '/process/' + methodID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
@@ -237,6 +253,12 @@ class Voxel51API:
         pprint.pprint(res.status_code)
         pprint.pprint(res.json())
 
-    # TODO save to hidden file on local disk
     def save_token(self):
-        pass
+        f = open('.api-token.txt', 'w')
+        f.write(self.token)
+        f.close()
+
+    def load_token(self):
+        f = open('.api-token.txt', 'rb')
+        self.token = f.readline()
+        f.close()

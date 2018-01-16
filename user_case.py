@@ -51,3 +51,39 @@ input('Press enter to continue...\n')
 print('\nGet remaining files by group name')
 api.get_data_set('testData')
 input('Press enter to continue...\n')
+
+print('\nSee what methods are available for tasks')
+api.tasks_page()
+input('Press enter to continue...\n')
+
+print('\nSee if you have any current tasks')
+api.get_current_tasks()
+input('Press enter to continue...\n')
+
+print('\nTry to pause the running task')
+api.pause_task(1)
+input('Press enter to continue...\n')
+
+print('\nRun the task again')
+api.run_task(1)
+input('Press enter to continue...\n')
+
+print('\nStop the task')
+api.stop_task(1)
+input('Press enter to continue...\n')
+
+print('\nDelete the task we do not want')
+api.delete_task(1)
+input('Press enter to continue...\n')
+
+print('\nCheck the status of the other task')
+api.get_task_status(2)
+input('Press enter to continue...\n')
+
+print('\nRemind ourselves of the task details')
+api.get_task_details(2)
+input('Press enter to continue...\n')
+
+print('\nGet the output from the completed task')
+api.get_task_output(2)
+input('Press enter to continue...\n')
