@@ -21,13 +21,13 @@ class Voxel51API:
             'username': username,
             'password': password,
         }
-        endpoint = 'http://localhost:4000/sign-up'
+        endpoint = 'http://localhost:4000/v1/sign-up'
         res = requests.post(endpoint, data=data)
         self.print_rsp(res)
         return res
 
     def authenticate(self, username, password):
-        endpoint = 'http://localhost:4000/authenticate'
+        endpoint = 'http://localhost:4000/v1/authenticate'
         res = requests.post(endpoint, auth=(username, password))
         self.print_rsp(res)
         self.token = res.json()['access_token']
@@ -88,7 +88,6 @@ class Voxel51API:
         pprint.pprint(res)
         return res
 
-    # TODO Finish testing this function
     def download_file(self, fileID):
         fileID = str(fileID)
         endpoint = self.url + '/data/' + fileID + '/download'
@@ -111,7 +110,6 @@ class Voxel51API:
         pprint.pprint(res)
         return res
 
-    # TODO Finish testing this function
     def download_data_set(self, groupName):
         endpoint = self.url + '/data/group/' + groupName + '/download'
         header = {'Authorization': 'Bearer ' + self.token}
@@ -128,18 +126,20 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test
     def create_task(self, filename):
         endpoint = self.url + '/task'
         header = {'Authorization': 'Bearer ' + self.token}
         f = open(filename, 'rb')
-        data = json.load(f)
-        res = requests.post(endpoint, headers=header, data=data)
+        g = json.load(f)
+        f.close()
+        f = open(filename, 'rb')
+        files = []
+        files.append(('file', f))
+        res = requests.post(endpoint, headers=header, files=files, data=g)
         self.print_rsp(res)
-        file.close()
+        f.close()
         return res
 
-    # TODO Test
     def get_current_tasks(self):
         endpoint = self.url + '/task/list'
         header = {'Authorization': 'Bearer ' + self.token}
@@ -147,7 +147,6 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test
     def run_task(self, taskID):
         taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/run'
@@ -156,7 +155,6 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test
     def pause_task(self, taskID):
         taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/pause'
@@ -165,7 +163,6 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test
     def stop_task(self, taskID):
         taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/stop'
@@ -174,19 +171,6 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test Necessary to implement?
-    def change_task_status(self, taskID, status):
-        taskID = str(taskID)
-        if status != 'stop' or status != 'pause' or status != 'run':
-            return 'IncorrectStatusError'
-
-        endpoint = self.url + '/task/' + taskID + '/' + status
-        header = {'Authorization': 'Bearer ' + self.token}
-        res = requests.put(endpoint, headers=header)
-        self.print_rsp(res)
-        return res
-
-    # TODO Test
     def delete_task(self, taskID):
         taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID
@@ -195,7 +179,6 @@ class Voxel51API:
         pprint.pprint(res)
         return res
 
-    # TODO Test
     def get_task_status(self, taskID):
         taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/status'
@@ -204,7 +187,6 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test
     def get_task_details(self, taskID):
         taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/specs'
@@ -213,7 +195,6 @@ class Voxel51API:
         self.print_rsp(res)
         return res
 
-    # TODO Test
     def get_task_output(self, taskID):
         taskID = str(taskID)
         endpoint = self.url + '/task/' + taskID + '/output'

@@ -1,5 +1,10 @@
 from client_lib import Voxel51API
 import os
+import sqlite3
+
+
+# seed a complete task for final function calls
+con = sqlite3.connect('../database.sqlite')
 
 api = Voxel51API()
 
@@ -52,8 +57,17 @@ print('\nGet remaining files by group name')
 api.get_data_set('testData')
 input('Press enter to continue...\n')
 
+print('\nDownload remaining files by group name')
+api.download_data_set('testData')
+input('Press enter to continue...\n')
+
 print('\nSee what methods are available for tasks')
 api.tasks_page()
+input('Press enter to continue...\n')
+
+file4 = os.getcwd() + '/use-case-data/params.json'
+print('\nCreate a new task using one of the files')
+api.create_task(file4)
 input('Press enter to continue...\n')
 
 print('\nSee if you have any current tasks')
@@ -72,18 +86,18 @@ print('\nStop the task')
 api.stop_task(1)
 input('Press enter to continue...\n')
 
-print('\nDelete the task we do not want')
-api.delete_task(1)
-input('Press enter to continue...\n')
+# change the isComplete status to true
+seed = "UPDATE Tasks SET isComplete = 'true' WHERE Tasks.name = 'testCase'"
+with con:
+    cur = con.cursor()
+    cur.execute(seed)
 
-print('\nCheck the status of the other task')
-api.get_task_status(2)
-input('Press enter to continue...\n')
+con.close()
 
 print('\nRemind ourselves of the task details')
-api.get_task_details(2)
+api.get_task_details(1)
 input('Press enter to continue...\n')
 
 print('\nGet the output from the completed task')
-api.get_task_output(2)
+api.get_task_output(1)
 input('Press enter to continue...\n')
