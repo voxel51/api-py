@@ -10,7 +10,7 @@ Welcome to Python Client Library Voxel51 API's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   modules
 
 Indices and tables
 ==================
