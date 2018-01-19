@@ -17,6 +17,7 @@ import json
 class API:
     """Python client library for Voxel51 API"""
 
+    # TODO Refactor to work with environment variable then look for hidden file
     def __init__(self):
         """Constructor of the API class."""
 
@@ -39,6 +40,7 @@ class API:
         self.print_rsp(res)
         return res
 
+    # TODO Remove before production deployment
     def signup(self, username, password):
         """Creates a new client with username:password.
         If the passed username is already in use, the sign-up will not be
@@ -62,6 +64,7 @@ class API:
         self.print_rsp(res)
         return res
 
+    # TODO Remove before production deployment
     def authenticate(self, username, password):
         """Retrieves valid JSON web token if valid username:password supplied.
         Provides a valid authentication token if a valid username:password
@@ -460,6 +463,7 @@ class API:
 
     # UTILITY FUNCTIONS
 
+    # TODO Remove before production deployment
     def print_rsp(self, res):
         """Utility function to pretty print the response from requests.
 
@@ -474,6 +478,7 @@ class API:
         pprint.pprint(res.status_code)
         pprint.pprint(res.json())
 
+    # TODO Remove before production deployment
     def save_token(self):
         """Utility function to write and save API token to file for future use.
 
@@ -485,6 +490,7 @@ class API:
         f.write(self.token)
         f.close()
 
+    # TODO Remove before production deployment
     def load_token(self):
         """Utility function to load written API token from saved file.
 
