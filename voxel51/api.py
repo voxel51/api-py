@@ -14,7 +14,7 @@ import pprint
 import json
 
 
-class ClientLibrary:
+class API:
     """Python client library for Voxel51 API"""
 
     def __init__(self):

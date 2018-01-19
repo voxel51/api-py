@@ -32,13 +32,9 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode',
-             'sphinxcontrib.napoleon']
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.viewcode',
+              'sphinxcontrib.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -53,8 +49,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Python Client Library Voxel51 API'
-copyright = '2018, D. Hodgson'
+project = 'Voxel51 API - Python Client Library'
+copyright = '2018, Voxel51, LLC'
 author = 'D. Hodgson'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -172,8 +168,5 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-
-
-
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+# intersphinx_mapping = {'https://docs.python.org/': None}

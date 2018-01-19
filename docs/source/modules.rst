@@ -1,7 +1,5 @@
-python_client_lib
-=================
+dist
+====
 
 .. toctree::
    :maxdepth: 4
-
-   client_lib
