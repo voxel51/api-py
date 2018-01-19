@@ -1,4 +1,4 @@
-from voxel51api import ClientLibrary
+from voxel51.api import API
 import os
 import sqlite3
 
@@ -6,7 +6,7 @@ import sqlite3
 # seed a complete task for final function calls
 con = sqlite3.connect('../database.sqlite')
 
-api = ClientLibrary()
+api = API()
 
 print('The following example demonstrates a typical user-case\n')
 print('Sign-up')
@@ -26,9 +26,9 @@ api.list_data_files()
 input('Press enter to continue...\n')
 
 print('\nAs no data files are present, we need to upload some')
-file1 = os.getcwd() + '/use-case-data/ex1.txt'
-file2 = os.getcwd() + '/use-case-data/ex2.mp4'
-file3 = os.getcwd() + '/use-case-data/ex3.jpeg'
+file1 = os.getcwd() + '/data/ex1.txt'
+file2 = os.getcwd() + '/data/ex2.mp4'
+file3 = os.getcwd() + '/data/ex3.jpeg'
 multiple_files = [file1, file2, file3]
 
 api.add_data_files(multiple_files, 'testData')
@@ -65,7 +65,7 @@ print('\nSee what methods are available for tasks')
 api.tasks_page()
 input('Press enter to continue...\n')
 
-file4 = os.getcwd() + '/use-case-data/params.json'
+file4 = os.getcwd() + '/data/params.json'
 print('\nCreate a new task using one of the files')
 api.create_task(file4)
 input('Press enter to continue...\n')
