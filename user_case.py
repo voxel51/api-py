@@ -1,4 +1,4 @@
-from client_lib import Voxel51API
+from voxel51api import ClientLibrary
 import os
 import sqlite3
 
@@ -6,7 +6,7 @@ import sqlite3
 # seed a complete task for final function calls
 con = sqlite3.connect('../database.sqlite')
 
-api = Voxel51API()
+api = ClientLibrary()
 
 print('The following example demonstrates a typical user-case\n')
 print('Sign-up')
