@@ -62,28 +62,28 @@ api.download_data_set('testData')
 input('Press enter to continue...\n')
 
 print('\nSee what methods are available for tasks')
-api.tasks_page()
+api.jobs_page()
 input('Press enter to continue...\n')
 
 file4 = os.getcwd() + '/data/params.json'
 print('\nCreate a new task using one of the files')
-api.create_task(file4)
+api.create_job(file4)
 input('Press enter to continue...\n')
 
 print('\nSee if you have any current tasks')
-api.get_current_tasks()
+api.get_current_jobs()
 input('Press enter to continue...\n')
 
 print('\nTry to pause the running task')
-api.pause_task(1)
+api.pause_job(1)
 input('Press enter to continue...\n')
 
 print('\nRun the task again')
-api.run_task(1)
+api.run_job(1)
 input('Press enter to continue...\n')
 
 print('\nStop the task')
-api.stop_task(1)
+api.stop_job(1)
 input('Press enter to continue...\n')
 
 # change the isComplete status to true
@@ -95,9 +95,9 @@ with con:
 con.close()
 
 print('\nRemind ourselves of the task details')
-api.get_task_details(1)
+api.get_job_details(1)
 input('Press enter to continue...\n')
 
 print('\nGet the output from the completed task')
-api.get_task_output(1)
+api.get_job_output(1)
 input('Press enter to continue...\n')
