@@ -91,7 +91,7 @@ class API:
         """Returns hypermedia on available data route functions.
 
         Returns:
-            HTTP response with hypermedia on available methods.
+            HTTP response with hypermedia on available algorithms.
         """
 
         endpoint = self.url + '/data'
@@ -246,21 +246,21 @@ class API:
 
     # TASK FUNCTIONS
 
-    def tasks_page(self):
-        """Returns hypermedia on available task functions.
+    def jobs_page(self):
+        """Returns hypermedia on available job functions.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        endpoint = self.url + '/task'
+        endpoint = self.url + '/job'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def create_task(self, filename):
-        """Creates a new task for an ETA backend pipeline.
+    def create_job(self, filename):
+        """Creates a new job for an ETA backend pipeline.
         Requires a valid JSON file specifying parameters and key fields
         to be uploaded with it.
 
@@ -271,7 +271,7 @@ class API:
             HTTP response Success 201; 4xx response if error
         """
 
-        endpoint = self.url + '/task'
+        endpoint = self.url + '/job'
         header = {'Authorization': 'Bearer ' + self.token}
         f = open(filename, 'rb')
         g = json.load(f)
@@ -284,133 +284,133 @@ class API:
         f.close()
         return res
 
-    def get_current_tasks(self):
-        """Returns all existing tasks related to the client ID.
+    def get_current_jobs(self):
+        """Returns all existing jobs related to the client ID.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        endpoint = self.url + '/task/list'
+        endpoint = self.url + '/job/list'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def run_task(self, taskID):
-        """Modifies the task status to run if paused or stopped.
+    def run_job(self, jobID):
+        """Modifies the job status to run if paused or stopped.
 
         Args:
-            taskID (str, int): Unique task identifying number.
+            jobID (str, int): Unique job identifying number.
 
         Returns:
             HTTP response Success 201; 4xx response if error
         """
 
-        taskID = str(taskID)
-        endpoint = self.url + '/task/' + taskID + '/run'
+        jobID = str(jobID)
+        endpoint = self.url + '/job/' + jobID + '/run'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def pause_task(self, taskID):
-        """Modifies the task status to pause if currently running.
+    def pause_job(self, jobID):
+        """Modifies the job status to pause if currently running.
 
         Args:
-            taskID (str, int): Unique task identifying number.
+            jobID (str, int): Unique job identifying number.
 
         Returns:
             HTTP response Success 201; 4xx response if error
         """
 
-        taskID = str(taskID)
-        endpoint = self.url + '/task/' + taskID + '/pause'
+        jobID = str(jobID)
+        endpoint = self.url + '/job/' + jobID + '/pause'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def stop_task(self, taskID):
-        """Modifes the task status to stop if paused or running.
+    def stop_job(self, jobID):
+        """Modifes the job status to stop if paused or running.
 
         Args:
-            taskID (str, int): Unique task identifying number.
+            jobID (str, int): Unique job identifying number.
 
         Returns:
             HTTP response Success 201; 4xx response if error
         """
 
-        taskID = str(taskID)
-        endpoint = self.url + '/task/' + taskID + '/stop'
+        jobID = str(jobID)
+        endpoint = self.url + '/job/' + jobID + '/stop'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.put(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def delete_task(self, taskID):
-        """Deletes a task if and only if it is currently stopped.
+    def delete_job(self, jobID):
+        """Deletes a job if and only if it is currently stopped.
 
         Args:
-            taskID (str, int): Unique task identifying number.
+            jobID (str, int): Unique job identifying number.
 
         Returns:
             HTTP response Success 201; 4xx response if error
         """
 
-        taskID = str(taskID)
-        endpoint = self.url + '/task/' + taskID
+        jobID = str(jobID)
+        endpoint = self.url + '/job/' + jobID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.delete(endpoint, headers=header)
         pprint.pprint(res)
         return res
 
-    def get_task_status(self, taskID):
-        """Returns current status of specified task.
+    def get_job_status(self, jobID):
+        """Returns current status of specified job.
 
         Args:
-            taskID (str, int): Unique task identifying number.
+            jobID (str, int): Unique job identifying number.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        taskID = str(taskID)
-        endpoint = self.url + '/task/' + taskID + '/status'
+        jobID = str(jobID)
+        endpoint = self.url + '/job/' + jobID + '/status'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def get_task_details(self, taskID):
-        """Returns details on specified task.
+    def get_job_details(self, jobID):
+        """Returns details on specified job.
 
         Args:
-            taskID (str, int): Unique task identifying number.
+            jobID (str, int): Unique job identifying number.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        taskID = str(taskID)
-        endpoint = self.url + '/task/' + taskID + '/specs'
+        jobID = str(jobID)
+        endpoint = self.url + '/job/' + jobID + '/specs'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def get_task_output(self, taskID):
-        """Returns output if the specified task is complete.
+    def get_job_output(self, jobID):
+        """Returns output if the specified job is complete.
 
         Args:
-            taskID (str, int): Unique task identifying number.
+            jobID (str, int): Unique job identifying number.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        taskID = str(taskID)
-        endpoint = self.url + '/task/' + taskID + '/output'
+        jobID = str(jobID)
+        endpoint = self.url + '/job/' + jobID + '/output'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
@@ -419,43 +419,43 @@ class API:
     # PROCESS/DOC FUNCTIONS
 
     def docs_page(self):
-        """Returns hypermedia on documentation of available ETA methods.
+        """Returns hypermedia on documentation of available ETA algorithms.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        endpoint = self.url + '/process'
+        endpoint = self.url + '/info'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def list_methods(self):
-        """Returns a list of all available ETA backend methods.
+    def list_algorithms(self):
+        """Returns a list of all available ETA backend algorithms.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        endpoint = self.url + '/process/list'
+        endpoint = self.url + '/info/list'
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
         return res
 
-    def get_method_details(self, methodID):
-        """Returns details on the specified ETA backend method if it exists.
+    def get_algorithm_details(self, algorithmID):
+        """Returns details on the specified ETA backend algorithm if it exists.
 
         Args:
-            methodID (str, int): Unique ETA method identifying number.
+            algorithmID (str, int): Unique ETA algorithm identifying number.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        methodID = str(methodID)
-        endpoint = self.url + '/process/' + methodID
+        algorithmID = str(algorithmID)
+        endpoint = self.url + '/info/' + algorithmID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         self.print_rsp(res)
