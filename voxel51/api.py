@@ -10,8 +10,10 @@ David Hodgson, david@voxel51.com
 '''
 
 import requests
-import pprint
 import json
+import auth
+
+BASE_API_URL = 'http://localhost:4000/v1'
 
 
 class API:
@@ -21,12 +23,15 @@ class API:
     def __init__(self):
         """Constructor of the API class."""
 
-        self.url = 'http://localhost:4000/v1'
+        self.url = BASE_API_URL
         """str: Base url to access API."""
-        self.token = ''
+        self.token = auth.find_token()
         """str: Stores JSON web token for authentication"""
+        if (self.token < 0):
+            raise Exception('No token found')
+            return -1
 
-    # SIGN-UP AND AUTHENTICATION
+        self.header = {'Authorization': 'Bearer ' + self.token}
 
     def get_home_page(self):
         """Returns hypermedia detailing basic steps to access the API.
@@ -35,54 +40,8 @@ class API:
             HTTP response with hypermedia. Error status is bad request.
         """
 
-        endpoint = 'http://localhost:4000'
+        endpoint = self.url
         res = requests.get(endpoint)
-        self.print_rsp(res)
-        return res
-
-    # TODO Remove before production deployment
-    def signup(self, username, password):
-        """Creates a new client with username:password.
-        If the passed username is already in use, the sign-up will not be
-        successful. The username:password combination is used to get a valid
-        authentication token.
-
-        Args:
-            username (str): Unique username for new client
-            password (str): Password associated with username
-
-        Returns:
-            HTTP response with success; 4xx response if error
-        """
-
-        data = {
-            'username': username,
-            'password': password,
-        }
-        endpoint = 'http://localhost:4000/v1/sign-up'
-        res = requests.post(endpoint, data=data)
-        self.print_rsp(res)
-        return res
-
-    # TODO Remove before production deployment
-    def authenticate(self, username, password):
-        """Retrieves valid JSON web token if valid username:password supplied.
-        Provides a valid authentication token if a valid username:password
-        combination is attached to the HTTP request. Stores a valid token
-        to the class token attribute.
-
-        Args:
-            username (str): Unique client username
-            password (str): Password associated with username
-
-        Returns:
-            HTTP response with authentication token; 4xx response if error
-        """
-
-        endpoint = 'http://localhost:4000/v1/authenticate'
-        res = requests.post(endpoint, auth=(username, password))
-        self.print_rsp(res)
-        self.token = res.json()['access_token']
         return res
 
     # DATA FUNCTIONS
@@ -95,9 +54,8 @@ class API:
         """
 
         endpoint = self.url + '/data'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def list_data_files(self):
@@ -109,139 +67,132 @@ class API:
         """
 
         endpoint = self.url + '/data/list'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
-    def get_data_specs(self, fileID):
+    def get_data_specs(self, file_id):
         """Returns details on the specified file if exists.
 
         Returns:
             HTTP response with file details; 4xx response if error.
         """
 
-        fileID = str(fileID)
-        endpoint = self.url + '/data/' + fileID
-        header = {'Authorization': 'Bearer ' + self.token}
+        file_id = str(file_id)
+        endpoint = self.url + '/data/' + file_id
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
-    def add_data_files(self, files, groupName='Not Applicable'):
+    def add_data_files(self, files, group_name=None):
         """Posts new file(s) to the server and assigns unique ID to each file.
 
         Args:
             files (str): Array of file paths
-            groupName (str): Optional data set/group identifier
+            group_name(str): Optional data set/group identifier
 
         Returns:
             HTTP response with uploaded files; 4xx or 5xx response if error
         """
 
         endpoint = self.url + '/data/upload'
-        header = {'Authorization': 'Bearer ' + self.token}
-        data = {'groupName': groupName}
+        header = self.header
+        data = {'groupName': group_name}
         input_files = []
         for file in files:
-            print(file)
             input_files.append(('files', open(file, 'rb')))
         try:
-            print(input_files)
             res = requests.post(
                 endpoint,
                 headers=header,
                 files=input_files,
                 data=data)
 
-            self.print_rsp(res)
+        except IOError:
+            pass
+
         finally:
             for file in input_files:
                 # [0] contains files key; [1] contains actual file
                 file[1].close()
             return res
 
-    def delete_file(self, fileID):
+    def delete_file(self, file_id):
         """Deletes specified file from database if exists.
 
         Args:
-            fileID (str, int): Unique file identifying number.
+            file_id (str, int): Unique file identifying number.
 
         Returns:
             HTTP response with Success 204; 4xx response if error
         """
 
-        fileID = str(fileID)
-        endpoint = self.url + '/data/' + fileID
-        header = {'Authorization': 'Bearer ' + self.token}
+        file_id = str(file_id)
+        endpoint = self.url + '/data/' + file_id
+        header = self.header
         res = requests.delete(endpoint, headers=header)
-        pprint.pprint(res)
         return res
 
-    def download_file(self, fileID):
+    def download_file(self, file_id):
         """Downloads specified file to the /data/downloads folder.
 
         Args:
-            fileID (str, int): Unique file identifying number.
+            file_id (str, int): Unique file identifying number.
 
         Returns:
             HTTP response with downloaded file information
         """
 
-        fileID = str(fileID)
-        endpoint = self.url + '/data/' + fileID + '/download'
-        header = {'Authorization': 'Bearer ' + self.token}
+        file_id = str(file_id)
+        endpoint = self.url + '/data/' + file_id + '/download'
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
-    def get_data_set(self, groupName):
+    def get_data_set(self, group_name):
         """Returns information on specified data set if exists.
         Returns a 404 response if no set by the specified name exists.
 
         Args:
-            groupName (str): Unique data set identifying name.
+            group_name(str): Unique data set identifying name.
 
         Returns:
             HTTP response with files in data set; 4xx response if error
         """
 
-        endpoint = self.url + '/data/group/' + groupName
-        header = {'Authorization': 'Bearer ' + self.token}
+        endpoint = self.url + '/data/group/' + group_name
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
-    def delete_data_set(self, groupName):
+    def delete_data_set(self, group_name):
         """Deletes all files from specified data set if exists.
 
         Args:
-            groupName (str): Unique data set identifying name.
+            group_name(str): Unique data set identifying name.
 
         Returns:
             HTTP response Success 204; 4xx or 5xx response if error
         """
 
-        endpoint = self.url + '/data/group/' + groupName
-        header = {'Authorization': 'Bearer ' + self.token}
+        endpoint = self.url + '/data/group/' + group_name
+        header = self.header
         res = requests.delete(endpoint, headers=header)
-        pprint.pprint(res)
         return res
 
-    def download_data_set(self, groupName):
+    def download_data_set(self, group_name):
         """Downloads all files in data set to /data/downloads/ folder.
 
         Args:
-            groupName (str): Unique data set identifying name.
+            group_name(str): Unique data set identifying name.
 
         Returns:
             HTTP response Success 200; 4xx response if error
         """
 
-        endpoint = self.url + '/data/group/' + groupName + '/download'
-        header = {'Authorization': 'Bearer ' + self.token}
+        endpoint = self.url + '/data/group/' + group_name + '/download'
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     # TASK FUNCTIONS
@@ -254,9 +205,8 @@ class API:
         """
 
         endpoint = self.url + '/job'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def create_job(self, filename):
@@ -272,15 +222,16 @@ class API:
         """
 
         endpoint = self.url + '/job'
-        header = {'Authorization': 'Bearer ' + self.token}
-        f = open(filename, 'rb')
-        g = json.load(f)
-        f.close()
-        f = open(filename, 'rb')
+        header = self.header
+        g = None
         files = []
-        files.append(('file', f))
+        with open(filename, 'rb') as f:
+            g = json.load(f)
+
+        with open(filename, 'rb') as f:
+            files.append(('file', f))
+
         res = requests.post(endpoint, headers=header, files=files, data=g)
-        self.print_rsp(res)
         f.close()
         return res
 
@@ -292,9 +243,8 @@ class API:
         """
 
         endpoint = self.url + '/job/list'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def run_job(self, jobID):
@@ -309,9 +259,8 @@ class API:
 
         jobID = str(jobID)
         endpoint = self.url + '/job/' + jobID + '/run'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.put(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def pause_job(self, jobID):
@@ -326,9 +275,8 @@ class API:
 
         jobID = str(jobID)
         endpoint = self.url + '/job/' + jobID + '/pause'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.put(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def stop_job(self, jobID):
@@ -343,9 +291,8 @@ class API:
 
         jobID = str(jobID)
         endpoint = self.url + '/job/' + jobID + '/stop'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.put(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def delete_job(self, jobID):
@@ -360,9 +307,8 @@ class API:
 
         jobID = str(jobID)
         endpoint = self.url + '/job/' + jobID
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.delete(endpoint, headers=header)
-        pprint.pprint(res)
         return res
 
     def get_job_status(self, jobID):
@@ -377,9 +323,8 @@ class API:
 
         jobID = str(jobID)
         endpoint = self.url + '/job/' + jobID + '/status'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def get_job_details(self, jobID):
@@ -394,9 +339,8 @@ class API:
 
         jobID = str(jobID)
         endpoint = self.url + '/job/' + jobID + '/specs'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def get_job_output(self, jobID):
@@ -411,9 +355,8 @@ class API:
 
         jobID = str(jobID)
         endpoint = self.url + '/job/' + jobID + '/output'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     # PROCESS/DOC FUNCTIONS
@@ -426,9 +369,8 @@ class API:
         """
 
         endpoint = self.url + '/info'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def list_algorithms(self):
@@ -439,9 +381,8 @@ class API:
         """
 
         endpoint = self.url + '/info/list'
-        header = {'Authorization': 'Bearer ' + self.token}
+        header = self.header
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
 
     def get_algorithm_details(self, algorithmID):
@@ -458,25 +399,7 @@ class API:
         endpoint = self.url + '/info/' + algorithmID
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
-        self.print_rsp(res)
         return res
-
-    # UTILITY FUNCTIONS
-
-    # TODO Remove before production deployment
-    def print_rsp(self, res):
-        """Utility function to pretty print the response from requests.
-
-        Args:
-            res: HTTP response object
-
-        Returns:
-            None
-        """
-
-        pprint.pprint(res.url)
-        pprint.pprint(res.status_code)
-        pprint.pprint(res.json())
 
     # TODO Remove before production deployment
     def save_token(self):
