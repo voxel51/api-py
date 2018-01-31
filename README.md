@@ -1,34 +1,73 @@
-# Voxel51, LLC API Python Client Library
+# Voxel51 API Python Client Library
 
-This project provides a Python client library for accessing the Voxel51 API's
-core functionality. Visit Voxel51's main repository for more information on
-the video analytic services they can provide. The Python library can be
-imported and a new class instance created. This instance stores the target
-base url of the api as well any generated API authentication token.
+This package defines a Python client library for accessing the Voxel51 Vision
+Services API. The library is a thin wrapper that provides full access to all
+of the API's capabilities from Python code.
 
-## Sign-up and Authentication
-To gain access to the API, please visit the [Voxel51 API website](http://api.voxel51.com)
-to create a new account. After validating this account, get a
-[valid authentication token](http://api.voxel51.com/authenticate). **Save this
-API token in a secure location!** This token permits access to the rest of the
-API functionality.
+See the `docs/` directory for full documentation of the library.
 
-## Usage
-More details on the client library's function can be found in the included
-documentation. To use the module:
 
-```python
-from voxel51/api import API
+## Installation
 
-api = API() #creates new API instance
-
-res = api.get_home_page() # your first API call
-pprint.pprint(res) # print the HTTP response
+First, clone the repository
+```shell
+git clone https://github.com/voxel51/api-python
+cd api-python
 ```
 
-By default, the class constructor will check for the existence of an
-environment variable, `VOXEL51_API_TOKEN`, which should contain the API
-authentication token from above. If this environment variable is
-undefined, the class constructor checks for a file `.api-token.txt`.
-This file should just contain the saved authentication token.
-An error will be thrown if neither of these two options are used.
+Then install the package
+```shell
+pip install .
+```
+
+## Sign-up and Authentication
+
+To use the API, you must first create an account at [https://api.voxel51.com](
+https://api.voxel51.com). Next, download an API authentication token from
+[https://api.voxel51.com/authenticate](https://api.voxel51.com/authenticate).
+**Keep this token private**---it is your access key to the API.
+
+Each API request you make must provide a valid API token. To activate a token,
+you can either set the `VOXEL51_API_TOKEN` environment variable to point
+to your API token file:
+
+```shell
+# You can make this permanent by setting this variable
+# in your ~/.bashrc or /etc/environment
+export VOXEL51_API_TOKEN="/path/to/your/token.json"
+```
+
+Alternatively, you can activate your token using the client library:
+
+```python
+from voxel51.auth import activate_token
+
+activate_token("/path/to/your/token.json")
+```
+
+With this approach, your token is copied to a `.api-token.json` file in your
+client library distribution, so you can safely delete/move the original token
+file.
+
+
+## Usage
+
+After you have activated an API token, you have full access to the API.
+The following code block demonstrates a simple use case:
+
+```python
+from voxel51.api import API
+from pprint import pprint
+
+# Create an API instance
+api = API()
+
+# Get basic information about the API
+res = api.get_home_page()
+
+# Pretty-print the HTTP response
+pprint(res)
+```
+
+For a complete description of the supported API methods, see the documentation
+in the `docs/` directory.
