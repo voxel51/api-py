@@ -1,0 +1,15 @@
+
+__pycache__
+
+.DS_Store
+
+*.pyc
+__pycache__
+
+*.egg-info
+
+.api-token.json
+
+/docs/
+!/docs/source/
+!/docs/Makefile
