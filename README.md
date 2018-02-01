@@ -71,3 +71,47 @@ pprint(res)
 
 For a complete description of the supported API methods, see the documentation
 in the `docs/` directory.
+
+## Additional Examples (Use Case)
+
+List all Data on Record
+
+```python
+res = api.list_data_files()
+```
+
+Posting Data with Optional Data Set Name
+
+```python
+res = api.add_data_files(['file1.txt', 'file2.jpg'], 'group1')
+```
+
+Create new Job
+
+```python
+res = api.create_job('path_to_job_description.json')
+```
+
+Run Job with Specified ID Number
+
+```python
+res = api.run_job('#')
+```
+
+Check Job Status
+
+```python
+res = api.get_job_status('#')
+```
+
+Get Job Output
+
+```python
+res = api.get_job_output('#')
+```
+
+Delete Job Output
+
+```python
+res = api.delete_job('#')
+```
