@@ -392,27 +392,3 @@ class API(object):
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         return res
-
-    # TODO Remove before production deployment
-    def save_token(self):
-        """Utility function to write and save API token to file for future use.
-
-        Returns:
-            None
-        """
-
-        f = open('.api-token.txt', 'w')
-        f.write(self.token)
-        f.close()
-
-    # TODO Remove before production deployment
-    def load_token(self):
-        """Utility function to load written API token from saved file.
-
-        Returns:
-            None
-        """
-
-        f = open('.api-token.txt', 'rb')
-        self.token = f.readline()
-        f.close()
