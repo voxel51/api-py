@@ -11,7 +11,7 @@ Brian Moore, brian@voxel51.com
 import logging
 import os
 
-import voxel51.utils as voxu
+from voxel51 import utils
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def activate_token(path):
     Args:
         path (str): the path to an API token to store in $LIB/.api-token.json
     '''
-    voxu.copy_file(path, TOKEN_PATH)
+    utils.copy_file(path, TOKEN_PATH)
     logger.info("Token successfully activated")
 
 
@@ -99,4 +99,4 @@ class Token(object):
         Returns:
             An instance of Token()
         '''
-        return cls(voxu.read_json(path))
+        return cls(utils.read_json(path))
