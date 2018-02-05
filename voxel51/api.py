@@ -32,86 +32,81 @@ class API(object):
         self._header = self.token.get_header()
 
     def get_home_page(self):
-        """Returns hypermedia detailing basic steps to access the API.
+        '''Gets details on the basic steps to access the API.
 
         Returns:
-            HTTP response with hypermedia. Error status is bad request.
-        """
-
+            HTTP response with hypermedia on basic API details
+        '''
         endpoint = self.url
-        res = requests.get(endpoint)
-        return res
+        return requests.get(endpoint)
 
     def get_data_page(self):
-        """Returns hypermedia on available data route functions.
+        '''Gets details on the available data-related functions.
 
         Returns:
-            HTTP response with hypermedia on available algorithms.
-        """
+            HTTP response with hypermedia on available data functions
+        '''
+        endpoint = self.url + "/data"
+        return requests.get(endpoint, headers=self._header)
 
-        endpoint = self.url + '/data'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def list_data_files(self):
-        """Returns a list of any data files present under client ID.
-        If no files are present, returns a 404 response.
+    def list_data(self):
+        '''Returns a list of all data uploaded to the cloud.
 
         Returns:
-            HTTP response with files; 4xx response if error
-        """
+            HTTP response containing the data list. If no data is found,
+                a 4xx response is returned
+        '''
+        endpoint = self.url + "/data/list"
+        return requests.get(endpoint, headers=self._header)
 
-        endpoint = self.url + '/data/list'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def get_data_specs(self, file_id):
-        """Returns details on the specified file if exists.
-
-        Returns:
-            HTTP response with file details; 4xx response if error.
-        """
-
-        file_id = str(file_id)
-        endpoint = self.url + '/data/' + file_id
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def add_data_files(self, files, group_name=None):
-        """Posts new file(s) to the server and assigns unique ID to each file.
+    def get_data_info(self, data_id):
+        '''Gets details about the uploaded data with the given ID.
 
         Args:
-            files (str): Array of file paths
-            group_name(str): Optional data set/group identifier
+            data_id (str): the ID of some uploaded data
 
         Returns:
-            HTTP response with uploaded files; 4xx or 5xx response if error
-        """
+            HTTP response containing information about the data. If no data is
+                found with the given ID, a 4xx response is returned
+        '''
+        endpoint = self.url + "/data/" + str(data_id)
+        return requests.get(endpoint, headers=self._header)
 
-        endpoint = self.url + '/data/upload'
-        header = self.header
-        data = {'groupName': group_name}
-        input_files = []
-        for file in files:
-            input_files.append(('files', open(file, 'rb')))
+    def upload_data(self, paths, group_name=None):
+        '''Uploads data to the cloud.
+
+        Args:
+            paths (str): a list of file paths
+            group_name(str): optional group name to assign to the data
+
+        Returns:
+            HTTP response describing the newly uploaded data. If an error
+                occured, a 4xx or 5xx response is returned
+
+        Raises:
+            DataUploadError
+        '''
+        data =
         try:
-            res = requests.post(
+            # Open files
+            files = []
+            for p in paths:
+                files.append(("files", open(p, "rb")))
+
+            # Upload data
+            endpoint = self.url + "/data/upload"
+            return requests.post(
                 endpoint,
-                headers=header,
-                files=input_files,
-                data=data)
-
-        except IOError:
-            pass
-
+                headers=self._header,
+                files=files,
+                data={"groupName": group_name},
+            )
+        except IOError as e:
+            raise DataUploadError("Failed to upload data:\n" + e.message)
         finally:
-            for file in input_files:
-                # [0] contains files key; [1] contains actual file
-                file[1].close()
-            return res
+            # Close files
+            for f, _ in files:
+                f.close()
 
     def delete_file(self, file_id):
         """Deletes specified file from database if exists.
@@ -392,3 +387,7 @@ class API(object):
         header = {'Authorization': 'Bearer ' + self.token}
         res = requests.get(endpoint, headers=header)
         return res
+
+
+class DataUploadError(Exception):
+    pass
