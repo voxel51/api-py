@@ -42,8 +42,6 @@ class API(object):
         res = requests.get(endpoint)
         return res
 
-    # DATA FUNCTIONS
-
     def get_data_page(self):
         """Returns hypermedia on available data route functions.
 
@@ -192,8 +190,6 @@ class API(object):
         header = self.header
         res = requests.get(endpoint, headers=header)
         return res
-
-    # TASK FUNCTIONS
 
     def jobs_page(self):
         """Returns hypermedia on available job functions.
@@ -356,8 +352,6 @@ class API(object):
         header = self.header
         res = requests.get(endpoint, headers=header)
         return res
-
-    # PROCESS/DOC FUNCTIONS
 
     def docs_page(self):
         """Returns hypermedia on documentation of available ETA algorithms.
