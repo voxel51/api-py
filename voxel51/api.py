@@ -1,37 +1,35 @@
 #!usr/bin/env python
 '''
-Voxel51 API Python client library for programmatic access to the
-API's functions.
+Main Python interface for the Voxel51 Vision Services API.
 
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com
 
 David Hodgson, david@voxel51.com
+Brian Moore, brian@voxel51.com
 '''
-
 import requests
-import json
-import auth
 
-BASE_API_URL = 'http://localhost:4000/v1'
+from voxel51 import auth
 
 
-class API:
-    """Python client library for Voxel51 API"""
+# @todo move to https://api.voxel51.com/v1 for production
+BASE_API_URL = "http://localhost:4000/v1"
 
-    # TODO Refactor to work with environment variable then look for hidden file
+
+class API(object):
+    '''A class for managing a session with the Voxel51 Vision Services API.
+
+    Attributes:
+        url (string): the base URL of the API
+        token (voxel51.auth.Token): the authentication token for this session
+    '''
+
     def __init__(self):
-        """Constructor of the API class."""
-
+        '''Starts a new API session.'''
         self.url = BASE_API_URL
-        """str: Base url to access API."""
-        self.token = auth.find_token()
-        """str: Stores JSON web token for authentication"""
-        if (self.token < 0):
-            raise Exception('No token found')
-            return -1
-
-        self.header = {'Authorization': 'Bearer ' + self.token}
+        self.token = auth.load_token()
+        self._header = self.token.get_header()
 
     def get_home_page(self):
         """Returns hypermedia detailing basic steps to access the API.
