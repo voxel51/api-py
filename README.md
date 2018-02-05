@@ -28,8 +28,8 @@ https://api.voxel51.com). Next, download an API authentication token from
 **Keep this token private**---it is your access key to the API.
 
 Each API request you make must provide a valid API token. To activate a token,
-you can either set the `VOXEL51_API_TOKEN` environment variable to point
-to your API token file:
+you can set the `VOXEL51_API_TOKEN` environment variable to point to your
+API token file:
 
 ```shell
 # You can make this permanent by setting this variable
@@ -37,7 +37,7 @@ to your API token file:
 export VOXEL51_API_TOKEN="/path/to/your/token.json"
 ```
 
-Alternatively, you can activate your token using the client library:
+Alternatively, you can activate a token using the client library:
 
 ```python
 from voxel51.auth import activate_token
@@ -45,19 +45,18 @@ from voxel51.auth import activate_token
 activate_token("/path/to/your/token.json")
 ```
 
-With this approach, your token is copied to a `.api-token.json` file in your
-client library distribution, so you can safely delete/move the original token
-file.
+With this approach, your token is copied to `~/.voxel51/api-token.json` for
+safe-keeping, so you can safely delete/move the input token file.
 
 
-## Usage
+## Hello World
 
 After you have activated an API token, you have full access to the API.
 The following code block demonstrates a simple use case:
 
 ```python
 from voxel51.api import API
-from pprint import pprint
+from voxel51.utils import print_response
 
 # Create an API instance
 api = API()
@@ -66,52 +65,64 @@ api = API()
 res = api.get_home_page()
 
 # Pretty-print the HTTP response
-pprint(res)
+print_response(res)
 ```
 
-For a complete description of the supported API methods, see the documentation
+
+### Additional Usage Examples
+
+The following examples highlights some actions you can take using the API.
+For a complete description of the supported methods, see the documentation
 in the `docs/` directory.
 
-## Additional Examples (Use Case)
-
-List all Data on Record
-
+* Get a list of all data you have uploaded to the Voxel51 cloud:
 ```python
-res = api.list_data_files()
+res = api.list_data()
 ```
 
-Posting Data with Optional Data Set Name
-
+* Upload data to the Voxel51 cloud:
 ```python
-res = api.add_data_files(['file1.txt', 'file2.jpg'], 'group1')
+# Upload a single file
+res = api.upload_data('video.mp4')
+
+# Add multiple files to the given group
+res = api.upload_data(['video1.mp4', 'video2.mp4'], group='group_name')
 ```
 
-Create new Job
-
+* Create a new job on the Voxel51 cloud:
 ```python
-res = api.create_job('path_to_job_description.json')
+# Pass the path to a job JSON
+res = api.create_job("/path/to/your/job.json")
+
+# Pass a JSON dictionary directly
+job = {
+    "name": "test-job",
+    "data": [
+        "#",
+    ]
+    "params": {
+        "size": [1920, 1080],
+    },
+}
+res = api.create_job(job)
 ```
 
-Run Job with Specified ID Number
-
+* Run the job with the specified ID:
 ```python
-res = api.run_job('#')
+res = api.run_job("$jobId")
 ```
 
-Check Job Status
-
+* Check the status of a job:
 ```python
-res = api.get_job_status('#')
+res = api.get_job_status("$jobId")
 ```
 
-Get Job Output
-
+* Download the output of a completed job:
 ```python
-res = api.get_job_output('#')
+res = api.download_job_output("$jobId")
 ```
 
-Delete Job Output
-
+* Delete a job:
 ```python
-res = api.delete_job('#')
+res = api.delete_job("$jobId")
 ```
