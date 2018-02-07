@@ -69,7 +69,7 @@ print_response(res)
 ```
 
 
-### Additional Usage Examples
+## Additional Usage Examples
 
 The following examples highlights some actions you can take using the API.
 For a complete description of the supported methods, see the documentation
