@@ -58,13 +58,13 @@ The following code block demonstrates a simple use case:
 from voxel51.api import API
 from voxel51.utils import print_response
 
-# Create an API instance
+# Start an API session
 api = API()
 
 # Get basic information about the API
 res = api.get_home_page()
 
-# Pretty-print the HTTP response
+# Pretty-print the response
 print_response(res)
 ```
 
@@ -75,27 +75,31 @@ The following examples highlights some actions you can take using the API.
 For a complete description of the supported methods, see the documentation
 in the `docs/` directory.
 
-* Get a list of all data you have uploaded to the Voxel51 cloud:
+* Get a list of all data you have uploaded
 ```python
-res = api.list_data()
+res = api.get_data_list()
+print_response(res)
 ```
 
-* Upload data to the Voxel51 cloud:
+* Upload new data to the cloud
 ```python
 # Upload a single file
-res = api.upload_data('video.mp4')
+res = api.upload_data("video.mp4")
+print_response(res)
 
-# Add multiple files to the given group
-res = api.upload_data(['video1.mp4', 'video2.mp4'], group='group_name')
+# Upload multiple files and assign them to a dataset
+res = api.upload_data(["video1.mp4", "video2.mp4"], group_name="videos")
+print_response(res)
 ```
 
-* Create a new job on the Voxel51 cloud:
+* Create a new job in the cloud
 ```python
 # Pass the path to a job JSON
 res = api.create_job("/path/to/your/job.json")
+print_response(res)
 
-# Pass a JSON dictionary directly
-job = {
+# Pass a JSON dictionary
+res = api.create_job({
     "name": "test-job",
     "data": [
         "#",
@@ -103,26 +107,31 @@ job = {
     "params": {
         "size": [1920, 1080],
     },
-}
-res = api.create_job(job)
+})
+print_response(res)
 ```
 
-* Run the job with the specified ID:
+* Run a job
 ```python
-res = api.run_job("$jobId")
+job_id = "XXXXXXXXXXXXXXXX"
+res = api.start_job(job_id)
+print_response(res)
 ```
 
-* Check the status of a job:
+* Check the status of a job
 ```python
-res = api.get_job_status("$jobId")
+res = api.get_job_status(job_id)
+print_response(res)
 ```
 
-* Download the output of a completed job:
+* Download the output of a completed job
 ```python
-res = api.download_job_output("$jobId")
+res = api.download_job_output(job_id)
+print_response(res)
 ```
 
-* Delete a job:
+* Delete a job
 ```python
-res = api.delete_job("$jobId")
+res = api.delete_job(job_id)
+print_response(res)
 ```
