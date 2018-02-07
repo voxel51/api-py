@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 TOKEN_ENVIRON_VAR = "VOXEL51_API_TOKEN"
 VOXEL51_DIR = os.path.join(os.path.expanduser("~"), ".voxel51")
 TOKEN_PATH = os.path.join(VOXEL51_DIR, "api-token.json")
-PRIVATE_KEY_FIELD = "key"
+PRIVATE_KEY_FIELD = "private_key"
 
 
 def activate_token(path):
