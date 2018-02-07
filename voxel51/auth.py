@@ -66,7 +66,7 @@ def load_token():
     try:
         return Token.from_disk(path)
     except IOError:
-        raise TokenLoadError("No token found at '%s'", TOKEN_PATH)
+        raise TokenLoadError("No token found at '%s'" % TOKEN_PATH)
 
 
 class TokenLoadError(Exception):
