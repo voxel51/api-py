@@ -9,8 +9,10 @@ David Hodgson, david@voxel51.com
 Brian Moore, brian@voxel51.com
 '''
 import requests
+from six import string_types
 
 from voxel51 import auth
+from voxel51 import utils
 
 
 # @todo move to https://api.voxel51.com/v1 for production
@@ -35,358 +37,326 @@ class API(object):
         '''Gets details on the basic steps to access the API.
 
         Returns:
-            HTTP response with hypermedia on basic API details
+            HTTP response with a description of basic API functions
         '''
         endpoint = self.url
         return requests.get(endpoint)
+
+    # DATA FUNCTIONS ###########################################################
 
     def get_data_page(self):
         '''Gets details on the available data-related functions.
 
         Returns:
-            HTTP response with hypermedia on available data functions
+            HTTP response with a description of available data functions
         '''
         endpoint = self.url + "/data"
         return requests.get(endpoint, headers=self._header)
 
-    def list_data(self):
+    def get_data_list(self):
         '''Returns a list of all data uploaded to the cloud.
 
         Returns:
             HTTP response containing the data list. If no data is found,
-                a 4xx response is returned
+                a 4xx error response is returned
         '''
         endpoint = self.url + "/data/list"
         return requests.get(endpoint, headers=self._header)
 
     def get_data_info(self, data_id):
-        '''Gets details about the uploaded data with the given ID.
+        '''Gets information about the uploaded data with the given ID.
 
         Args:
             data_id (str): the ID of some uploaded data
 
         Returns:
             HTTP response containing information about the data. If no data is
-                found with the given ID, a 4xx response is returned
+                found with the given ID, a 4xx error response is returned
         '''
-        endpoint = self.url + "/data/" + str(data_id)
+        endpoint = self.url + "/data/" + data_id
+        return requests.get(endpoint, headers=self._header)
+
+    def get_dataset_info(self, group_name):
+        '''Gets information about the dataset with the given name.
+
+        Args:
+            group_name (str): the name of an uploaded dataset
+
+        Returns:
+            HTTP response containing information about the dataset. If no
+                group is found with the given ID, a 4xx error reponse is
+                returned
+        '''
+        endpoint = self.url + "/data/group/" + group_name
         return requests.get(endpoint, headers=self._header)
 
     def upload_data(self, paths, group_name=None):
         '''Uploads data to the cloud.
 
         Args:
-            paths (str): a list of file paths
-            group_name(str): optional group name to assign to the data
+            paths (str, list): a filepath or list of filepaths
+            group_name (str): optional group name to assign to the data
 
         Returns:
             HTTP response describing the newly uploaded data. If an error
-                occured, a 4xx or 5xx response is returned
+                occured, a 4xx or 5xx error response is returned
 
         Raises:
-            DataUploadError
+            DataUploadError if an error occured while transmitting the data via
+                the POST request
         '''
-        data =
-        try:
-            # Open files
-            files = []
-            for p in paths:
-                files.append(("files", open(p, "rb")))
+        if isinstance(paths, string_types):
+            paths = [paths]
 
-            # Upload data
+        try:
             endpoint = self.url + "/data/upload"
+            files = [("files", open(p, "rb")) for p in paths]
+            data = {"groupName": group_name}
             return requests.post(
-                endpoint,
-                headers=self._header,
-                files=files,
-                data={"groupName": group_name},
-            )
+                endpoint, headers=self._header, files=files, data=data)
         except IOError as e:
             raise DataUploadError("Failed to upload data:\n" + e.message)
         finally:
-            # Close files
-            for f, _ in files:
+            for _, f in files:
                 f.close()
 
-    def delete_file(self, file_id):
-        """Deletes specified file from database if exists.
+    def delete_data(self, data_id):
+        '''Deletes the data with the given ID from the cloud.
 
         Args:
-            file_id (str, int): Unique file identifying number.
+            data_id (str): the ID of some uploaded data
 
         Returns:
-            HTTP response with Success 204; 4xx response if error
-        """
+            A 204 success HTTP response if the deletion was successful. If an
+                error occurs or the ID was invalid, a 4xx error response is
+                returned
+        '''
+        endpoint = self.url + "/data/" + data_id
+        return requests.delete(endpoint, headers=self._header)
 
-        file_id = str(file_id)
-        endpoint = self.url + '/data/' + file_id
-        header = self.header
-        res = requests.delete(endpoint, headers=header)
-        return res
-
-    def download_file(self, file_id):
-        """Downloads specified file to the /data/downloads folder.
+    def delete_dataset(self, group_name):
+        '''Deletes the dataset with the given group name.
 
         Args:
-            file_id (str, int): Unique file identifying number.
+            group_name (str): the name of an uploaded dataset
 
         Returns:
-            HTTP response with downloaded file information
-        """
+            A 204 success HTTP response if the deletion was succseful. If an
+                error occurs or the group name was invalid, a 4xx or 5xx error
+                response is returned
+        '''
+        endpoint = self.url + "/data/group/" + group_name
+        return requests.delete(endpoint, headers=self._header)
 
-        file_id = str(file_id)
-        endpoint = self.url + '/data/' + file_id + '/download'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def get_data_set(self, group_name):
-        """Returns information on specified data set if exists.
-        Returns a 404 response if no set by the specified name exists.
+    # @todo allow user to customize download location
+    def download_data(self, data_id):
+        '''Downloads the data with the given ID to /data/downloads.
 
         Args:
-            group_name(str): Unique data set identifying name.
+            data_id (str): the ID of some uploaded data
 
         Returns:
-            HTTP response with files in data set; 4xx response if error
-        """
+            HTTP response containing information about the downloaded data. If
+                an error occurs or the ID was invalid, a 4xx error response is
+                returned
+        '''
+        endpoint = self.url + "/data/" + data_id + "/download"
+        return requests.get(endpoint, headers=self._header)
 
-        endpoint = self.url + '/data/group/' + group_name
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def delete_data_set(self, group_name):
-        """Deletes all files from specified data set if exists.
+    # @todo allow user to customize download location
+    def download_dataset(self, group_name):
+        '''Downloads the dataset with the given group name to /data/downloads.
 
         Args:
-            group_name(str): Unique data set identifying name.
+            group_name (str): the name of an uploaded dataset
 
         Returns:
-            HTTP response Success 204; 4xx or 5xx response if error
-        """
+            HTTP response containing information about the downloaded dataset.
+                If an error occurs or the group name was invalid, a 4xx error
+                response is returned
+        '''
+        endpoint = self.url + "/data/group/" + group_name + "/download"
+        return requests.get(endpoint, headers=self._header)
 
-        endpoint = self.url + '/data/group/' + group_name
-        header = self.header
-        res = requests.delete(endpoint, headers=header)
-        return res
+    # JOBS FUNCTIONS ###########################################################
 
-    def download_data_set(self, group_name):
-        """Downloads all files in data set to /data/downloads/ folder.
+    def get_jobs_page(self):
+        '''Gets details on the available job-related functions.
+
+        Returns:
+            HTTP response with a description of available job functions
+        '''
+        endpoint = self.url + "/job"
+        return requests.get(endpoint, headers=self._header)
+
+    def create_job(self, job_json):
+        '''Creates a new job in the cloud.
 
         Args:
-            group_name(str): Unique data set identifying name.
+            job_json (dict, str): either a JSON dictionary or the path to a
+                JSON file on disk describing the algorithm, data, and
+                parameters of the job to run
 
         Returns:
-            HTTP response Success 200; 4xx response if error
-        """
+            A 204 success HTTP response if the job creation was succseful. If
+                an error occured, a 4xx error response is returned
+        '''
+        if isinstance(job_json, string_types):
+            job_json = utils.read_json(job_json)
 
-        endpoint = self.url + '/data/group/' + group_name + '/download'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
+        endpoint = self.url + "/job"
+        return requests.post(endpoint, headers=self._header, data=job_json)
 
-    def jobs_page(self):
-        """Returns hypermedia on available job functions.
+    def get_job_list(self):
+        '''Returns a list of all existing jobs in the cloud.
 
         Returns:
-            HTTP response Success 200; 4xx response if error
-        """
+            HTTP response containing the list of jobs. If no jobs are found,
+                a 4xx error response is returned
+        '''
+        endpoint = self.url + "/job/list"
+        return requests.get(endpoint, headers=self._header)
 
-        endpoint = self.url + '/job'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def create_job(self, filename):
-        """Creates a new job for an ETA backend pipeline.
-        Requires a valid JSON file specifying parameters and key fields
-        to be uploaded with it.
+    def start_job(self, job_id):
+        '''Starts the job with the given ID. The job must be an existing job
+        that is currently paused or stopped.
 
         Args:
-            filename (str): Absolute path and filename to JSON parameter file.
+            job_id (str): the ID of some existing job
 
         Returns:
-            HTTP response Success 201; 4xx response if error
-        """
+            A 201 success HTTP response if the start was succseful. If an
+                error occurs or the job ID was invalid, a 4xx error response
+                is returned
+        '''
+        endpoint = self.url + "/job/" + job_id + "/run"
+        return requests.put(endpoint, headers=self._header)
 
-        endpoint = self.url + '/job'
-        header = self.header
-        g = None
-        files = []
-        with open(filename, 'rb') as f:
-            g = json.load(f)
-
-        with open(filename, 'rb') as f:
-            files.append(('file', f))
-
-        res = requests.post(endpoint, headers=header, files=files, data=g)
-        f.close()
-        return res
-
-    def get_current_jobs(self):
-        """Returns all existing jobs related to the client ID.
-
-        Returns:
-            HTTP response Success 200; 4xx response if error
-        """
-
-        endpoint = self.url + '/job/list'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def run_job(self, jobID):
-        """Modifies the job status to run if paused or stopped.
+    def pause_job(self, job_id):
+        '''Pauses the job with the given ID. The job must be an existing job
+        that is currently running.
 
         Args:
-            jobID (str, int): Unique job identifying number.
+            job_id (str): the ID of some existing job
 
         Returns:
-            HTTP response Success 201; 4xx response if error
-        """
+            A 201 success HTTP response if the pause was succseful. If an
+                error occurs or the job ID was invalid, a 4xx error response
+                is returned
+        '''
+        endpoint = self.url + "/job/" + job_id + "/pause"
+        return requests.put(endpoint, headers=self._header)
 
-        jobID = str(jobID)
-        endpoint = self.url + '/job/' + jobID + '/run'
-        header = self.header
-        res = requests.put(endpoint, headers=header)
-        return res
-
-    def pause_job(self, jobID):
-        """Modifies the job status to pause if currently running.
+    def stop_job(self, job_id):
+        '''Stops the job with the given ID. The job must be an existing job
+        that is currently running.
 
         Args:
-            jobID (str, int): Unique job identifying number.
+            job_id (str): the ID of some existing job
 
         Returns:
-            HTTP response Success 201; 4xx response if error
-        """
+            A 201 success HTTP response if the stop was succseful. If an
+                error occurs or the job ID was invalid, a 4xx error response
+                is returned
+        '''
+        endpoint = self.url + "/job/" + job_id + "/stop"
+        return requests.put(endpoint, headers=self._header)
 
-        jobID = str(jobID)
-        endpoint = self.url + '/job/' + jobID + '/pause'
-        header = self.header
-        res = requests.put(endpoint, headers=header)
-        return res
-
-    def stop_job(self, jobID):
-        """Modifes the job status to stop if paused or running.
+    def delete_job(self, job_id):
+        '''Deletes the job with the given ID. The job must be an existing job
+        that is currently stopped.
 
         Args:
-            jobID (str, int): Unique job identifying number.
+            job_id (str): the ID of some existing job
 
         Returns:
-            HTTP response Success 201; 4xx response if error
-        """
+            A 201 success HTTP response if the deletion was succseful. If an
+                error occurs or the job ID was invalid, a 4xx error response
+                is returned
+        '''
+        endpoint = self.url + "/job/" + job_id
+        return requests.delete(endpoint, headers=self._header)
 
-        jobID = str(jobID)
-        endpoint = self.url + '/job/' + jobID + '/stop'
-        header = self.header
-        res = requests.put(endpoint, headers=header)
-        return res
-
-    def delete_job(self, jobID):
-        """Deletes a job if and only if it is currently stopped.
+    def get_job_status(self, job_id):
+        '''Gets the status of the job with the given ID.
 
         Args:
-            jobID (str, int): Unique job identifying number.
+            job_id (str): the ID of some existing job
 
         Returns:
-            HTTP response Success 201; 4xx response if error
-        """
+            HTTP response describing the job status. If an error occurs or
+                the job ID was invalid, a 4xx error response is returned
+        '''
+        endpoint = self.url + "/job/" + job_id + "/status"
+        return requests.get(endpoint, headers=self._header)
 
-        jobID = str(jobID)
-        endpoint = self.url + '/job/' + jobID
-        header = self.header
-        res = requests.delete(endpoint, headers=header)
-        return res
-
-    def get_job_status(self, jobID):
-        """Returns current status of specified job.
+    def get_job_specs(self, job_id):
+        '''Gets specifications of the job with the given ID.
 
         Args:
-            jobID (str, int): Unique job identifying number.
+            job_id (str): the ID of some existing job
 
         Returns:
-            HTTP response Success 200; 4xx response if error
-        """
+            HTTP response describing the job specifications. If an error occurs
+                or the job ID was invalid, a 4xx error response is returned
+        '''
+        endpoint = self.url + "/job/" + job_id + "/specs"
+        return requests.get(endpoint, headers=self._header)
 
-        jobID = str(jobID)
-        endpoint = self.url + '/job/' + jobID + '/status'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def get_job_details(self, jobID):
-        """Returns details on specified job.
+    # @todo allow user to customize download location
+    def download_job_output(self, job_id):
+        '''Downloads the output of the job with the given ID to
+        /data/downloads.
 
         Args:
-            jobID (str, int): Unique job identifying number.
+            job_id (str): the ID of some existing job
 
         Returns:
-            HTTP response Success 200; 4xx response if error
-        """
+            HTTP response containing information about the downloaded job
+                output. If an error occurs or the ID was invalid, a 4xx error
+                response is returned
+        '''
+        endpoint = self.url + "/job/" + job_id + "/output"
+        return requests.get(endpoint, headers=self._header)
 
-        jobID = str(jobID)
-        endpoint = self.url + '/job/' + jobID + '/specs'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
+    # INFO FUNCTIONS ###########################################################
 
-    def get_job_output(self, jobID):
-        """Returns output if the specified job is complete.
+    def get_docs_page(self):
+        '''Gets details on the available algorithm documentation functions.
+
+        Returns:
+            HTTP response with a description of basic algorithm documentation
+            functions
+        '''
+        # @todo rename this route "/docs"?
+        endpoint = self.url + "/info"
+        return requests.get(endpoint, headers=self._header)
+
+    def get_algorithm_list(self):
+        '''Returns a list of all available vision algorithms.
+
+        Returns:
+            HTTP response containing the algorithms list. If an error occurs,
+                a 4xx error response is returned
+        '''
+        # @todo rename this route "/docs/list"?
+        endpoint = self.url + "/info/list"
+        return requests.get(endpoint, headers=self._header)
+
+    def get_algorithm_info(self, algo_id):
+        '''Gets information about the vision algorithm with the given ID.
 
         Args:
-            jobID (str, int): Unique job identifying number.
+            algo_id (str): the ID of some vision algorithm
 
         Returns:
-            HTTP response Success 200; 4xx response if error
-        """
-
-        jobID = str(jobID)
-        endpoint = self.url + '/job/' + jobID + '/output'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def docs_page(self):
-        """Returns hypermedia on documentation of available ETA algorithms.
-
-        Returns:
-            HTTP response Success 200; 4xx response if error
-        """
-
-        endpoint = self.url + '/info'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def list_algorithms(self):
-        """Returns a list of all available ETA backend algorithms.
-
-        Returns:
-            HTTP response Success 200; 4xx response if error
-        """
-
-        endpoint = self.url + '/info/list'
-        header = self.header
-        res = requests.get(endpoint, headers=header)
-        return res
-
-    def get_algorithm_details(self, algorithmID):
-        """Returns details on the specified ETA backend algorithm if it exists.
-
-        Args:
-            algorithmID (str, int): Unique ETA algorithm identifying number.
-
-        Returns:
-            HTTP response Success 200; 4xx response if error
-        """
-
-        algorithmID = str(algorithmID)
-        endpoint = self.url + '/info/' + algorithmID
-        header = {'Authorization': 'Bearer ' + self.token}
-        res = requests.get(endpoint, headers=header)
-        return res
+            HTTP response containing information about the algorithm. If no
+                data is found with the given ID, a 4xx error response is
+                returned
+        '''
+        # @todo rename this route "/docs/:algoId"?
+        endpoint = self.url + "/info/" + algo_id
+        return requests.get(endpoint, headers=self._header)
 
 
 class DataUploadError(Exception):
