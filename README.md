@@ -126,7 +126,8 @@ print_response(res)
 
 * Download the output of a completed job
 ```python
-res = api.download_job_output(job_id)
+output_path = "/path/to/output.json"
+res = api.download_job_output(job_id, output_path)
 print_response(res)
 ```
 
