@@ -32,6 +32,7 @@ class API(object):
         self.url = BASE_API_URL
         self.token = auth.load_token()
         self._header = self.token.get_header()
+        self._session = requests.Session()
 
     def get_home_page(self):
         '''Gets details on the basic steps to access the API.
@@ -40,7 +41,7 @@ class API(object):
             HTTP response with a description of basic API functions
         '''
         endpoint = self.url
-        return requests.get(endpoint)
+        return self._session.get(endpoint)
 
     # DATA FUNCTIONS ###########################################################
 
@@ -51,7 +52,7 @@ class API(object):
             HTTP response with a description of available data functions
         '''
         endpoint = self.url + "/data"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def get_data_list(self):
         '''Returns a list of all data uploaded to the cloud.
@@ -61,7 +62,7 @@ class API(object):
                 a 4xx error response is returned
         '''
         endpoint = self.url + "/data/list"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def get_data_info(self, data_id):
         '''Gets information about the uploaded data with the given ID.
@@ -74,7 +75,7 @@ class API(object):
                 found with the given ID, a 4xx error response is returned
         '''
         endpoint = self.url + "/data/" + data_id
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def get_dataset_info(self, group_name):
         '''Gets information about the dataset with the given name.
@@ -88,7 +89,7 @@ class API(object):
                 returned
         '''
         endpoint = self.url + "/data/group/" + group_name
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def upload_data(self, paths, group_name=None):
         '''Uploads data to the cloud.
@@ -112,7 +113,7 @@ class API(object):
             endpoint = self.url + "/data/upload"
             files = [("files", open(p, "rb")) for p in paths]
             data = {"groupName": group_name}
-            return requests.post(
+            return self._session.post(
                 endpoint, headers=self._header, files=files, data=data)
         except IOError as e:
             raise DataUploadError("Failed to upload data:\n" + e.message)
@@ -132,7 +133,7 @@ class API(object):
                 returned
         '''
         endpoint = self.url + "/data/" + data_id
-        return requests.delete(endpoint, headers=self._header)
+        return self._session.delete(endpoint, headers=self._header)
 
     def delete_dataset(self, group_name):
         '''Deletes the dataset with the given group name.
@@ -146,7 +147,7 @@ class API(object):
                 response is returned
         '''
         endpoint = self.url + "/data/group/" + group_name
-        return requests.delete(endpoint, headers=self._header)
+        return self._session.delete(endpoint, headers=self._header)
 
     # @todo allow user to customize download location
     def download_data(self, data_id):
@@ -161,7 +162,7 @@ class API(object):
                 returned
         '''
         endpoint = self.url + "/data/" + data_id + "/download"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     # @todo allow user to customize download location
     def download_dataset(self, group_name):
@@ -176,7 +177,7 @@ class API(object):
                 response is returned
         '''
         endpoint = self.url + "/data/group/" + group_name + "/download"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     # JOBS FUNCTIONS ###########################################################
 
@@ -187,7 +188,7 @@ class API(object):
             HTTP response with a description of available job functions
         '''
         endpoint = self.url + "/job"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def create_job(self, job_json):
         '''Creates a new job in the cloud.
@@ -205,7 +206,7 @@ class API(object):
             job_json = utils.read_json(job_json)
 
         endpoint = self.url + "/job"
-        return requests.post(endpoint, headers=self._header, data=job_json)
+        return self._session.post(endpoint, headers=self._header, data=job_json)
 
     def get_job_list(self):
         '''Returns a list of all existing jobs in the cloud.
@@ -215,7 +216,7 @@ class API(object):
                 a 4xx error response is returned
         '''
         endpoint = self.url + "/job/list"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def start_job(self, job_id):
         '''Starts the job with the given ID. The job must be an existing job
@@ -230,7 +231,7 @@ class API(object):
                 is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/run"
-        return requests.put(endpoint, headers=self._header)
+        return self._session.put(endpoint, headers=self._header)
 
     def pause_job(self, job_id):
         '''Pauses the job with the given ID. The job must be an existing job
@@ -245,7 +246,7 @@ class API(object):
                 is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/pause"
-        return requests.put(endpoint, headers=self._header)
+        return self._session.put(endpoint, headers=self._header)
 
     def stop_job(self, job_id):
         '''Stops the job with the given ID. The job must be an existing job
@@ -260,7 +261,7 @@ class API(object):
                 is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/stop"
-        return requests.put(endpoint, headers=self._header)
+        return self._session.put(endpoint, headers=self._header)
 
     def delete_job(self, job_id):
         '''Deletes the job with the given ID. The job must be an existing job
@@ -275,7 +276,7 @@ class API(object):
                 is returned
         '''
         endpoint = self.url + "/job/" + job_id
-        return requests.delete(endpoint, headers=self._header)
+        return self._session.delete(endpoint, headers=self._header)
 
     def get_job_status(self, job_id):
         '''Gets the status of the job with the given ID.
@@ -288,7 +289,7 @@ class API(object):
                 the job ID was invalid, a 4xx error response is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/status"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def get_job_specs(self, job_id):
         '''Gets specifications of the job with the given ID.
@@ -301,7 +302,7 @@ class API(object):
                 or the job ID was invalid, a 4xx error response is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/specs"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     # @todo allow user to customize download location
     def download_job_output(self, job_id):
@@ -317,7 +318,7 @@ class API(object):
                 response is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/output"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     # INFO FUNCTIONS ###########################################################
 
@@ -330,7 +331,7 @@ class API(object):
         '''
         # @todo rename this route "/docs"?
         endpoint = self.url + "/info"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def get_algorithm_list(self):
         '''Returns a list of all available vision algorithms.
@@ -341,7 +342,7 @@ class API(object):
         '''
         # @todo rename this route "/docs/list"?
         endpoint = self.url + "/info/list"
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
     def get_algorithm_info(self, algo_id):
         '''Gets information about the vision algorithm with the given ID.
@@ -356,7 +357,7 @@ class API(object):
         '''
         # @todo rename this route "/docs/:algoId"?
         endpoint = self.url + "/info/" + algo_id
-        return requests.get(endpoint, headers=self._header)
+        return self._session.get(endpoint, headers=self._header)
 
 
 class DataUploadError(Exception):
