@@ -23,5 +23,5 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
-    install_requires=['requests', 'six'],
+    install_requires=["requests", "requests-toolbelt", "six"],
 )
