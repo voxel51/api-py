@@ -321,7 +321,6 @@ class API(object):
         endpoint = self.url + "/job/" + job_id + "/specs"
         return self._session.get(endpoint, headers=self._header)
 
-    # @todo allow user to customize download location
     def download_job_output(self, job_id, path):
         '''Downloads the output of the job with the given ID to the given path.
 
