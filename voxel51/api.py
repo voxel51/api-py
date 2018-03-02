@@ -47,7 +47,7 @@ class API(object):
         endpoint = self.url
         return self._session.get(endpoint)
 
-    # DATA FUNCTIONS ###########################################################
+    # DATA FUNCTIONS ##########################################################
 
     def get_data_page(self):
         '''Gets details on the available data-related functions.
@@ -195,7 +195,7 @@ class API(object):
         #return self._session.get(endpoint, headers=self._header)
         return self._download(endpoint, path)
 
-    # JOBS FUNCTIONS ###########################################################
+    # JOBS FUNCTIONS ##########################################################
 
     def get_jobs_page(self):
         '''Gets details on the available job-related functions.
@@ -222,7 +222,8 @@ class API(object):
             job_json = utils.read_json(job_json)
 
         endpoint = self.url + "/job"
-        return self._session.post(endpoint, headers=self._header, data=job_json)
+        return self._session.post(
+            endpoint, headers=self._header, data=job_json)
 
     def get_job_list(self):
         '''Returns a list of all existing jobs in the cloud.
@@ -337,7 +338,7 @@ class API(object):
         #return self._session.get(endpoint, headers=self._header)
         self._download(endpoint, path)
 
-    # INFO FUNCTIONS ###########################################################
+    # INFO FUNCTIONS ##########################################################
 
     def get_docs_page(self):
         '''Gets details on the available algorithm documentation functions.
