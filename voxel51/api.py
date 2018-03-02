@@ -8,8 +8,12 @@ voxel51.com
 David Hodgson, david@voxel51.com
 Brian Moore, brian@voxel51.com
 '''
+import os
+
 import requests
-from six import string_types
+import requests_toolbelt as rtb
+import requests_toolbelt.downloadutils.stream as rtbs
+import six
 
 from voxel51 import auth
 from voxel51 import utils
@@ -101,14 +105,11 @@ class API(object):
         Returns:
             HTTP response describing the newly uploaded data. If an error
                 occured, a 4xx or 5xx error response is returned
-
-        Raises:
-            DataUploadError if an error occured while transmitting the data via
-                the POST request
         '''
-        if isinstance(paths, string_types):
+        if isinstance(paths, six.string_types):
             paths = [paths]
 
+        '''
         try:
             endpoint = self.url + "/data/upload"
             files = [("files", open(p, "rb")) for p in paths]
@@ -119,6 +120,19 @@ class API(object):
             raise DataUploadError("Failed to upload data:\n" + e.message)
         finally:
             for _, f in files:
+                f.close()
+        '''
+
+        try:
+            endpoint = self.url + "/data/upload"
+            data = {os.path.basename(p): open(p, "rb") for p in paths}
+            data["groupName"] = group_name
+            encoder = rtb.MultipartEncoder(data)
+            headers = self._header.copy()
+            headers["Content-Type"] = encoder.content_type
+            self._session.post(endpoint, data=encoder, headers=headers)
+        finally:
+            for f in files.values():
                 f.close()
 
     def delete_data(self, data_id):
@@ -149,12 +163,12 @@ class API(object):
         endpoint = self.url + "/data/group/" + group_name
         return self._session.delete(endpoint, headers=self._header)
 
-    # @todo allow user to customize download location
-    def download_data(self, data_id):
-        '''Downloads the data with the given ID to /data/downloads.
+    def download_data(self, data_id, path):
+        '''Downloads the data with the given ID to the given path.
 
         Args:
             data_id (str): the ID of some uploaded data
+            path (str): the path to write to
 
         Returns:
             HTTP response containing information about the downloaded data. If
@@ -162,14 +176,15 @@ class API(object):
                 returned
         '''
         endpoint = self.url + "/data/" + data_id + "/download"
-        return self._session.get(endpoint, headers=self._header)
+        #return self._session.get(endpoint, headers=self._header)
+        return self._download(endpoint, path)
 
-    # @todo allow user to customize download location
-    def download_dataset(self, group_name):
-        '''Downloads the dataset with the given group name to /data/downloads.
+    def download_dataset(self, group_name, path):
+        '''Downloads the dataset with the given group name to the given path.
 
         Args:
             group_name (str): the name of an uploaded dataset
+            path (str): the path to write to
 
         Returns:
             HTTP response containing information about the downloaded dataset.
@@ -177,7 +192,8 @@ class API(object):
                 response is returned
         '''
         endpoint = self.url + "/data/group/" + group_name + "/download"
-        return self._session.get(endpoint, headers=self._header)
+        #return self._session.get(endpoint, headers=self._header)
+        return self._download(endpoint, path)
 
     # JOBS FUNCTIONS ###########################################################
 
@@ -202,7 +218,7 @@ class API(object):
             A 204 success HTTP response if the job creation was succseful. If
                 an error occured, a 4xx error response is returned
         '''
-        if isinstance(job_json, string_types):
+        if isinstance(job_json, six.string_types):
             job_json = utils.read_json(job_json)
 
         endpoint = self.url + "/job"
@@ -305,12 +321,12 @@ class API(object):
         return self._session.get(endpoint, headers=self._header)
 
     # @todo allow user to customize download location
-    def download_job_output(self, job_id):
-        '''Downloads the output of the job with the given ID to
-        /data/downloads.
+    def download_job_output(self, job_id, path):
+        '''Downloads the output of the job with the given ID to the given path.
 
         Args:
             job_id (str): the ID of some existing job
+            path (str): the path to write to
 
         Returns:
             HTTP response containing information about the downloaded job
@@ -318,7 +334,8 @@ class API(object):
                 response is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/output"
-        return self._session.get(endpoint, headers=self._header)
+        #return self._session.get(endpoint, headers=self._header)
+        self._download(endpoint, path)
 
     # INFO FUNCTIONS ###########################################################
 
@@ -359,6 +376,11 @@ class API(object):
         endpoint = self.url + "/info/" + algo_id
         return self._session.get(endpoint, headers=self._header)
 
+    # PRIVATE FUNCTIONS #######################################################
 
-class DataUploadError(Exception):
-    pass
+    def _download(self, url, path):
+        res = self._session.get(url, headers=self._header, stream=True)
+        utils.ensure_basedir(path)
+        with open(path, "wb") as f:
+            rtbs.stream_response_to_file(res, path=f)
+        return res
