@@ -102,21 +102,6 @@ class API(object):
             HTTP response describing the newly uploaded data. If an error
                 occured, a 4xx or 5xx error response is returned
         '''
-
-        '''
-        try:
-            endpoint = self.url + "/data/upload"
-            files = [("files", open(p, "rb")) for p in paths]
-            data = {"groupName": group_name}
-            return self._session.post(
-                endpoint, headers=self._header, files=files, data=data)
-        except IOError as e:
-            raise DataUploadError("Failed to upload data:\n" + e.message)
-        finally:
-            for _, f in files:
-                f.close()
-        '''
-
         endpoint = self.url + "/data/upload"
         filename = os.path.basename(path)
         try:
@@ -170,7 +155,6 @@ class API(object):
                 returned
         '''
         endpoint = self.url + "/data/" + data_id + "/download"
-        #return self._session.get(endpoint, headers=self._header)
         return self._stream_download(endpoint, path)
 
     def download_dataset(self, group_name, path):
@@ -186,7 +170,6 @@ class API(object):
                 response is returned
         '''
         endpoint = self.url + "/data/group/" + group_name + "/download"
-        #return self._session.get(endpoint, headers=self._header)
         return self._stream_download(endpoint, path)
 
     # JOBS FUNCTIONS ##########################################################
@@ -328,7 +311,6 @@ class API(object):
                 response is returned
         '''
         endpoint = self.url + "/job/" + job_id + "/output"
-        #return self._session.get(endpoint, headers=self._header)
         self._stream_download(endpoint, path)
 
     # INFO FUNCTIONS ##########################################################
