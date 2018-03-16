@@ -172,7 +172,7 @@ class API(object):
         '''
         endpoint = self.url + "/data/" + data_id + "/download"
         #return self._session.get(endpoint, headers=self._header)
-        return self._download(endpoint, path)
+        return self._stream_download(endpoint, path)
 
     def download_dataset(self, group_name, path):
         '''Downloads the dataset with the given group name to the given path.
@@ -188,7 +188,7 @@ class API(object):
         '''
         endpoint = self.url + "/data/group/" + group_name + "/download"
         #return self._session.get(endpoint, headers=self._header)
-        return self._download(endpoint, path)
+        return self._stream_download(endpoint, path)
 
     # JOBS FUNCTIONS ##########################################################
 
@@ -330,7 +330,7 @@ class API(object):
         '''
         endpoint = self.url + "/job/" + job_id + "/output"
         #return self._session.get(endpoint, headers=self._header)
-        self._download(endpoint, path)
+        self._stream_download(endpoint, path)
 
     # INFO FUNCTIONS ##########################################################
 
@@ -373,7 +373,7 @@ class API(object):
 
     # PRIVATE FUNCTIONS #######################################################
 
-    def _download(self, url, path):
+    def _stream_download(self, url, path):
         res = self._session.get(url, headers=self._header, stream=True)
         utils.ensure_basedir(path)
         with open(path, "wb") as f:
