@@ -92,19 +92,17 @@ class API(object):
         endpoint = self.url + "/data/group/" + group_name
         return self._session.get(endpoint, headers=self._header)
 
-    def upload_data(self, paths, group_name=None):
+    def upload_data(self, path, group_name=None):
         '''Uploads data to the cloud.
 
         Args:
-            paths (str, list): a filepath or list of filepaths
+            path (str): the path to the data
             group_name (str): optional group name to assign to the data
 
         Returns:
             HTTP response describing the newly uploaded data. If an error
                 occured, a 4xx or 5xx error response is returned
         '''
-        if isinstance(paths, six.string_types):
-            paths = [paths]
 
         '''
         try:
@@ -120,17 +118,17 @@ class API(object):
                 f.close()
         '''
 
+        endpoint = self.url + "/data/upload"
+        filename = os.path.basename(path)
         try:
-            endpoint = self.url + "/data/upload"
-            data = {os.path.basename(p): open(p, "rb") for p in paths}
+            data = {filename: open(path, "rb")}
             data["groupName"] = group_name
             encoder = rtb.MultipartEncoder(data)
             headers = self._header.copy()
             headers["Content-Type"] = encoder.content_type
             self._session.post(endpoint, data=encoder, headers=headers)
         finally:
-            for f in files.values():
-                f.close()
+            data[filename].close()
 
     def delete_data(self, data_id):
         '''Deletes the data with the given ID from the cloud.
