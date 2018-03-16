@@ -16,8 +16,7 @@ from voxel51 import auth
 from voxel51 import utils
 
 
-# @todo move to https://api.voxel51.com/v1 for production
-BASE_API_URL = "http://localhost:4000/v1"
+BASE_API_URL = "https://api.voxel51.com/v1"
 
 
 class API(object):
