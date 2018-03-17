@@ -83,12 +83,12 @@ print_response(res)
 
 * Upload new data to the cloud
 ```python
-# Upload a single file
+# Upload data
 res = api.upload_data("video.mp4")
 print_response(res)
 
-# Upload multiple files and assign them to a dataset
-res = api.upload_data(["video1.mp4", "video2.mp4"], group_name="videos")
+# Upload data and assign to a dataset
+res = api.upload_data("video.mp4", group_name="videos")
 print_response(res)
 ```
 
@@ -99,21 +99,29 @@ res = api.create_job("/path/to/your/job.json")
 print_response(res)
 
 # Pass a JSON dictionary
-res = api.create_job({
-    "name": "test-job",
-    "data": [
-        "#",
-    ]
-    "params": {
-        "size": [1920, 1080],
+job_dict = {
+    "name": "a-name-for-your-job",
+    "algorithm": ":algoId"
+    "data": {
+        "video": {
+            ":inputName": ":dataId",
+            "type": "data-id"
+        },
+        ...
+    }
+    "parameters": {
+        "param1": val1,
+        "param2": val2,
+        ...
     },
-})
+}
+res = api.create_job(job_dict)
 print_response(res)
 ```
 
 * Run a job
 ```python
-job_id = "XXXXXXXXXXXXXXXX"
+job_id = ":jobId"
 res = api.start_job(job_id)
 print_response(res)
 ```
