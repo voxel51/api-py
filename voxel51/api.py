@@ -1,4 +1,3 @@
-#!usr/bin/env python
 '''
 Main Python interface for the Voxel51 Vision Services API.
 

@@ -1,12 +1,8 @@
-#!usr/bin/env python
 '''
-Utility functions for the API.
+Utility functions for the Voxel51 Vision Services API.
 
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com
-
-David Hodgson, david@voxel51.com
-Brian Moore, brian@voxel51.com
 '''
 import json
 import logging

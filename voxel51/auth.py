@@ -1,12 +1,8 @@
-#!usr/bin/env python
 '''
-Implementation of authentication for the Voxel51 Vision Services API.
+Authentication library for the Voxel51 Vision Services API.
 
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com
-
-David Hodgson, david@voxel51.com
-Brian Moore, brian@voxel51.com
 '''
 import logging
 import os
