@@ -11,8 +11,8 @@ import requests_toolbelt as rtb
 import requests_toolbelt.downloadutils.stream as rtbs
 import six
 
-from voxel51 import auth
-from voxel51 import utils
+import voxel51.auth as voxa
+import voxel51.utils as voxu
 
 
 BASE_API_URL = "https://api.voxel51.com/v1"
@@ -29,7 +29,7 @@ class API(object):
     def __init__(self):
         '''Starts a new API session.'''
         self.url = BASE_API_URL
-        self.token = auth.load_token()
+        self.token = voxa.load_token()
         self._header = self.token.get_header()
         self._session = requests.Session()
 
@@ -195,7 +195,7 @@ class API(object):
                 an error occured, a 4xx error response is returned
         '''
         if isinstance(job_json, six.string_types):
-            job_json = utils.read_json(job_json)
+            job_json = voxu.read_json(job_json)
 
         endpoint = self.url + "/job"
         return self._session.post(
@@ -355,7 +355,7 @@ class API(object):
 
     def _stream_download(self, url, path):
         res = self._session.get(url, headers=self._header, stream=True)
-        utils.ensure_basedir(path)
+        voxu.ensure_basedir(path)
         with open(path, "wb") as f:
             rtbs.stream_response_to_file(res, path=f)
         return res
