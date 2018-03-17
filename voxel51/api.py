@@ -1,6 +1,8 @@
 '''
 Main Python interface for the Voxel51 Vision Services API.
 
+@todo add more content to all docstrings
+
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com
 '''
@@ -19,7 +21,18 @@ BASE_API_URL = "https://api.voxel51.com/v1"
 
 
 class API(object):
-    '''A class for managing a session with the Voxel51 Vision Services API.
+    '''Main class for managing a session with the Voxel51 Vision Services API.
+
+    Examples:
+        ```python
+        from voxel51.api import API
+
+        # Start an API session
+        api = API()
+
+        # Get basic information about the API
+        res = api.get_home_page()
+        ```
 
     Attributes:
         url (string): the base URL of the API
