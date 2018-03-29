@@ -88,7 +88,7 @@ res = api.upload_data("video.mp4")
 print_response(res)
 
 # Upload data and assign to a dataset
-res = api.upload_data("video.mp4", group_name="videos")
+res = api.upload_data("video.mp4", dataset="videos")
 print_response(res)
 ```
 

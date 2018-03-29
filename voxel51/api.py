@@ -89,26 +89,26 @@ class API(object):
         endpoint = self.url + "/data/" + data_id
         return self._session.get(endpoint, headers=self._header)
 
-    def get_dataset_info(self, group_name):
+    def get_dataset_info(self, dataset_name):
         '''Gets information about the dataset with the given name.
 
         Args:
-            group_name (str): the name of an uploaded dataset
+            dataset_name (str): the name of an uploaded dataset
 
         Returns:
             HTTP response containing information about the dataset. If no
                 group is found with the given ID, a 4xx error reponse is
                 returned
         '''
-        endpoint = self.url + "/data/group/" + group_name
+        endpoint = self.url + "/dataset/" + dataset_name
         return self._session.get(endpoint, headers=self._header)
 
-    def upload_data(self, path, group_name=None):
+    def upload_data(self, path, dataset_name=None):
         '''Uploads data to the cloud.
 
         Args:
             path (str): the path to the data
-            group_name (str): optional group name to assign to the data
+            dataset_name (str): optional dataset to which to add the data
 
         Returns:
             HTTP response describing the newly uploaded data. If an error
@@ -116,12 +116,14 @@ class API(object):
         '''
         endpoint = self.url + "/data/upload"
         filename = os.path.basename(path)
+        content_disposition = "attachment; filename=%s" % filename
         try:
             data = {filename: open(path, "rb")}
-            data["groupName"] = group_name
+            data["dataset"] = dataset_name
             encoder = rtb.MultipartEncoder(data)
             headers = self._header.copy()
             headers["Content-Type"] = encoder.content_type
+            headers["Content-Disposition"] = content_disposition
             self._session.post(endpoint, data=encoder, headers=headers)
         finally:
             data[filename].close()
@@ -140,18 +142,18 @@ class API(object):
         endpoint = self.url + "/data/" + data_id
         return self._session.delete(endpoint, headers=self._header)
 
-    def delete_dataset(self, group_name):
-        '''Deletes the dataset with the given group name.
+    def delete_dataset(self, dataset_name):
+        '''Deletes the dataset with the given name.
 
         Args:
-            group_name (str): the name of an uploaded dataset
+            dataset_name (str): the name of an uploaded dataset
 
         Returns:
             A 204 success HTTP response if the deletion was succseful. If an
                 error occurs or the group name was invalid, a 4xx or 5xx error
                 response is returned
         '''
-        endpoint = self.url + "/data/group/" + group_name
+        endpoint = self.url + "/dataset/" + dataset_name
         return self._session.delete(endpoint, headers=self._header)
 
     def download_data(self, data_id, path):
@@ -169,11 +171,11 @@ class API(object):
         endpoint = self.url + "/data/" + data_id + "/download"
         return self._stream_download(endpoint, path)
 
-    def download_dataset(self, group_name, path):
-        '''Downloads the dataset with the given group name to the given path.
+    def download_dataset(self, dataset_name, path):
+        '''Downloads the dataset with the given name to the given path.
 
         Args:
-            group_name (str): the name of an uploaded dataset
+            dataset_name (str): the name of the dataset
             path (str): the path to write to
 
         Returns:
@@ -181,7 +183,7 @@ class API(object):
                 If an error occurs or the group name was invalid, a 4xx error
                 response is returned
         '''
-        endpoint = self.url + "/data/group/" + group_name + "/download"
+        endpoint = self.url + "/dataset/" + dataset_name + "/download"
         return self._stream_download(endpoint, path)
 
     # JOBS FUNCTIONS ##########################################################
