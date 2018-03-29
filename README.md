@@ -62,7 +62,7 @@ from voxel51.utils import print_response
 api = API()
 
 # Get basic information about the API
-res = api.get_home_page()
+res = api.get_root()
 
 # Pretty-print the response
 print_response(res)

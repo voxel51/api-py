@@ -31,7 +31,7 @@ class API(object):
         api = API()
 
         # Get basic information about the API
-        res = api.get_home_page()
+        res = api.get_root()
         ```
 
     Attributes:
@@ -46,7 +46,7 @@ class API(object):
         self._header = self.token.get_header()
         self._session = requests.Session()
 
-    def get_home_page(self):
+    def get_root(self):
         '''Gets details on the basic steps to access the API.
 
         Returns:
