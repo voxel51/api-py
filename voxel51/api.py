@@ -1,7 +1,5 @@
 '''
-Main Python interface for the Voxel51 Vision Services API.
-
-@todo add more content to all docstrings
+Main interface for the Voxel51 Vision Services API.
 
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com

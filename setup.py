@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Install Voxel51 API Python client library.
+Installs the Python client library for the Voxel51 Vision Services API.
 
 Copyright 2018, Voxel51, LLC
 voxel51.com
