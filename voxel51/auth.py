@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 TOKEN_ENVIRON_VAR = "VOXEL51_API_TOKEN"
 VOXEL51_DIR = os.path.join(os.path.expanduser("~"), ".voxel51")
 TOKEN_PATH = os.path.join(VOXEL51_DIR, "api-token.json")
+ACCESS_TOKEN_FIELD = "access_token"
 PRIVATE_KEY_FIELD = "private_key"
 
 
@@ -71,18 +72,19 @@ class TokenLoadError(Exception):
 class Token(object):
     '''A class encapsulating an API authentication token.'''
 
-    def __init__(self, content):
+    def __init__(self, token):
         '''Creates a token object with the given contents
 
         Args:
-            content (dict): a JSON dictionary defining an API token
+            token (dict): a JSON dictionary defining an API token
         '''
-        self._content = content
+        self._token_dict = token
+        self._private_key = token[ACCESS_TOKEN_FIELD][PRIVATE_KEY_FIELD]
 
     def get_header(self):
         '''Returns a header dictionary for authenticating requests with
         this token.'''
-        return {"Authorization": "Bearer " + self._content[PRIVATE_KEY_FIELD]}
+        return {"Authorization": "Bearer " + self._private_key}
 
     @classmethod
     def from_disk(cls, path):
