@@ -42,7 +42,7 @@ def deactivate_token():
         os.remove(TOKEN_PATH)
         logger.info("Token '%s' successfully deactivated", TOKEN_PATH)
     except OSError:
-        logger.info("No active token to deactivate")
+        logger.info("No token to deactivate")
 
 
 def load_token():
@@ -62,7 +62,16 @@ def load_token():
     try:
         return Token.from_disk(path)
     except IOError:
-        raise TokenLoadError("No token found at '%s'" % TOKEN_PATH)
+        raise TokenLoadError("No token found")
+
+
+def found_active_token():
+    '''Returns True/False whether an active token is currently available.'''
+    try:
+        load_token();
+        return True
+    except TokenLoadError:
+        return False
 
 
 class TokenLoadError(Exception):
