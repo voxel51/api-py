@@ -44,25 +44,7 @@ class API(object):
         self._header = self.token.get_header()
         self._session = requests.Session()
 
-    def get_root(self):
-        '''Gets details on the basic steps to access the API.
-
-        Returns:
-            HTTP response with a description of basic API functions
-        '''
-        endpoint = self.url
-        return self._session.get(endpoint)
-
     # DATA FUNCTIONS ##########################################################
-
-    def get_data_page(self):
-        '''Gets details on the available data-related functions.
-
-        Returns:
-            HTTP response with a description of available data functions
-        '''
-        endpoint = self.url + "/data"
-        return self._session.get(endpoint, headers=self._header)
 
     def get_data_list(self):
         '''Returns a list of all data uploaded to the cloud.
@@ -185,15 +167,6 @@ class API(object):
         return self._stream_download(endpoint, path)
 
     # JOBS FUNCTIONS ##########################################################
-
-    def get_jobs_page(self):
-        '''Gets details on the available job-related functions.
-
-        Returns:
-            HTTP response with a description of available job functions
-        '''
-        endpoint = self.url + "/job"
-        return self._session.get(endpoint, headers=self._header)
 
     def create_job(self, job_json):
         '''Creates a new job in the cloud.
@@ -326,17 +299,6 @@ class API(object):
         self._stream_download(endpoint, path)
 
     # INFO FUNCTIONS ##########################################################
-
-    def get_docs_page(self):
-        '''Gets details on the available algorithm documentation functions.
-
-        Returns:
-            HTTP response with a description of basic algorithm documentation
-            functions
-        '''
-        # @todo rename this route "/docs"?
-        endpoint = self.url + "/info"
-        return self._session.get(endpoint, headers=self._header)
 
     def get_algorithm_list(self):
         '''Returns a list of all available vision algorithms.
