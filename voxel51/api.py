@@ -7,12 +7,12 @@ voxel51.com
 import json
 import os
 
+import mimetypes
 import requests
-import requests_toolbelt as rtb
 import requests_toolbelt.downloadutils.stream as rtbs
-import six
 
 import voxel51.auth as voxa
+import voxel51.jobs as voxj
 import voxel51.utils as voxu
 
 
@@ -218,125 +218,200 @@ class API(object):
             headers=self._header, files=files, verify=VERIFY_REQUESTS)
         _validate_response(res)
 
+    def remove_data_from_dataset(
+            self, data_id, dataset_id, delete_files=False):
+        '''Removes the data with the given ID from the dataset with the given
+        ID.
+
+        Args:
+            data_id (str): the ID of the data to remove from the dataset
+            dataset_id (str): the dataset ID
+            delete_files (bool): whether to delete the underlying data file
+                from cloud storage. By default, this is False
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/dataset/" + dataset_id
+        files = {
+            "data_id": (None, data_id),
+            "delete_files": (None, str(delete_files)),
+        }
+        res = self._session.delete(endpoint,
+            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+
+    def get_dataset_details(self, dataset_id):
+        '''Gets details about the dataset with the given ID.
+
+        Args:
+            dataset_id (str): the dataset ID
+
+        Returns:
+            a dictionary containing metadata about the dataset
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/dataset/" + dataset_id
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)["dataset"]
+
+    def download_dataset(self, dataset_id, output_path):
+        '''Downloads the dataset with the given ID as a zip file.
+
+        Args:
+            dataset_id (str): the dataset ID
+            output_path (str): the output path to write to
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/dataset/" + dataset_id + "/download"
+        self._stream_download(endpoint, output_path)
+
+    def delete_dataset(self, dataset_id, delete_files=False):
+        '''Deletes the dataset with the given ID.
+
+        Args:
+            dataset_id (str): the dataset ID
+            delete_files (bool): whether to delete the underlying data files
+                from cloud storage. By default, this is False
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        self.remove_data_from_dataset(
+            dataset_id, None, delete_files=delete_files)
+
     # JOBS FUNCTIONS ##########################################################
 
-    def create_job(self, job_json):
-        '''Creates a new job in the cloud.
-
-        Args:
-            job_json (dict, str): either a JSON dictionary or the path to a
-                JSON file on disk describing the algorithm, data, and
-                parameters of the job to run
+    def list_jobs(self):
+        '''Returns a list of all jobs in the cloud.
 
         Returns:
-            A 204 success HTTP response if the job creation was succseful. If
-                an error occured, a 4xx error response is returned
-        '''
-        if isinstance(job_json, six.string_types):
-            job_json = voxu.read_json(job_json)
+            a list of job IDs
 
-        endpoint = self.url + "/job"
-        return self._session.post(
-            endpoint, headers=self._header, data=job_json)
-
-    def get_job_list(self):
-        '''Returns a list of all existing jobs in the cloud.
-
-        Returns:
-            HTTP response containing the list of jobs. If no jobs are found,
-                a 4xx error response is returned
+        Raises:
+            APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/job/list"
-        return self._session.get(endpoint, headers=self._header)
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)["jobs"]
 
-    def start_job(self, job_id):
-        '''Starts the job with the given ID. The job must be an existing job
-        that is currently paused or stopped.
+    def upload_job_request(self, job_request, job_name, auto_start=False):
+        '''Uploads a job request to the cloud.
 
         Args:
-            job_id (str): the ID of some existing job
+            job_request (voxel51.jobs.JobRequest): a JobRequest instance
+                describing the job
+            job_name (str): a name for the job
+            auto_start (bool): whether to automatically start the job upon
+                creation. By default, this is False
 
         Returns:
-            A 201 success HTTP response if the start was succseful. If an
-                error occurs or the job ID was invalid, a 4xx error response
-                is returned
+            a dictionary containing metadata about the job
+
+        Raises:
+            APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/run"
-        return self._session.put(endpoint, headers=self._header)
+        endpoint = self.url + "/job"
+        files = {
+            "file": ("job.json", str(job_request), "application/json"),
+            "job_name": (None, job_name),
+            "auto_start": (None, str(auto_start)),
+        }
+        res = self._session.post(endpoint,
+            files=files, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)
 
-    def pause_job(self, job_id):
-        '''Pauses the job with the given ID. The job must be an existing job
-        that is currently running.
-
-        Args:
-            job_id (str): the ID of some existing job
-
-        Returns:
-            A 201 success HTTP response if the pause was succseful. If an
-                error occurs or the job ID was invalid, a 4xx error response
-                is returned
-        '''
-        endpoint = self.url + "/job/" + job_id + "/pause"
-        return self._session.put(endpoint, headers=self._header)
-
-    def stop_job(self, job_id):
-        '''Stops the job with the given ID. The job must be an existing job
-        that is currently running.
+    def get_job_details(self, job_id):
+        '''Gets details about the job with the given ID.
 
         Args:
-            job_id (str): the ID of some existing job
+            job_id (str): the job ID
 
         Returns:
-            A 201 success HTTP response if the stop was succseful. If an
-                error occurs or the job ID was invalid, a 4xx error response
-                is returned
-        '''
-        endpoint = self.url + "/job/" + job_id + "/stop"
-        return self._session.put(endpoint, headers=self._header)
+            a dictionary containing metadata about the job
 
-    def delete_job(self, job_id):
-        '''Deletes the job with the given ID. The job must be an existing job
-        that is currently stopped.
-
-        Args:
-            job_id (str): the ID of some existing job
-
-        Returns:
-            A 201 success HTTP response if the deletion was succseful. If an
-                error occurs or the job ID was invalid, a 4xx error response
-                is returned
+        Raises:
+            APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/job/" + job_id
-        return self._session.delete(endpoint, headers=self._header)
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)["job"]
+
+    def get_job_request(self, job_id):
+        '''Gets the job request for the job with the given ID.
+
+        Args:
+            job_id (str): the job ID
+
+        Returns:
+            a voxel51.jobs.JobRequest instance describing the job
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/job/" + job_id + "/request"
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return voxj.JobRequest.from_dict(_parse_json_response(res))
+
+    def start_job(self, job_id):
+        '''Starts the job with the given ID.
+
+        Args:
+            job_id (str): the job ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/job/" + job_id + "/start"
+        res = self._session.put(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
 
     def get_job_status(self, job_id):
         '''Gets the status of the job with the given ID.
 
         Args:
-            job_id (str): the ID of some existing job
+            job_id (str): the job ID
 
         Returns:
-            HTTP response describing the job status. If an error occurs or
-                the job ID was invalid, a 4xx error response is returned
+            a dictionary describing the status of the job
+
+        Raises:
+            APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/job/" + job_id + "/status"
-        return self._session.get(endpoint, headers=self._header)
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)
 
-    def get_job_specs(self, job_id):
-        '''Gets specifications of the job with the given ID.
+    def download_job_output(self, job_id, output_path):
+        '''Downloads the output of the job with the given ID.
 
         Args:
-            job_id (str): the ID of some existing job
+            job_id (str): the job ID
+            output_path (str): the output path to write to
 
-        Returns:
-            HTTP response describing the job specifications. If an error occurs
-                or the job ID was invalid, a 4xx error response is returned
+        Raises:
+            APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/specs"
-        return self._session.get(endpoint, headers=self._header)
+        endpoint = self.url + "/job/" + job_id + "/output"
+        self._stream_download(endpoint, output_path)
 
-    def download_job_output(self, job_id, path):
-        '''Downloads the output of the job with the given ID to the given path.
+    # PRIVATE FUNCTIONS #######################################################
 
         Args:
             job_id (str): the ID of some existing job
