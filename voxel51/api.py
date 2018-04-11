@@ -166,49 +166,57 @@ class API(object):
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
 
-    def delete_dataset(self, dataset_name):
-        '''Deletes the dataset with the given name.
+    # DATASET FUNCTIONS #######################################################
 
     def list_datasets(self):
         '''Returns a list of all datasets in cloud storage.
 
         Returns:
-            A 204 success HTTP response if the deletion was succseful. If an
-                error occurs or the group name was invalid, a 4xx or 5xx error
-                response is returned
-        '''
-        endpoint = self.url + "/dataset/" + dataset_name
-        return self._session.delete(endpoint, headers=self._header)
+            a list of dataset IDs
 
-    def download_data(self, data_id, path):
-        '''Downloads the data with the given ID to the given path.
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/dataset/list"
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)["datasets"]
+
+    def create_dataset(self, dataset_name):
+        '''Creates a new dataset in the cloud with the given name.
 
         Args:
-            data_id (str): the ID of some uploaded data
-            path (str): the path to write to
+            dataset_name (str): a name for the dataset
 
         Returns:
-            HTTP response containing information about the downloaded data. If
-                an error occurs or the ID was invalid, a 4xx error response is
-                returned
-        '''
-        endpoint = self.url + "/data/" + data_id + "/download"
-        return self._stream_download(endpoint, path)
+            a dictionary containing metadata about the dataset
 
-    def download_dataset(self, dataset_name, path):
-        '''Downloads the dataset with the given name to the given path.
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/dataset"
+        files = {"dataset_name": (None, dataset_name)}
+        res = self._session.post(endpoint,
+            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)
+
+    def add_data_to_dataset(self, data_id, dataset_id):
+        '''Adds the data with the given ID to the dataset with the given ID.
 
         Args:
-            dataset_name (str): the name of the dataset
-            path (str): the path to write to
+            data_id (str): the ID of the data to add to the dataset
+            dataset_id (str): the dataset ID
 
-        Returns:
-            HTTP response containing information about the downloaded dataset.
-                If an error occurs or the group name was invalid, a 4xx error
-                response is returned
+        Raises:
+            APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_name + "/download"
-        return self._stream_download(endpoint, path)
+        endpoint = self.url + "/dataset/" + dataset_id
+        files = {"data_id": (None, data_id)}
+        res = self._session.put(endpoint,
+            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+        _validate_response(res)
 
     # JOBS FUNCTIONS ##########################################################
 
