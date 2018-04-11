@@ -83,81 +83,88 @@ class API(object):
 
     # DATA FUNCTIONS ##########################################################
 
-    def get_data_list(self):
-        '''Returns a list of all data uploaded to the cloud.
+    def list_data(self):
+        '''Returns a list of all data uploaded to cloud storage.
 
         Returns:
-            HTTP response containing the data list. If no data is found,
-                a 4xx error response is returned
+            a list of data IDs
+
+        Raises:
+            APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/data/list"
-        return self._session.get(endpoint, headers=self._header)
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)["data"]
 
-    def get_data_info(self, data_id):
-        '''Gets information about the uploaded data with the given ID.
+    def upload_data(self, path):
+        '''Uploads data to cloud storage.
 
         Args:
-            data_id (str): the ID of some uploaded data
+            path (str): the path to the data file
 
         Returns:
-            HTTP response containing information about the data. If no data is
-                found with the given ID, a 4xx error response is returned
+            a dictionary containing metadata about the uploaded data
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/data"
+        filename = os.path.basename(path)
+        mime_type = _get_mime_type(path)
+        with open(path, "rb") as df:
+            files = {"file": (filename, df, mime_type)}
+            res = self._session.post(endpoint,
+                files=files, headers=self._header, verify=VERIFY_REQUESTS)
+
+        _validate_response(res)
+        return _parse_json_response(res)["data"]
+
+    def get_data_details(self, data_id):
+        '''Gets details about the data with the given ID.
+
+        Args:
+            data_id (str): the data ID
+
+        Returns:
+            a dictionary containing metadata about the data
+
+        Raises:
+            APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/data/" + data_id
-        return self._session.get(endpoint, headers=self._header)
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)["data"]
 
-    def get_dataset_info(self, dataset_name):
-        '''Gets information about the dataset with the given name.
-
-        Args:
-            dataset_name (str): the name of an uploaded dataset
-
-        Returns:
-            HTTP response containing information about the dataset. If no
-                group is found with the given ID, a 4xx error reponse is
-                returned
-        '''
-        endpoint = self.url + "/dataset/" + dataset_name
-        return self._session.get(endpoint, headers=self._header)
-
-    def upload_data(self, path, dataset_name=None):
-        '''Uploads data to the cloud.
+    def download_data(self, data_id, output_path):
+        '''Downloads the data with the given ID.
 
         Args:
-            path (str): the path to the data
-            dataset_name (str): optional dataset to which to add the data
+            data_id (str): the data ID
+            output_path (str): the output path to write to
 
-        Returns:
-            HTTP response describing the newly uploaded data. If an error
-                occured, a 4xx or 5xx error response is returned
+        Raises:
+            APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data/upload"
-        filename = os.path.basename(path)
-        content_disposition = "attachment; filename=%s" % filename
-        try:
-            data = {filename: open(path, "rb")}
-            data["dataset"] = dataset_name
-            encoder = rtb.MultipartEncoder(data)
-            headers = self._header.copy()
-            headers["Content-Type"] = encoder.content_type
-            headers["Content-Disposition"] = content_disposition
-            self._session.post(endpoint, data=encoder, headers=headers)
-        finally:
-            data[filename].close()
+        endpoint = self.url + "/data/" + data_id + "/download"
+        self._stream_download(endpoint, output_path)
 
     def delete_data(self, data_id):
         '''Deletes the data with the given ID from the cloud.
 
         Args:
-            data_id (str): the ID of some uploaded data
+            data_id (str): the data ID
 
-        Returns:
-            A 204 success HTTP response if the deletion was successful. If an
-                error occurs or the ID was invalid, a 4xx error response is
-                returned
+        Raises:
+            APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/data/" + data_id
-        return self._session.delete(endpoint, headers=self._header)
+        res = self._session.delete(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
 
     def delete_dataset(self, dataset_name):
         '''Deletes the dataset with the given name.
