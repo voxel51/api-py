@@ -413,51 +413,84 @@ class API(object):
 
     # PRIVATE FUNCTIONS #######################################################
 
-        Args:
-            job_id (str): the ID of some existing job
-            path (str): the path to write to
-
-        Returns:
-            HTTP response containing information about the downloaded job
-                output. If an error occurs or the ID was invalid, a 4xx error
-                response is returned
-        '''
-        endpoint = self.url + "/job/" + job_id + "/output"
-        self._stream_download(endpoint, path)
-
-    # INFO FUNCTIONS ##########################################################
-
-    def get_algorithm_list(self):
-        '''Returns a list of all available vision algorithms.
-
-        Returns:
-            HTTP response containing the algorithms list. If an error occurs,
-                a 4xx error response is returned
-        '''
-        # @todo rename this route "/docs/list"?
-        endpoint = self.url + "/info/list"
-        return self._session.get(endpoint, headers=self._header)
-
-    def get_algorithm_info(self, algo_id):
-        '''Gets information about the vision algorithm with the given ID.
-
-        Args:
-            algo_id (str): the ID of some vision algorithm
-
-        Returns:
-            HTTP response containing information about the algorithm. If no
-                data is found with the given ID, a 4xx error response is
-                returned
-        '''
-        # @todo rename this route "/docs/:algoId"?
-        endpoint = self.url + "/info/" + algo_id
-        return self._session.get(endpoint, headers=self._header)
-
-    # PRIVATE FUNCTIONS #######################################################
-
-    def _stream_download(self, url, path):
-        res = self._session.get(url, headers=self._header, stream=True)
-        voxu.ensure_basedir(path)
-        with open(path, "wb") as f:
+    def _stream_download(self, url, output_path):
+        res = self._session.get(
+            url, headers=self._header, stream=True, verify=VERIFY_REQUESTS)
+        voxu.ensure_basedir(output_path)
+        with open(output_path, "wb") as f:
             rtbs.stream_response_to_file(res, path=f)
-        return res
+
+        _validate_response(res)
+
+
+def _get_mime_type(path):
+    return mimetypes.guess_type(path)[0] or "application/octet-stream"
+
+
+def _validate_response(res):
+    if APIErrorResponse.is_error(res):
+        APIErrorResponse.from_response(res).throw()
+
+
+def _parse_json_response(res):
+    return json.loads(res.content)
+
+
+class APIErrorResponse(object):
+    '''Class encapsulating an error response from the API.
+
+    Attributes:
+        code (int): the error code
+        message (str): the error message
+    '''
+
+    def __init__(self, code, message):
+        '''Creates a new APIErrorResponse object.
+
+        Args:
+            code (int): the error code
+            message (str): the error message
+        '''
+        self.code = code
+        self.message = message
+
+    def __str__(self):
+        return "Error %d: %s" % (self.code, self.message)
+
+    def throw(self):
+        '''Throws the APIError exception defined by this object.'''
+        raise APIError(self)
+
+    @staticmethod
+    def is_error(res):
+        '''Returns True/False whether the given response is an error.
+
+        Args:
+            res (requests.Response): a requests response
+
+        Returns:
+            True/False
+        '''
+        return not res.ok
+
+    @classmethod
+    def from_response(cls, res):
+        '''Constructs an APIErrorResponse from the given Response object.
+
+        Args:
+            res (requests.Response): a requests response
+
+        Returns:
+            an instance of APIErrorResponse
+
+        Raises:
+            ValueError: if the given response is not an error response
+        '''
+        if not cls.is_error(res):
+            raise ValueError("Response is not an error")
+        message = _parse_json_response(res)["error"]["message"]
+        return cls(res.status_code, message)
+
+
+class APIError(Exception):
+    pass
