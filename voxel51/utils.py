@@ -7,25 +7,10 @@ voxel51.com
 import json
 import logging
 import os
-from pprint import pprint
 import shutil
 
 
 logger = logging.getLogger(__name__)
-
-
-def print_response(res):
-    '''Utility function to pretty print the response from an HTTP request
-
-    Args:
-        res: HTTP response object
-
-    Returns:
-        None
-    '''
-    pprint(res.url)
-    pprint(res.status_code)
-    pprint(res.json())
 
 
 def ensure_basedir(path):
@@ -58,6 +43,9 @@ def read_json(path):
 
     Args:
         path (str): the input path
+
+    Returns:
+        a JSON list/dictionary
     '''
     with open(path, "rt") as f:
         return json.load(f)
