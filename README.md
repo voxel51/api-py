@@ -1,21 +1,20 @@
 # Voxel51 API Python Client Library
 
 This package defines a Python client library for accessing the Voxel51 Vision
-Services API. The library is a thin wrapper that provides full access to all
-of the API's capabilities from Python code.
+Services API.
 
 See the `docs/` directory for full documentation of the library.
 
 
 ## Installation
 
-First, clone the repository
+Clone the repository:
 ```shell
 git clone https://github.com/voxel51/api-python
 cd api-python
 ```
 
-Then install the package
+and then install the package:
 ```shell
 pip install .
 ```
@@ -27,17 +26,15 @@ https://api.voxel51.com). Next, download an API authentication token from
 [https://api.voxel51.com/authenticate](https://api.voxel51.com/authenticate).
 **Keep this token private**---it is your access key to the API.
 
-Each API request you make must provide a valid API token. To activate a token,
-you can set the `VOXEL51_API_TOKEN` environment variable to point to your
-API token file:
+Each API request you make must be authenticated by your token. To activate your
+token, set the `VOXEL51_API_TOKEN` environment variable in your shell to point
+to your API token file:
 
 ```shell
-# You can make this permanent by setting this variable
-# in your ~/.bashrc or /etc/environment
 export VOXEL51_API_TOKEN="/path/to/your/token.json"
 ```
 
-Alternatively, you can activate a token using the client library:
+Alternatively, you can permanently activate a token with:
 
 ```python
 from voxel51.auth import activate_token
@@ -45,27 +42,25 @@ from voxel51.auth import activate_token
 activate_token("/path/to/your/token.json")
 ```
 
-With this approach, your token is copied to `~/.voxel51/api-token.json` for
-safe-keeping, so you can safely delete/move the input token file.
+In the latter case, your token is copied to `~/.voxel51/api-token.json`
+and will be automatically used in all future sessions. A token can be
+deactivated via the `voxel51.auth.deactivate_token()` method.
+
+After you have activated an API token, you have full access to the API.
 
 
 ## Hello World
 
-After you have activated an API token, you have full access to the API.
-The following code block demonstrates a simple use case:
+The following code block demonstrates a simple use of the API:
 
 ```python
 from voxel51.api import API
-from voxel51.utils import print_response
 
 # Start an API session
 api = API()
 
-# Get basic information about the API
-res = api.get_root()
-
-# Pretty-print the response
-print_response(res)
+# List algorithms exposed by the API
+algo_list = api.list_algorithms()
 ```
 
 
@@ -75,72 +70,45 @@ The following examples highlights some actions you can take using the API.
 For a complete description of the supported methods, see the documentation
 in the `docs/` directory.
 
-* Get a list of all data you have uploaded
+* Upload data to the Voxel51 cloud:
 ```python
-res = api.get_data_list()
-print_response(res)
+data_metadata = api.upload_data("/path/to/video.mp4")
 ```
 
-* Upload new data to the cloud
+* List the data you have uploaded:
 ```python
-# Upload data
-res = api.upload_data("video.mp4")
-print_response(res)
-
-# Upload data and assign to a dataset
-res = api.upload_data("video.mp4", dataset="videos")
-print_response(res)
+data_list = api.list_data()
 ```
 
-* Create a new job in the cloud
+* Create a job request:
 ```python
-# Pass the path to a job JSON
-res = api.create_job("/path/to/your/job.json")
-print_response(res)
-
-# Pass a JSON dictionary
-job_dict = {
-    "name": "a-name-for-your-job",
-    "algorithm": ":algoId"
-    "data": {
-        "video": {
-            ":inputName": ":dataId",
-            "type": "data-id"
-        },
-        ...
-    }
-    "parameters": {
-        "param1": val1,
-        "param2": val2,
-        ...
-    },
-}
-res = api.create_job(job_dict)
-print_response(res)
+job_request = JobRequest(algo_id)
+job_request.set_input("<input>", data_id=data_id)
+job_request.set_parameter("<param1>", val1)
+job_request.set_parameter("<param2>", val2)
 ```
 
-* Run a job
+* Upload the job request:
 ```python
-job_id = ":jobId"
-res = api.start_job(job_id)
-print_response(res)
+job_metadata = api.upload_job_request(job_request, "test-job")
 ```
 
-* Check the status of a job
+* List the jobs you have created:
 ```python
-res = api.get_job_status(job_id)
-print_response(res)
+job_list = api.list_jobs()
 ```
 
-* Download the output of a completed job
+* Start a job:
 ```python
-output_path = "/path/to/output.json"
-res = api.download_job_output(job_id, output_path)
-print_response(res)
+api.start_job(job_id)
 ```
 
-* Delete a job
+* Get the status of a job:
 ```python
-res = api.delete_job(job_id)
-print_response(res)
+job_status = api.get_job_status(job_id)
+```
+
+* Download the output of a completed job:
+```python
+api.download_job_output(job_id, output_path)
 ```
