@@ -4,6 +4,7 @@ Main interface for the Voxel51 Vision Services API.
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com
 '''
+import json
 import os
 
 import requests
@@ -16,6 +17,7 @@ import voxel51.utils as voxu
 
 
 BASE_API_URL = "https://api.voxel51.com/v1"
+VERIFY_REQUESTS = False  # @todo remove once SSL certificate is signed
 
 
 class API(object):
@@ -28,8 +30,8 @@ class API(object):
         # Start an API session
         api = API()
 
-        # Get basic information about the API
-        res = api.get_root()
+        # Get the list of algorithms exposed by the API
+        algo_list = api.get_algorithm_list()
         ```
 
     Attributes:
@@ -43,6 +45,41 @@ class API(object):
         self.token = voxa.load_token()
         self._header = self.token.get_header()
         self._session = requests.Session()
+
+    # ALGORITHM FUNCTIONS #####################################################
+
+    def list_algorithms(self):
+        '''Returns a list of all available algorithms.
+
+        Returns:
+            a list of dicts describing the available algorithms
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/algo/list"
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)["algorithms"]
+
+    def get_algorithm_doc(self, algo_id):
+        '''Gets documentation about the algorithm with the given ID.
+
+        Args:
+            algo_id (str): the algorithm ID
+
+        Returns:
+            a dictionary containing the algorithm documentation
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/algo/" + algo_id
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)
 
     # DATA FUNCTIONS ##########################################################
 
@@ -125,8 +162,8 @@ class API(object):
     def delete_dataset(self, dataset_name):
         '''Deletes the dataset with the given name.
 
-        Args:
-            dataset_name (str): the name of an uploaded dataset
+    def list_datasets(self):
+        '''Returns a list of all datasets in cloud storage.
 
         Returns:
             A 204 success HTTP response if the deletion was succseful. If an
