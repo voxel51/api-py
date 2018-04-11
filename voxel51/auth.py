@@ -1,5 +1,5 @@
 '''
-Authentication library for the Voxel51 Vision Services API.
+Authentication module for the Voxel51 Vision Services API.
 
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com
