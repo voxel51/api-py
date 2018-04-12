@@ -30,8 +30,8 @@ class API(object):
         # Start an API session
         api = API()
 
-        # Get the list of algorithms exposed by the API
-        algo_list = api.get_algorithm_list()
+        # List the algorithms exposed by the API
+        algo_list = api.list_algorithms()
         ```
 
     Attributes:
