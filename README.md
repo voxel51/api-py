@@ -112,3 +112,29 @@ job_status = api.get_job_status(job_id)
 ```python
 api.download_job_output(job_id, output_path)
 ```
+
+
+## Generating Documentation
+
+This project uses
+[Sphinx-Napoleon](https://pypi.python.org/pypi/sphinxcontrib-napoleon)
+to generate its documentation from source. To install the necessary
+dependencies to generate the documentation, run:
+
+```shell
+pip install --upgrade sphinx
+pip install --upgrade sphinx_rtd_theme
+pip install --upgrade sphinxcontrib-napoleon
+```
+
+To generate the documentation, run:
+
+```shell
+sphinx-apidoc -f -o docs/source .
+
+cd docs
+make html
+```
+
+To view the documentation, open the `build/html/index.html` file in
+your browser.
