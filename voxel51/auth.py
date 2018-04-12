@@ -21,7 +21,8 @@ PRIVATE_KEY_FIELD = "private_key"
 
 
 def activate_token(path):
-    '''Activates the given token by copying it to ~/.voxel51/api-token.json.
+    '''Activates the given token by copying it to
+    ``~/.voxel51/api-token.json``.
 
     Subsequent voxel51.api.API() instances created will now use this token
     for authentication.
@@ -36,7 +37,7 @@ def activate_token(path):
 def deactivate_token():
     '''Deactivates (deletes) the currently active token, if any.
 
-    The active token is the token at ~/.voxel51/api-token.json
+    The active token is the token at ``~/.voxel51/api-token.json``.
     '''
     try:
         os.remove(TOKEN_PATH)
@@ -48,15 +49,15 @@ def deactivate_token():
 def load_token():
     '''Loads the active API token.
 
-    If the VOXEL51_API_TOKEN environment variable is set, this is the active
-    token and will be loaded. Otherwise the token is loaded from
-    ~/.voxel51/api-token.json.
+    If the ``VOXEL51_API_TOKEN`` environment variable is set, this is the
+    active token and will be loaded. Otherwise the token is loaded from
+    ``~/.voxel51/api-token.json``.
 
     Returns:
-        The active token, an instance of Token()
+        The active token, an instance of ``Token``
 
     Raises:
-        TokenLoadError: if no valid token was found
+        TokenLoadError if no valid token was found
     '''
     path = os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
