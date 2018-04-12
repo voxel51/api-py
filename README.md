@@ -1,4 +1,10 @@
 # Voxel51 API Python Client Library
+>
+> Copyright 2017-2018, Voxel51, LLC.
+>
+> Brian Moore, brian@voxel51.com
+> David Hodgson, david@voxel51.com
+>
 
 This package defines a Python client library for accessing the Voxel51 Vision
 Services API.
