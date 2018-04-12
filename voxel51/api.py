@@ -23,8 +23,8 @@ VERIFY_REQUESTS = False  # @todo remove once SSL certificate is signed
 class API(object):
     '''Main class for managing a session with the Voxel51 Vision Services API.
 
-    Examples:
-        ```python
+    Example usage::
+
         from voxel51.api import API
 
         # Start an API session
@@ -32,7 +32,6 @@ class API(object):
 
         # List the algorithms exposed by the API
         algo_list = api.list_algorithms()
-        ```
 
     Attributes:
         url (string): the base URL of the API
