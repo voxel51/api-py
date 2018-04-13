@@ -16,6 +16,3 @@ make html
 cd ..
 
 echo "**** API documentation complete"
-
-# Open docs in browser
-open docs/build/html/index.html
