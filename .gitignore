@@ -3,11 +3,9 @@
 
 *.pyc
 __pycache__
-
 *.egg-info
 
-.api-token.json
-
 /docs/
-!/docs/source/
 !/docs/Makefile
+!/docs/source/conf.py
+!/docs/source/index.rst
