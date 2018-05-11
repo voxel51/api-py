@@ -23,16 +23,6 @@ VERIFY_REQUESTS = False  # @todo remove once SSL certificate is signed
 class API(object):
     '''Main class for managing a session with the Voxel51 Vision Services API.
 
-    Example usage::
-
-        from voxel51.api import API
-
-        # Start an API session
-        api = API()
-
-        # List the algorithms exposed by the API
-        algo_list = api.list_algorithms()
-
     Attributes:
         url (string): the base URL of the API
         token (voxel51.auth.Token): the authentication token for this session
@@ -409,6 +399,23 @@ class API(object):
         '''
         endpoint = self.url + "/job/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
+
+    # TYPES FUNCTIONS ##########################################################
+
+    def get_types_doc(self):
+        '''Gets documentation about the types supported by the system.
+
+        Returns:
+            a dictionary containing the types documentation
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/types/"
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)
 
     # PRIVATE FUNCTIONS #######################################################
 
