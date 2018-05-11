@@ -1,9 +1,5 @@
 # Voxel51 Vision Services API Demo
 >
-> Copyright 2017-2018, Voxel51, LLC.
->
-> Brian Moore, brian@voxel51.com
->
 > Last used: April 11, 2018
 >
 > API revision: `92ade5dc8d2f610419cee7acb92c1375156ac962`
@@ -284,3 +280,11 @@ JOB_OUTPUT_PATH="/Users/Brian/Desktop/output.zip"
 curl -k "https://api.voxel51.com/v1/job/${JOB_ID}/output" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" > "${JOB_OUTPUT_PATH}"
 ```
+
+
+## Copyright
+
+Copyright 2018, Voxel51, LLC<br>
+voxel51.com
+
+Brian Moore, brian@voxel51.com
