@@ -61,18 +61,18 @@ from voxel51.api import API
 api = API()
 ```
 
-### Algorithms
+### Analytics
 
-List available algorithms:
+List available analytics:
 
 ```py
-algos = api.list_algorithms();
+analytics = api.list_analytics();
 ```
 
-Download algorithm documentation:
+Get documentation for an analytic:
 
 ```py
-doc = api.get_algorithm_doc(algo_id);
+doc = api.get_analytic_doc(analytic_id);
 ```
 
 ### Data
@@ -94,7 +94,7 @@ data_list = api.list_data()
 * Create a job request:
 
 ```python
-job_request = JobRequest(algo_id)
+job_request = JobRequest(analytic_id)
 job_request.set_input("<input>", data_id=data_id)
 job_request.set_parameter("<param1>", val1)
 job_request.set_parameter("<param2>", val2)

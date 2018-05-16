@@ -12,19 +12,19 @@ class JobRequest(voxu.Serializable):
     '''Class encapsulating a job request for the API.
 
     Attributes:
-        algorithm (str): the ID of the algorithm to run
+        analytic (str): the ID of the analytic to run
         inputs (dict): a dictionary mapping input names to RemoteDataPath
             instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
-    def __init__(self, algo_id):
-        '''Initializes a JobRequest instance for the given algorithm.
+    def __init__(self, analytic_id):
+        '''Initializes a JobRequest instance for the given analytic.
 
         Args:
-            algo_id (str): the ID of the algorithm to run
+            analytic_id (str): the ID of the analytic to run
         '''
-        self.algorithm = algo_id
+        self.analytic = analytic_id
         self.inputs = {}
         self.parameters = {}
 
@@ -73,7 +73,7 @@ class JobRequest(voxu.Serializable):
     @classmethod
     def from_dict(cls, d):
         '''Constructs a JobRequest instance from a JSON dictionary.'''
-        job_request = cls(d["algorithm"])
+        job_request = cls(d["analytic"])
         for name, val in d["inputs"].items():
             job_request.set_input(name, path=RemoteDataPath.from_dict(val))
         for name, val in d["parameters"].items():

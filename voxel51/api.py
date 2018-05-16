@@ -35,36 +35,36 @@ class API(object):
         self._header = self.token.get_header()
         self._session = requests.Session()
 
-    # ALGORITHM FUNCTIONS #####################################################
+    # ANALYTICS FUNCTIONS #####################################################
 
-    def list_algorithms(self):
-        '''Returns a list of all available algorithms.
+    def list_analytics(self):
+        '''Returns a list of all available analytics.
 
         Returns:
-            a list of dicts describing the available algorithms
+            a list of dicts describing the available analytics
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/algo/list"
+        endpoint = self.url + "/analytics/list"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
-        return _parse_json_response(res)["algorithms"]
+        return _parse_json_response(res)["analytics"]
 
-    def get_algorithm_doc(self, algo_id):
-        '''Gets documentation about the algorithm with the given ID.
+    def get_analytic_doc(self, analytic_id):
+        '''Gets documentation about the analytic with the given ID.
 
         Args:
-            algo_id (str): the algorithm ID
+            analytic_id (str): the analytic ID
 
         Returns:
-            a dictionary containing the algorithm documentation
+            a dictionary containing the analytic documentation
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/algo/" + algo_id
+        endpoint = self.url + "/analytics/" + analytic_id
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
