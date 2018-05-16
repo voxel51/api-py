@@ -52,7 +52,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'Vision Services API'
 copyright = '2018, Voxel51, LLC'
-author = 'D. Hodgson'
+author = 'Brian Moore'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
