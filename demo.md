@@ -218,7 +218,7 @@ curl -k "https://api.voxel51.com/v1/data/${DATA_ID}" \
 
 List jobs
 ```shell
-curl -k "https://api.voxel51.com/v1/job/list" \
+curl -k "https://api.voxel51.com/v1/jobs/list" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" | python -m json.tool
 ```
 
@@ -246,7 +246,7 @@ Upload job request
 ```shell
 JOB_NAME="test-job"
 
-curl -k "https://api.voxel51.com/v1/job" \
+curl -k "https://api.voxel51.com/v1/jobs" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" -F "file=@${JOB_REQUEST_PATH}" \
     -F "job_name=${JOB_NAME}" -F "auto_start=false" | python -m json.tool
 ```
@@ -255,25 +255,25 @@ Get job details
 ```shell
 JOB_ID="41549249-2291-4b76-9230-6127064464a8"
 
-curl -k "https://api.voxel51.com/v1/job/${JOB_ID}" \
+curl -k "https://api.voxel51.com/v1/jobs/${JOB_ID}" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" | python -m json.tool
 ```
 
 Get job request
 ```shell
-curl -k "https://api.voxel51.com/v1/job/${JOB_ID}/request" \
+curl -k "https://api.voxel51.com/v1/jobs/${JOB_ID}/request" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" | python -m json.tool
 ```
 
 Start job
 ```shell
-curl -k "https://api.voxel51.com/v1/job/${JOB_ID}/start" \
+curl -k "https://api.voxel51.com/v1/jobs/${JOB_ID}/start" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" -X PUT | python -m json.tool
 ```
 
 Get job status
 ```shell
-curl -k "https://api.voxel51.com/v1/job/${JOB_ID}/status" \
+curl -k "https://api.voxel51.com/v1/jobs/${JOB_ID}/status" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" | python -m json.tool
 ```
 
@@ -281,6 +281,6 @@ Download output of a completed job
 ```
 JOB_OUTPUT_PATH="/Users/Brian/Desktop/output.zip"
 
-curl -k "https://api.voxel51.com/v1/job/${JOB_ID}/output" \
+curl -k "https://api.voxel51.com/v1/jobs/${JOB_ID}/output" \
     -H "Authorization: Bearer ${PRIVATE_KEY}" > "${JOB_OUTPUT_PATH}"
 ```
