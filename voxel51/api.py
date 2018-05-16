@@ -166,7 +166,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/list"
+        endpoint = self.url + "/datasets/list"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -201,7 +201,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         files = {"data_id": (None, data_id)}
         res = self._session.put(endpoint,
             headers=self._header, files=files, verify=VERIFY_REQUESTS)
@@ -221,7 +221,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         files = {
             "data_id": (None, data_id),
             "delete_files": (None, str(delete_files)),
@@ -242,7 +242,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -258,7 +258,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id + "/download"
+        endpoint = self.url + "/datasets/" + dataset_id + "/download"
         self._stream_download(endpoint, output_path)
 
     def delete_dataset(self, dataset_id, delete_files=False):
@@ -286,7 +286,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/list"
+        endpoint = self.url + "/jobs/list"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -331,7 +331,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id
+        endpoint = self.url + "/jobs/" + job_id
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -349,7 +349,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/request"
+        endpoint = self.url + "/jobs/" + job_id + "/request"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -364,7 +364,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/start"
+        endpoint = self.url + "/jobs/" + job_id + "/start"
         res = self._session.put(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -381,7 +381,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/status"
+        endpoint = self.url + "/jobs/" + job_id + "/status"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -397,7 +397,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/output"
+        endpoint = self.url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
 
     # TYPES FUNCTIONS ##########################################################
