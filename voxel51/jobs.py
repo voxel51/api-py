@@ -1,0 +1,170 @@
+'''
+Job request creation and manipulation library for the Voxel51 Vision Services
+API.
+
+Copyright 2017-2018, Voxel51, LLC
+voxel51.com
+'''
+import voxel51.utils as voxu
+
+
+class JobRequest(voxu.Serializable):
+    '''Class encapsulating a job request for the API.
+
+    Attributes:
+        algorithm (str): the ID of the algorithm to run
+        inputs (dict): a dictionary mapping input names to RemoteDataPath
+            instances
+        parameters (dict): a dictionary mapping parameter names to values
+    '''
+
+    def __init__(self, algo_id):
+        '''Initializes a JobRequest instance for the given algorithm.
+
+        Args:
+            algo_id (str): the ID of the algorithm to run
+        '''
+        self.algorithm = algo_id
+        self.inputs = {}
+        self.parameters = {}
+
+    def set_input(self, name, path=None, **kwargs):
+        '''Sets the input of the given name.
+
+        The input value can be specified either as a RemoteDataPath instance
+        or as valid keyword arguments to construct one.
+
+        Args:
+            name (str): the input name to set
+            path (RemoteDataPath): a RemoteDataPath instance. If not specified,
+                valid kwargs must be provided
+            **kwargs: valid arguments for RemoteDataPath()
+        '''
+        self.inputs[name] = path or RemoteDataPath(**kwargs)
+
+    def set_data_parameter(self, name, path=None, **kwargs):
+        '''Sets the data parameter of the given name.
+
+        Data parameters are parameters that are defined by a RemoteDataPath
+        instance and are read from cloud storage at runtime by the Vision
+        Engine. The parameter can be specified either as a RemoteDataPath
+        instance or as valid keyword arguments to construct one.
+
+        Args:
+            name (str): the input name to set
+            path (RemoteDataPath): a RemoteDataPath instance. If not specified,
+                valid kwargs must be provided
+            **kwargs: valid arguments for RemoteDataPath()
+        '''
+        self.parameters[name] = path or RemoteDataPath(**kwargs)
+
+    def set_parameter(self, name, val):
+        '''Sets the (non-data) parameter of the given name.
+
+        Non-data parameters are parameters whose values are defined directly by
+        a value that is JSON serializable.
+
+        Args:
+            name (str): the input name to set
+            val: the parameter value, which must be JSON serializable
+        '''
+        self.parameters[name] = val
+
+    @classmethod
+    def from_dict(cls, d):
+        '''Constructs a JobRequest instance from a JSON dictionary.'''
+        job_request = cls(d["algorithm"])
+        for name, val in d["inputs"].items():
+            job_request.set_input(name, path=RemoteDataPath.from_dict(val))
+        for name, val in d["parameters"].items():
+            if RemoteDataPath.is_remote_path_dict(val):
+                # Data parameter
+                job_request.set_data_parameter(
+                    name, path=RemoteDataPath.from_dict(val))
+            else:
+                # Non-data parameter
+                job_request.set_parameter(name, val)
+        return job_request
+
+
+class RemoteDataPath(voxu.Serializable):
+    '''Class enapsulating a remote data path.
+
+    Attributes:
+        data_id (str): the ID of the data in cloud storage
+        signed_url (str): a signed URL with access to the data of interest
+            in third-party cloud storage
+    '''
+
+    DATA_ID_FIELD = "data-id"
+    SIGNED_URL_FIELD = "signed-url"
+
+    def __init__(self, data_id=None, signed_url=None):
+        '''Creates a RemoteDataPath instance defined by the given information.
+
+        Exactly one keyword value must be supplied to this constructor.
+
+        Args:
+            data_id (str): the ID of the data in cloud storage
+            signed_url (str): a signed URL with access to the data of interest
+                in third-party cloud storage
+
+        Raises:
+            RemoteDataPathError if the instance creation failed
+        '''
+        self.data_id = data_id
+        self.signed_url = signed_url
+        if not self.is_valid:
+            raise RemoteDataPathError("Invalid RemoteDataPath")
+
+    @property
+    def has_data_id(self):
+        '''Returns True/False whether this RemoteDataPath instance has a data
+        ID.
+        '''
+        return self.data_id is not None
+
+    @property
+    def has_signed_url(self):
+        '''Returns True/False whether this RemoteDataPath instance has a signed
+        URL.
+        '''
+        return self.signed_url is not None
+
+    @property
+    def is_valid(self):
+        '''Returns True/False whether this RemoteDataPath instance is valid.'''
+        return self.has_data_id ^ self.has_signed_url
+
+    @staticmethod
+    def is_remote_path_dict(val):
+        '''Returns True/False whether this value is a valid RemoteDataPath
+        dictionary.
+        '''
+        return (
+            isinstance(val, dict) and RemoteDataPath.from_dict(val).is_valid
+        )
+
+    @classmethod
+    def from_dict(cls, d):
+        '''Constructs a RemoteDataPath instance from a JSON dictionary.
+
+        Args:
+            d (dict): a JSON dictionary defining a RemoteDataPath instance
+        '''
+        if RemoteDataPath.DATA_ID_FIELD in d:
+            return cls(data_id=d[RemoteDataPath.DATA_ID_FIELD])
+        elif RemoteDataPath.SIGNED_URL_FIELD in d:
+            return cls(signed_url=d[RemoteDataPath.SIGNED_URL_FIELD])
+        raise RemoteDataPathError("Invalid RemoteDataPath dict: %s" % str(d))
+
+    def _attributes(self):
+        if self.has_data_id:
+            return {"data_id": RemoteDataPath.DATA_ID_FIELD}
+        elif self.has_signed_url:
+            return {"signed_url": RemoteDataPath.SIGNED_URL_FIELD}
+        raise RemoteDataPathError("Invalid RemoteDataPath")
+
+
+class RemoteDataPathError(Exception):
+    pass

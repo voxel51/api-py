@@ -1,0 +1,11 @@
+
+.DS_Store
+
+*.pyc
+__pycache__
+*.egg-info
+
+/docs/
+!/docs/Makefile
+!/docs/source/conf.py
+!/docs/source/index.rst
