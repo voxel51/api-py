@@ -23,16 +23,6 @@ VERIFY_REQUESTS = False  # @todo remove once SSL certificate is signed
 class API(object):
     '''Main class for managing a session with the Voxel51 Vision Services API.
 
-    Example usage::
-
-        from voxel51.api import API
-
-        # Start an API session
-        api = API()
-
-        # List the algorithms exposed by the API
-        algo_list = api.list_algorithms()
-
     Attributes:
         url (string): the base URL of the API
         token (voxel51.auth.Token): the authentication token for this session
@@ -45,36 +35,36 @@ class API(object):
         self._header = self.token.get_header()
         self._session = requests.Session()
 
-    # ALGORITHM FUNCTIONS #####################################################
+    # ANALYTICS FUNCTIONS #####################################################
 
-    def list_algorithms(self):
-        '''Returns a list of all available algorithms.
+    def list_analytics(self):
+        '''Returns a list of all available analytics.
 
         Returns:
-            a list of dicts describing the available algorithms
+            a list of dicts describing the available analytics
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/algo/list"
+        endpoint = self.url + "/analytics/list"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
-        return _parse_json_response(res)["algorithms"]
+        return _parse_json_response(res)["analytics"]
 
-    def get_algorithm_doc(self, algo_id):
-        '''Gets documentation about the algorithm with the given ID.
+    def get_analytic_doc(self, analytic_id):
+        '''Gets documentation about the analytic with the given ID.
 
         Args:
-            algo_id (str): the algorithm ID
+            analytic_id (str): the analytic ID
 
         Returns:
-            a dictionary containing the algorithm documentation
+            a dictionary containing the analytic documentation
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/algo/" + algo_id
+        endpoint = self.url + "/analytics/" + analytic_id
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -176,7 +166,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/list"
+        endpoint = self.url + "/datasets/list"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -211,7 +201,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         files = {"data_id": (None, data_id)}
         res = self._session.put(endpoint,
             headers=self._header, files=files, verify=VERIFY_REQUESTS)
@@ -231,7 +221,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         files = {
             "data_id": (None, data_id),
             "delete_files": (None, str(delete_files)),
@@ -252,7 +242,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -268,7 +258,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id + "/download"
+        endpoint = self.url + "/datasets/" + dataset_id + "/download"
         self._stream_download(endpoint, output_path)
 
     def delete_dataset(self, dataset_id, delete_files=False):
@@ -296,7 +286,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/list"
+        endpoint = self.url + "/jobs/list"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -341,7 +331,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id
+        endpoint = self.url + "/jobs/" + job_id
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -359,7 +349,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/request"
+        endpoint = self.url + "/jobs/" + job_id + "/request"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -374,7 +364,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/start"
+        endpoint = self.url + "/jobs/" + job_id + "/start"
         res = self._session.put(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -391,7 +381,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/status"
+        endpoint = self.url + "/jobs/" + job_id + "/status"
         res = self._session.get(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
@@ -407,8 +397,25 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/output"
+        endpoint = self.url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
+
+    # TYPES FUNCTIONS ##########################################################
+
+    def get_types_doc(self):
+        '''Gets documentation about the types supported by the system.
+
+        Returns:
+            a dictionary containing the types documentation
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/types/"
+        res = self._session.get(
+            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+        _validate_response(res)
+        return _parse_json_response(res)
 
     # PRIVATE FUNCTIONS #######################################################
 

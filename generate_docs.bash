@@ -9,7 +9,7 @@
 
 echo "**** Generating API documentation"
 
-sphinx-apidoc -f -o docs/source .
+sphinx-apidoc -f -o docs/source voxel51/
 
 cd docs
 make html
