@@ -308,7 +308,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job"
+        endpoint = self.url + "/jobs"
         files = {
             "file": ("job.json", str(job_request), "application/json"),
             "job_name": (None, job_name),
