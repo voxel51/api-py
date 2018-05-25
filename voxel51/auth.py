@@ -46,12 +46,15 @@ def deactivate_token():
         logger.info("No token to deactivate")
 
 
-def load_token():
+def load_token(token_path=None):
     '''Loads the active API token.
 
-    If the ``VOXEL51_API_TOKEN`` environment variable is set, this is the
-    active token and will be loaded. Otherwise the token is loaded from
-    ``~/.voxel51/api-token.json``.
+    Args:
+        token_path: an optional path to a valid Token JSON file. If no path is
+            provided as an argument, the ``VOXEL51_API_TOKEN`` environment
+            variable is checked and, if set, the token is loaded from that
+            path. Otherwise, the token is loaded from
+            ``~/.voxel51/api-token.json``
 
     Returns:
         The active token, an instance of ``Token``
@@ -59,7 +62,7 @@ def load_token():
     Raises:
         TokenLoadError if no valid token was found
     '''
-    path = os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
+    path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
         return Token.from_disk(path)
     except IOError:
