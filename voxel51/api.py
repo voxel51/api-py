@@ -28,10 +28,22 @@ class API(object):
         token (voxel51.auth.Token): the authentication token for this session
     '''
 
-    def __init__(self):
-        '''Starts a new API session.'''
+    def __init__(self, token_path=None):
+         '''Starts a new API session.
+
+        Args:
+            token_path: an optional path to a valid Token JSON file. If no
+            path is provided as an argument, it must instead be set via the
+            `VOXEL51_AGENT_TOKEN` environment variable
+
+            token_path: an optional path to a valid Token JSON file. If no path
+                is provided as an argument, the ``VOXEL51_API_TOKEN``
+                environment variable is checked and, if set, the token is
+                loaded from that path. Otherwise, the token is loaded from
+                ``~/.voxel51/api-token.json``
+        '''
         self.url = BASE_API_URL
-        self.token = voxa.load_token()
+        self.token = voxa.load_token(token_path=token_path)
         self._header = self.token.get_header()
         self._session = requests.Session()
 
