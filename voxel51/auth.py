@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 TOKEN_ENVIRON_VAR = "VOXEL51_API_TOKEN"
-VOXEL51_DIR = os.path.join(os.path.expanduser("~"), ".voxel51")
-TOKEN_PATH = os.path.join(VOXEL51_DIR, "api-token.json")
+TOKEN_PATH = os.path.join(
+    os.path.expanduser("~"), ".voxel51", "api-token.json")
 ACCESS_TOKEN_FIELD = "access_token"
 PRIVATE_KEY_FIELD = "private_key"
 
