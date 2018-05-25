@@ -499,10 +499,17 @@ class APIErrorResponse(object):
 
         Raises:
             ValueError: if the given response is not an error response
+            HTTPError: if the error was caused by the HTTP connection, not
+                the API itself
         '''
         if not cls.is_error(res):
             raise ValueError("Response is not an error")
-        message = _parse_json_response(res)["error"]["message"]
+
+        try:
+            message = _parse_json_response(res)["error"]["message"]
+        except ValueError:
+            res.raise_for_status()
+
         return cls(res.status_code, message)
 
 
