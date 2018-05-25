@@ -29,7 +29,7 @@ class API(object):
     '''
 
     def __init__(self, token_path=None):
-         '''Starts a new API session.
+        '''Starts a new API session.
 
         Args:
             token_path: an optional path to a valid Token JSON file. If no path
