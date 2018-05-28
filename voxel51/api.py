@@ -443,67 +443,42 @@ def _get_mime_type(path):
 
 
 def _validate_response(res):
-    if APIErrorResponse.is_error(res):
-        APIErrorResponse.from_response(res).throw()
+    if not res.ok:
+        raise APIError.from_response(res)
 
 
 def _parse_json_response(res):
     return json.loads(res.content)
 
 
-class APIErrorResponse(object):
-    '''Class encapsulating an error response from the API.
+class APIError(Exception):
+    '''Exception raised when an API request fails.'''
 
-    Attributes:
-        code (int): the error code
-        message (str): the error message
-    '''
-
-    def __init__(self, code, message):
-        '''Creates a new APIErrorResponse object.
+    def __init__(self, message, code):
+        '''Creates a new APIError object.
 
         Args:
-            code (int): the error code
             message (str): the error message
+            code (int): the error code
         '''
-        self.code = code
-        self.message = message
-
-    def __str__(self):
-        return "Error %d: %s" % (self.code, self.message)
-
-    def throw(self):
-        '''Throws the APIError exception defined by this object.'''
-        raise APIError(self)
-
-    @staticmethod
-    def is_error(res):
-        '''Returns True/False whether the given response is an error.
-
-        Args:
-            res (requests.Response): a requests response
-
-        Returns:
-            True/False
-        '''
-        return not res.ok
+        super(APIError, self).__init__("%d: %s" % (code, message))
 
     @classmethod
     def from_response(cls, res):
-        '''Constructs an APIErrorResponse from the given Response object.
+        '''Constructs an APIError from a requests reponse.
 
         Args:
             res (requests.Response): a requests response
 
         Returns:
-            an instance of APIErrorResponse
+            an instance of APIError
 
         Raises:
             ValueError: if the given response is not an error response
             HTTPError: if the error was caused by the HTTP connection, not
                 the API itself
         '''
-        if not cls.is_error(res):
+        if res.ok:
             raise ValueError("Response is not an error")
 
         try:
@@ -511,8 +486,4 @@ class APIErrorResponse(object):
         except ValueError:
             res.raise_for_status()
 
-        return cls(res.status_code, message)
-
-
-class APIError(Exception):
-    pass
+        return cls(message, res.status_code)
