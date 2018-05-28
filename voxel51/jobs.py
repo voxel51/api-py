@@ -12,6 +12,21 @@ DATA_ID_FIELD = "data-id"
 SIGNED_URL_FIELD = "signed-url"
 
 
+class JobState(object):
+    '''Enum describing the possible states of a job.'''
+
+    READY = "READY"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    FAILED = "FAILED"
+    COMPLETE = "COMPLETE"
+
+
+class JobExecutionError(Exception):
+    '''Error raised when there is a problem with the execution of a job.'''
+    pass
+
+
 class JobRequest(voxu.Serializable):
     '''Class encapsulating a job request for the API.
 
