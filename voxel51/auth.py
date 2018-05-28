@@ -28,7 +28,7 @@ def activate_token(path):
     for authentication.
 
     Args:
-        path (str): the path to an API token to store in $LIB/.api-token.json
+        path (str): the path to an API token JSON file
     '''
     voxu.copy_file(path, TOKEN_PATH)
     logger.info("Token successfully activated")
@@ -57,7 +57,7 @@ def load_token(token_path=None):
             ``~/.voxel51/api-token.json``
 
     Returns:
-        The active token, an instance of ``Token``
+        a Token instance
 
     Raises:
         TokenLoadError if no valid token was found
@@ -89,7 +89,7 @@ class Token(object):
         this token.
 
         Returns:
-            A header dictionary
+            a header dictionary
         '''
         return {"Authorization": "Bearer " + self._private_key}
 
@@ -101,7 +101,7 @@ class Token(object):
             path (str): the path to a valid token JSON file
 
         Returns:
-            An instance of Token()
+            a Token instance
         '''
         return cls(voxu.read_json(path))
 
