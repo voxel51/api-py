@@ -128,6 +128,31 @@ class RemoteDataPath(voxu.Serializable):
         if not self.is_valid:
             raise RemoteDataPathError("Invalid RemoteDataPath")
 
+    @classmethod
+    def from_data_id(cls, data_id):
+        '''Creates a RemoteDataPath instance defined by the given data ID.
+
+        Args:
+            data_id (str): the ID of the data in cloud storage
+
+        Returns:
+            a RemoteDataPath instance with the given data ID
+        '''
+        return cls(data_id=data_id)
+
+    @classmethod
+    def from_signed_url(cls, signed_url):
+        '''Creates a RemoteDataPath instance defined by the given signed URL.
+
+        Args:
+            signed_url (str): a signed URL with access to the data of interest
+                in third-party cloud storage
+
+        Returns:
+            a RemoteDataPath instance with the given signed URL
+        '''
+        return cls(signed_url=signed_url)
+
     @property
     def has_data_id(self):
         '''Determines whether this RemoteDataPath instance has a data ID.
