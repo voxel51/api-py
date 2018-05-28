@@ -5,6 +5,7 @@
 #  bash generate_docs.bash
 #
 # Copyright 2018, Voxel51, LLC
+# voxel51.com
 #
 
 echo "**** Generating API documentation"
