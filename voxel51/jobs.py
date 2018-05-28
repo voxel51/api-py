@@ -38,7 +38,7 @@ class JobRequest(voxu.Serializable):
             name (str): the input name to set
             path (RemoteDataPath): a RemoteDataPath instance. If not specified,
                 valid kwargs must be provided
-            **kwargs: valid arguments for RemoteDataPath()
+            **kwargs: valid argument(s) for RemoteDataPath()
         '''
         self.inputs[name] = path or RemoteDataPath(**kwargs)
 
@@ -54,7 +54,7 @@ class JobRequest(voxu.Serializable):
             name (str): the input name to set
             path (RemoteDataPath): a RemoteDataPath instance. If not specified,
                 valid kwargs must be provided
-            **kwargs: valid arguments for RemoteDataPath()
+            **kwargs: valid argument(s) for RemoteDataPath()
         '''
         self.parameters[name] = path or RemoteDataPath(**kwargs)
 
