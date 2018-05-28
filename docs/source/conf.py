@@ -39,6 +39,9 @@ extensions = [
   'm2r',
 ]
 
+# Types of class members to generate documentation for
+autodoc_default_flags = ['members', 'inherited-members']
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
