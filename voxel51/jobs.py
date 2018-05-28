@@ -8,6 +8,10 @@ voxel51.com
 import voxel51.utils as voxu
 
 
+DATA_ID_FIELD = "data-id"
+SIGNED_URL_FIELD = "signed-url"
+
+
 class JobRequest(voxu.Serializable):
     '''Class encapsulating a job request for the API.
 
@@ -78,7 +82,7 @@ class JobRequest(voxu.Serializable):
             d (dict): a JSON dictionary defining a JobRequest instance
 
         Returns:
-            an instance of JobRequest
+            a JobRequest instance
         '''
         job_request = cls(d["analytic"])
 
@@ -106,9 +110,6 @@ class RemoteDataPath(voxu.Serializable):
         signed_url (str): a signed URL with access to the data of interest
             in third-party cloud storage
     '''
-
-    DATA_ID_FIELD = "data-id"
-    SIGNED_URL_FIELD = "signed-url"
 
     def __init__(self, data_id=None, signed_url=None):
         '''Creates a RemoteDataPath instance defined by the given information.
@@ -207,17 +208,17 @@ class RemoteDataPath(voxu.Serializable):
         Returns:
             a RemoteDataPath instance
         '''
-        if RemoteDataPath.DATA_ID_FIELD in d:
-            return cls(data_id=d[RemoteDataPath.DATA_ID_FIELD])
-        elif RemoteDataPath.SIGNED_URL_FIELD in d:
-            return cls(signed_url=d[RemoteDataPath.SIGNED_URL_FIELD])
+        if DATA_ID_FIELD in d:
+            return cls(data_id=d[DATA_ID_FIELD])
+        elif SIGNED_URL_FIELD in d:
+            return cls(signed_url=d[SIGNED_URL_FIELD])
         raise RemoteDataPathError("Invalid RemoteDataPath dict: %s" % str(d))
 
     def _attributes(self):
         if self.has_data_id:
-            return {"data_id": RemoteDataPath.DATA_ID_FIELD}
+            return {"data_id": DATA_ID_FIELD}
         elif self.has_signed_url:
-            return {"signed_url": RemoteDataPath.SIGNED_URL_FIELD}
+            return {"signed_url": SIGNED_URL_FIELD}
         raise RemoteDataPathError("Invalid RemoteDataPath")
 
 
