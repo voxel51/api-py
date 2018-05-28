@@ -4,6 +4,7 @@ Authentication module for the Voxel51 Vision Services API.
 Copyright 2017-2018, Voxel51, LLC
 voxel51.com
 '''
+import json
 import logging
 import os
 
@@ -72,18 +73,25 @@ def load_token(token_path=None):
 class Token(object):
     '''A class encapsulating an API authentication token.'''
 
-    def __init__(self, token):
+    def __init__(self, token_dict):
         '''Creates a token object with the given contents
 
         Args:
-            token (dict): a JSON dictionary defining an API token
+            token_dict (dict): a JSON dictionary defining an API token
         '''
-        self._token_dict = token
-        self._private_key = token[ACCESS_TOKEN_FIELD][PRIVATE_KEY_FIELD]
+        self._token_dict = token_dict
+        self._private_key = token_dict[ACCESS_TOKEN_FIELD][PRIVATE_KEY_FIELD]
+
+    def __str__(self):
+        return voxu.json_to_str(self._token_dict)
 
     def get_header(self):
         '''Returns a header dictionary for authenticating requests with
-        this token.'''
+        this token.
+
+        Returns:
+            A header dictionary
+        '''
         return {"Authorization": "Bearer " + self._private_key}
 
     @classmethod
