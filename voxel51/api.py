@@ -9,7 +9,6 @@ import os
 
 import mimetypes
 import requests
-import requests_toolbelt.downloadutils.stream as rtbs
 
 import voxel51.auth as voxa
 import voxel51.jobs as voxj
@@ -18,6 +17,7 @@ import voxel51.utils as voxu
 
 BASE_API_URL = "https://api.voxel51.com/v1"
 VERIFY_REQUESTS = False  # @todo remove once SSL certificate is signed
+CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
 class API(object):
@@ -432,7 +432,8 @@ class API(object):
             url, headers=self._header, stream=True, verify=VERIFY_REQUESTS)
         voxu.ensure_basedir(output_path)
         with open(output_path, "wb") as f:
-            rtbs.stream_response_to_file(res, path=f)
+            for chunk in res.iter_content(chunk_size=CHUNK_SIZE):
+                f.write(chunk)
 
         _validate_response(res)
 

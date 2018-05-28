@@ -25,6 +25,5 @@ setup(
     ],
     install_requires=[
         "requests>=2.18.4",
-        "requests-toolbelt>=0.8.0",
     ],
 )
