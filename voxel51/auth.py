@@ -69,19 +69,6 @@ def load_token(token_path=None):
         raise TokenLoadError("No token found")
 
 
-def found_active_token():
-    '''Returns True/False whether an active token is currently available.'''
-    try:
-        load_token();
-        return True
-    except TokenLoadError:
-        return False
-
-
-class TokenLoadError(Exception):
-    pass
-
-
 class Token(object):
     '''A class encapsulating an API authentication token.'''
 
@@ -110,3 +97,7 @@ class Token(object):
             An instance of Token()
         '''
         return cls(voxu.read_json(path))
+
+
+class TokenLoadError(Exception):
+    pass
