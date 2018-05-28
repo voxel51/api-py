@@ -72,10 +72,21 @@ class JobRequest(voxu.Serializable):
 
     @classmethod
     def from_dict(cls, d):
-        '''Constructs a JobRequest instance from a JSON dictionary.'''
+        '''Constructs a JobRequest instance from a JSON dictionary.
+
+        Args:
+            d (dict): a JSON dictionary defining a JobRequest instance
+
+        Returns:
+            an instance of JobRequest
+        '''
         job_request = cls(d["analytic"])
+
+        # Set inputs
         for name, val in d["inputs"].items():
             job_request.set_input(name, path=RemoteDataPath.from_dict(val))
+
+        # Set parameters
         for name, val in d["parameters"].items():
             if RemoteDataPath.is_remote_path_dict(val):
                 # Data parameter
@@ -119,27 +130,43 @@ class RemoteDataPath(voxu.Serializable):
 
     @property
     def has_data_id(self):
-        '''Returns True/False whether this RemoteDataPath instance has a data
-        ID.
+        '''Determines whether this RemoteDataPath instance has a data ID.
+
+        Returns:
+            True if this instance has a data ID, and False otherwise
         '''
         return self.data_id is not None
 
     @property
     def has_signed_url(self):
-        '''Returns True/False whether this RemoteDataPath instance has a signed
-        URL.
+        '''Determines whether this RemoteDataPath instance has a signed URL.
+
+        Returns:
+            True if this instance has a signed URL, and False otherwise
         '''
         return self.signed_url is not None
 
     @property
     def is_valid(self):
-        '''Returns True/False whether this RemoteDataPath instance is valid.'''
+        '''Determines whether this RemoteDataPath instance is valid.
+
+        Returns:
+            True if this instance is valid, and False otherwise
+        '''
         return self.has_data_id ^ self.has_signed_url
 
     @staticmethod
     def is_remote_path_dict(val):
-        '''Returns True/False whether this value is a valid RemoteDataPath
+        '''Determines whether the given value defines a valid RemoteDataPath
         dictionary.
+
+        Args:
+            val: either a JSON dictionary representation of a RemoteDataPath
+                instance or another arbitrary value
+
+        Returns:
+            True if val is a valid RemoteDataPath JSON dictionary, and False
+                otherwise
         '''
         return (
             isinstance(val, dict) and RemoteDataPath.from_dict(val).is_valid
@@ -151,6 +178,9 @@ class RemoteDataPath(voxu.Serializable):
 
         Args:
             d (dict): a JSON dictionary defining a RemoteDataPath instance
+
+        Returns:
+            a RemoteDataPath instance
         '''
         if RemoteDataPath.DATA_ID_FIELD in d:
             return cls(data_id=d[RemoteDataPath.DATA_ID_FIELD])
