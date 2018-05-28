@@ -55,8 +55,8 @@ class JobRequest(voxu.Serializable):
 
         Args:
             name (str): the input name to set
-            path (RemoteDataPath): a RemoteDataPath instance. If not specified,
-                valid kwargs must be provided
+            path (RemoteDataPath, optional): a RemoteDataPath instance. If not
+                specified, valid kwargs must be provided
             **kwargs: valid argument(s) for RemoteDataPath()
         '''
         self.inputs[name] = path or RemoteDataPath(**kwargs)
@@ -71,8 +71,8 @@ class JobRequest(voxu.Serializable):
 
         Args:
             name (str): the input name to set
-            path (RemoteDataPath): a RemoteDataPath instance. If not specified,
-                valid kwargs must be provided
+            path (RemoteDataPath, optional): a RemoteDataPath instance. If not
+                specified, valid kwargs must be provided
             **kwargs: valid argument(s) for RemoteDataPath()
         '''
         self.parameters[name] = path or RemoteDataPath(**kwargs)
@@ -132,9 +132,9 @@ class RemoteDataPath(voxu.Serializable):
         Exactly one keyword value must be supplied to this constructor.
 
         Args:
-            data_id (str): the ID of the data in cloud storage
-            signed_url (str): a signed URL with access to the data of interest
-                in third-party cloud storage
+            data_id (str, optional): the ID of the data in cloud storage
+            signed_url (str, optional): a signed URL with access to the data
+                of interest in third-party cloud storage
 
         Raises:
             RemoteDataPathError if the instance creation failed

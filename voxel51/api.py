@@ -136,16 +136,21 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
-    def download_data(self, data_id, output_path):
+    def download_data(self, data_id, output_path=None):
         '''Downloads the data with the given ID.
 
         Args:
             data_id (str): the data ID
-            output_path (str): the output path to write to
+            output_path (str, optional): the output path to write to. By
+                default, the data is written to the current working directory
+                with the same filename as the data in cloud storage
 
         Raises:
             APIError if the request was unsuccessful
         '''
+        if not output_path:
+            output_path = self.get_data_details(data_id)["filename"]
+
         endpoint = self.url + "/data/" + data_id + "/download"
         self._stream_download(endpoint, output_path)
 
@@ -256,12 +261,13 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["dataset"]
 
-    def download_dataset(self, dataset_id, output_path):
+    def download_dataset(self, dataset_id, output_path='dataset.zip'):
         '''Downloads the dataset with the given ID as a zip file.
 
         Args:
             dataset_id (str): the dataset ID
-            output_path (str): the output path to write to
+            output_path (str, optional): the output path to write to. The
+                default is 'dataset.zip'
 
         Raises:
             APIError if the request was unsuccessful
@@ -395,12 +401,13 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def download_job_output(self, job_id, output_path):
+    def download_job_output(self, job_id, output_path='output.zip'):
         '''Downloads the output of the job with the given ID.
 
         Args:
             job_id (str): the job ID
-            output_path (str): the output path to write to
+            output_path (str, optional): the output path to write to. The
+                default is 'output.zip'
 
         Raises:
             APIError if the request was unsuccessful
