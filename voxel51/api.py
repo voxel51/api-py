@@ -6,6 +6,7 @@ Main interface for the Voxel51 Vision Services API.
 '''
 import json
 import os
+import time
 
 import mimetypes
 import requests
@@ -382,6 +383,55 @@ class API(object):
         res = self._session.put(
             endpoint, headers=self._header, verify=VERIFY_REQUESTS)
         _validate_response(res)
+
+    def get_job_state(self, job_id):
+        '''Gets the state of the job with the given ID.
+
+        Args:
+            job_id (str): the job ID
+
+        Returns:
+            the state of the job, which is a valid member of the JobState enum
+        '''
+        return self.get_job_details(job_id)["state"]
+
+    def is_job_complete(self, job_id):
+        '''Determines whether the job with the given ID is complete.
+
+        Args:
+            job_id (str): the job ID
+
+        Returns:
+            True if the job is complete, and False otherwise
+
+        Raises:
+            JobExecutionError if the job failed
+        '''
+        job_state = self.get_job_state(job_id)
+        if job_state == voxj.JobState.FAILED:
+            raise voxj.JobExecutionError("Job '%s' failed" % job_id)
+
+        return job_state == voxj.JobState.COMPLETE
+
+    def wait_until_complete(self, job_id, sleep_time=5, max_wait_time=600):
+        '''Block execution until the job with the given ID is complete.
+
+        Args:
+            job_id (str): the job ID
+            sleep_time (float, optional): the number of seconds to wait
+                between job state checks. The default is 5 seconds
+            max_wait_time (float, optional): the maximum number of seconds to
+                wait for the job to complete. The default is 600 seconds
+
+        Raises:
+            JobExecutionError if the job failed or the maximum wait time was
+                exceeded
+        '''
+        start_time = time.time()
+        while not self.is_job_complete(job_id):
+            time.sleep(sleep_time)
+            if (time.time() - start_time) > max_wait_time:
+                raise voxj.JobExecutionError("Maximum wait time exceeded")
 
     def get_job_status(self, job_id):
         '''Gets the status of the job with the given ID.
