@@ -238,4 +238,5 @@ class RemoteDataPath(voxu.Serializable):
 
 
 class RemoteDataPathError(Exception):
+    '''Error raised when an invalid RemoteDataPathError instance is found.'''
     pass
