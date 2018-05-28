@@ -51,6 +51,18 @@ def read_json(path):
         return json.load(f)
 
 
+def json_to_str(obj):
+    '''Generates a string representation of the JSON object.
+
+    Args:
+        obj: an object that can be directly dumped to a JSON file
+
+    Returns:
+        a string representation of the JSON object
+    '''
+    return json.dumps(obj, indent=4)
+
+
 def write_json(obj, path):
     '''Writes JSON object to file, creating the output directory if necessary.
 
@@ -60,7 +72,7 @@ def write_json(obj, path):
     '''
     ensure_basedir(path)
     with open(path, "wt") as f:
-        f.write(json.dumps(obj, indent=4))
+        f.write(json_to_str(obj))
 
 
 class Serializable(object):
@@ -96,6 +108,14 @@ class Serializable(object):
             v: _recurse(getattr(self, k))
             for k, v in self._attributes().items()
         }
+
+    def to_string(self):
+        '''Generates a string representation of the Serializable object.
+
+        Returns:
+            a string representation of the object
+        '''
+        return json_to_str(self.to_dict())
 
     def to_json(self, path):
         '''Serialzes the object to disk.
