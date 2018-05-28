@@ -36,7 +36,7 @@ export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
 
 Alternatively, you can permanently activate a token with:
 
-```python
+```py
 from voxel51.auth import activate_token
 
 activate_token("/path/to/your/api-token.json")
@@ -55,7 +55,7 @@ The following examples describe some actions you can take using the API.
 
 To initialize an API session, issue the following commands:
 
-```python
+```py
 from voxel51.api import API
 
 api = API()
@@ -77,57 +77,55 @@ doc = api.get_analytic_doc(analytic_id);
 
 ### Data
 
-* Upload data to the cloud:
+Upload data to the cloud:
 
-```python
-data_metadata = api.upload_data("/path/to/video.mp4")
+```py
+metadata = api.upload_data("/path/to/video.mp4")
 ```
 
-* List uploaded data:
+List uploaded data:
 
-```python
-data_list = api.list_data()
+```py
+data = api.list_data()
 ```
 
 ### Jobs
 
-* Create a job request:
+Upload a job request:
 
-```python
+```py
+# Create a job request
 job_request = JobRequest(analytic_id)
 job_request.set_input("<input>", data_id=data_id)
 job_request.set_parameter("<param1>", val1)
 job_request.set_parameter("<param2>", val2)
+
+# Upload the request
+metadata = api.upload_job_request(job_request, "test-job")
 ```
 
-* Upload the job request:
+List the jobs you have created:
 
-```python
-job_metadata = api.upload_job_request(job_request, "test-job")
+```py
+jobs = api.list_jobs()
 ```
 
-* List the jobs you have created:
+Start a job:
 
-```python
-job_list = api.list_jobs()
-```
-
-* Start a job:
-
-```python
+```py
 api.start_job(job_id)
 ```
 
-* Get the status of a job:
+Get the status of a job:
 
-```python
-job_status = api.get_job_status(job_id)
+```py
+status = api.get_job_status(job_id)
 ```
 
-* Download the output of a completed job:
+Download the output of a completed job:
 
-```python
-api.download_job_output(job_id, output_path)
+```py
+api.download_job_output(job_id, "/path/to/output.zip")
 ```
 
 
@@ -158,7 +156,7 @@ your browser.
 ## Copyright
 
 Copyright 2018, Voxel51, LLC<br>
-voxel51.com
+[voxel51.com](https://voxel51.com)
 
 Brian Moore, brian@voxel51.com<br>
 David Hodgson, david@voxel51.com
