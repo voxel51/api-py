@@ -76,16 +76,16 @@ def write_json(obj, path):
 
 
 class Serializable(object):
-    '''Base class for objects that can be serialized as JSON dictionaries.'''
+    '''Base class for objects that can be represented in JSON format.'''
 
     def __str__(self):
         return self.to_string()
 
     def to_dict(self):
-        '''Serialzes the object into a JSON dictionary.
+        '''Generates a JSON dictionary representation of the object.
 
         Returns:
-            a JSON serializable dictionary representation of this object
+            a JSON dictionary representation of the object
         '''
         return {
             v: _recurse(getattr(self, k))
@@ -93,7 +93,7 @@ class Serializable(object):
         }
 
     def to_string(self):
-        '''Generates a string representation of the Serializable object.
+        '''Generates a string representation of the object.
 
         Returns:
             a string representation of the object
@@ -101,7 +101,7 @@ class Serializable(object):
         return json_to_str(self.to_dict())
 
     def to_json(self, path):
-        '''Serializes the object to disk in JSON format.
+        '''Write the object to disk in JSON format.
 
         Args:
             path (str): the output JSON file path. The base output directory
@@ -111,11 +111,12 @@ class Serializable(object):
 
     @classmethod
     def from_dict(cls, d):
-        '''Constructs a Serializable object from a JSON dictionary
-        representation of it. Subclasses must implement this method.
+        '''Constructs a Serializable object from a JSON representation of it.
+        Subclasses must implement this method.
 
         Args:
-            d (dict): a JSON dictionary representation of the object
+            d (dict): a JSON dictionary representation of a Serializable
+                subclass
 
         Returns:
             an instance of the Serializable subclass
@@ -127,7 +128,7 @@ class Serializable(object):
         '''Constructs a Serializable object from a string representation of it.
 
         Args:
-            s (str): a string representation of a JSON dictionary
+            s (str): a string representation of a Serializable subclass
 
         Returns:
             an instance of the Serializable subclass
@@ -137,10 +138,6 @@ class Serializable(object):
     @classmethod
     def from_json(cls, path):
         '''Constructs a Serializable object from a JSON file.
-
-        Subclasses may override this method, but, by default, this method
-        simply reads the JSON and calls from_dict(), which subclasses must
-        implement.
 
         Args:
             path (str): the path to a JSON file
