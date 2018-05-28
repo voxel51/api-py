@@ -107,4 +107,5 @@ class Token(object):
 
 
 class TokenLoadError(Exception):
+    '''Exception raised when a Token fails to load.'''
     pass

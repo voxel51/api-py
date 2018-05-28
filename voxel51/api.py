@@ -398,7 +398,7 @@ class API(object):
             job_id (str): the job ID
 
         Returns:
-            the state of the job, which is a valid member of the JobState enum
+            the state of the job, which is a value in the JobState enum
         '''
         return self.get_job_details(job_id)["state"]
 
