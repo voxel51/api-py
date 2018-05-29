@@ -509,19 +509,6 @@ class API(object):
         _validate_response(res)
 
 
-def _get_mime_type(path):
-    return mimetypes.guess_type(path)[0] or "application/octet-stream"
-
-
-def _validate_response(res):
-    if not res.ok:
-        raise APIError.from_response(res)
-
-
-def _parse_json_response(res):
-    return json.loads(res.content)
-
-
 class APIError(Exception):
     '''Exception raised when an API request fails.'''
 
@@ -558,3 +545,16 @@ class APIError(Exception):
             res.raise_for_status()
 
         return cls(message, res.status_code)
+
+
+def _get_mime_type(path):
+    return mimetypes.guess_type(path)[0] or "application/octet-stream"
+
+
+def _validate_response(res):
+    if not res.ok:
+        raise APIError.from_response(res)
+
+
+def _parse_json_response(res):
+    return json.loads(res.content)
