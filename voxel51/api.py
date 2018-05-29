@@ -399,6 +399,9 @@ class API(object):
 
         Returns:
             the state of the job, which is a value in the JobState enum
+
+        Raises:
+            APIError if the request was unsuccessful
         '''
         return self.get_job_details(job_id)["state"]
 
@@ -413,6 +416,7 @@ class API(object):
 
         Raises:
             JobExecutionError if the job failed
+            APIError if the underlying API request was unsuccessful
         '''
         job_state = self.get_job_state(job_id)
         if job_state == voxj.JobState.FAILED:
@@ -435,6 +439,7 @@ class API(object):
         Raises:
             JobExecutionError if the job failed or the maximum wait time was
                 exceeded
+            APIError if an underlying API request was unsuccessful
         '''
         start_time = time.time()
         while not self.is_job_complete(job_id):
