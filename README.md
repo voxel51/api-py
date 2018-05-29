@@ -130,6 +130,7 @@ Wait until a job is complete and then download its output:
 ```py
 job_output_path = "/path/to/output.zip"
 
+api.wait_until_job_completes(job_id)
 api.download_job_output(job_id, job_output_path)
 ```
 
