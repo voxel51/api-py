@@ -51,14 +51,17 @@ After you have activated an API token, you have full access to the API.
 
 ## Example Usage
 
-The following examples describe some actions you can take using the API.
-
 To initialize an API session, issue the following commands:
 
 ```py
+import json
 from voxel51.api import API
 
 api = API()
+
+# Convenience function to view JSON outputs
+def pprint(obj):
+    print json.dumps(obj, indent=4)
 ```
 
 ### Analytics
@@ -66,13 +69,13 @@ api = API()
 List available analytics:
 
 ```py
-analytics = api.list_analytics();
+pprint(api.list_analytics())
 ```
 
 Get documentation for an analytic:
 
 ```py
-doc = api.get_analytic_doc(analytic_id);
+pprint(api.get_analytic_doc(analytic_id))
 ```
 
 ### Data
@@ -80,34 +83,40 @@ doc = api.get_analytic_doc(analytic_id);
 Upload data to the cloud:
 
 ```py
-metadata = api.upload_data("/path/to/video.mp4")
+upload_data_path = "/path/to/video.mp4"
+
+pprint(api.upload_data(upload_data_path))
 ```
 
 List uploaded data:
 
 ```py
-data = api.list_data()
+pprint(api.list_data())
 ```
 
 ### Jobs
 
-Upload a job request:
+List the jobs you have created:
 
 ```py
-# Create a job request
+pprint(api.list_jobs())
+```
+
+Create a job request:
+
+```py
 job_request = JobRequest(analytic_id)
 job_request.set_input("<input>", data_id=data_id)
 job_request.set_parameter("<param1>", val1)
 job_request.set_parameter("<param2>", val2)
 
-# Upload the request
-metadata = api.upload_job_request(job_request, "test-job")
+print job_request
 ```
 
-List the jobs you have created:
+Upload a job request:
 
 ```py
-jobs = api.list_jobs()
+pprint(api.upload_job_request(job_request, "test-job"))
 ```
 
 Start a job:
@@ -116,16 +125,18 @@ Start a job:
 api.start_job(job_id)
 ```
 
+Wait until a job is complete and then download its output:
+
+```py
+job_output_path = "/path/to/output.zip"
+
+api.download_job_output(job_id, job_output_path)
+```
+
 Get the status of a job:
 
 ```py
-status = api.get_job_status(job_id)
-```
-
-Download the output of a completed job:
-
-```py
-api.download_job_output(job_id, "/path/to/output.zip")
+pprint(api.get_job_status(job_id))
 ```
 
 
