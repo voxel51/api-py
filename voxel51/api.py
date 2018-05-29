@@ -420,15 +420,17 @@ class API(object):
 
         return job_state == voxj.JobState.COMPLETE
 
-    def wait_until_complete(self, job_id, sleep_time=5, max_wait_time=600):
+    def wait_until_job_completes(
+            self, job_id, sleep_time=5, max_wait_time=600
+        ):
         '''Block execution until the job with the given ID is complete.
 
         Args:
             job_id (str): the job ID
             sleep_time (float, optional): the number of seconds to wait
-                between job state checks. The default is 5 seconds
+                between job state checks. The default is 5
             max_wait_time (float, optional): the maximum number of seconds to
-                wait for the job to complete. The default is 600 seconds
+                wait for the job to complete. The default is 600
 
         Raises:
             JobExecutionError if the job failed or the maximum wait time was
