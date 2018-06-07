@@ -20,7 +20,6 @@ import voxel51.utils as voxu
 # @todo remove once SSL certificate is signed
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-VERIFY_REQUESTS = True
 ###############################################################################
 
 
@@ -64,7 +63,7 @@ class API(object):
         '''
         endpoint = self.url + "/analytics/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["analytics"]
 
@@ -82,7 +81,7 @@ class API(object):
         '''
         endpoint = self.url + "/analytics/" + analytic_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -99,7 +98,7 @@ class API(object):
         '''
         endpoint = self.url + "/data/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
@@ -121,7 +120,7 @@ class API(object):
         with open(path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
             res = self._session.post(endpoint,
-                files=files, headers=self._header, verify=VERIFY_REQUESTS)
+                files=files, headers=self._header)
 
         _validate_response(res)
         return _parse_json_response(res)["data"]
@@ -140,7 +139,7 @@ class API(object):
         '''
         endpoint = self.url + "/data/" + data_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
@@ -173,7 +172,7 @@ class API(object):
         '''
         endpoint = self.url + "/data/" + data_id
         res = self._session.delete(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
 
     # DATASET FUNCTIONS #######################################################
@@ -189,7 +188,7 @@ class API(object):
         '''
         endpoint = self.url + "/datasets/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["datasets"]
 
@@ -208,7 +207,7 @@ class API(object):
         endpoint = self.url + "/dataset"
         files = {"dataset_name": (None, dataset_name)}
         res = self._session.post(endpoint,
-            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+            headers=self._header, files=files)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -225,7 +224,7 @@ class API(object):
         endpoint = self.url + "/datasets/" + dataset_id
         files = {"data_id": (None, data_id)}
         res = self._session.put(endpoint,
-            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+            headers=self._header, files=files)
         _validate_response(res)
 
     def remove_data_from_dataset(
@@ -248,7 +247,7 @@ class API(object):
             "delete_files": (None, str(delete_files)),
         }
         res = self._session.delete(endpoint,
-            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+            headers=self._header, files=files)
         _validate_response(res)
 
     def get_dataset_details(self, dataset_id):
@@ -265,7 +264,7 @@ class API(object):
         '''
         endpoint = self.url + "/datasets/" + dataset_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["dataset"]
 
@@ -310,7 +309,7 @@ class API(object):
         '''
         endpoint = self.url + "/jobs/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
 
@@ -337,7 +336,7 @@ class API(object):
             "auto_start": (None, str(auto_start)),
         }
         res = self._session.post(endpoint,
-            files=files, headers=self._header, verify=VERIFY_REQUESTS)
+            files=files, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -355,7 +354,7 @@ class API(object):
         '''
         endpoint = self.url + "/jobs/" + job_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
 
@@ -373,7 +372,7 @@ class API(object):
         '''
         endpoint = self.url + "/jobs/" + job_id + "/request"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return voxj.JobRequest.from_dict(_parse_json_response(res))
 
@@ -388,7 +387,7 @@ class API(object):
         '''
         endpoint = self.url + "/jobs/" + job_id + "/start"
         res = self._session.put(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
 
     def get_job_state(self, job_id):
@@ -461,7 +460,7 @@ class API(object):
         '''
         endpoint = self.url + "/jobs/" + job_id + "/status"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -492,7 +491,7 @@ class API(object):
         '''
         endpoint = self.url + "/types/"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -500,7 +499,7 @@ class API(object):
 
     def _stream_download(self, url, output_path):
         res = self._session.get(
-            url, headers=self._header, stream=True, verify=VERIFY_REQUESTS)
+            url, headers=self._header, stream=True)
         voxu.ensure_basedir(output_path)
         with open(output_path, "wb") as f:
             for chunk in res.iter_content(chunk_size=CHUNK_SIZE):
