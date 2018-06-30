@@ -9,3 +9,4 @@ __pycache__
 !/docs/Makefile
 !/docs/source/conf.py
 !/docs/source/index.rst
+!/docs/source/readme.rst

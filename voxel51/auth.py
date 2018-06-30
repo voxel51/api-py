@@ -1,8 +1,8 @@
 '''
 Authentication module for the Voxel51 Vision Services API.
 
-Copyright 2017-2018, Voxel51, LLC
-voxel51.com
+| Copyright 2017-2018, Voxel51, LLC
+| `voxel51.com <https://voxel51.com/>`_
 '''
 import logging
 import os
@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 TOKEN_ENVIRON_VAR = "VOXEL51_API_TOKEN"
-VOXEL51_DIR = os.path.join(os.path.expanduser("~"), ".voxel51")
-TOKEN_PATH = os.path.join(VOXEL51_DIR, "api-token.json")
+TOKEN_PATH = os.path.join(
+    os.path.expanduser("~"), ".voxel51", "api-token.json")
 ACCESS_TOKEN_FIELD = "access_token"
 PRIVATE_KEY_FIELD = "private_key"
 
@@ -28,7 +28,7 @@ def activate_token(path):
     for authentication.
 
     Args:
-        path (str): the path to an API token to store in $LIB/.api-token.json
+        path (str): the path to an API token JSON file
     '''
     voxu.copy_file(path, TOKEN_PATH)
     logger.info("Token successfully activated")
@@ -46,54 +46,51 @@ def deactivate_token():
         logger.info("No token to deactivate")
 
 
-def load_token():
+def load_token(token_path=None):
     '''Loads the active API token.
 
-    If the ``VOXEL51_API_TOKEN`` environment variable is set, this is the
-    active token and will be loaded. Otherwise the token is loaded from
-    ``~/.voxel51/api-token.json``.
+    Args:
+        token_path: an optional path to a valid Token JSON file. If no path is
+            provided as an argument, the ``VOXEL51_API_TOKEN`` environment
+            variable is checked and, if set, the token is loaded from that
+            path. Otherwise, the token is loaded from
+            ``~/.voxel51/api-token.json``
 
     Returns:
-        The active token, an instance of ``Token``
+        a Token instance
 
     Raises:
         TokenLoadError if no valid token was found
     '''
-    path = os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
+    path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
         return Token.from_disk(path)
     except IOError:
         raise TokenLoadError("No token found")
 
 
-def found_active_token():
-    '''Returns True/False whether an active token is currently available.'''
-    try:
-        load_token();
-        return True
-    except TokenLoadError:
-        return False
-
-
-class TokenLoadError(Exception):
-    pass
-
-
 class Token(object):
     '''A class encapsulating an API authentication token.'''
 
-    def __init__(self, token):
+    def __init__(self, token_dict):
         '''Creates a token object with the given contents
 
         Args:
-            token (dict): a JSON dictionary defining an API token
+            token_dict (dict): a JSON dictionary defining an API token
         '''
-        self._token_dict = token
-        self._private_key = token[ACCESS_TOKEN_FIELD][PRIVATE_KEY_FIELD]
+        self._token_dict = token_dict
+        self._private_key = token_dict[ACCESS_TOKEN_FIELD][PRIVATE_KEY_FIELD]
+
+    def __str__(self):
+        return voxu.json_to_str(self._token_dict)
 
     def get_header(self):
         '''Returns a header dictionary for authenticating requests with
-        this token.'''
+        this token.
+
+        Returns:
+            a header dictionary
+        '''
         return {"Authorization": "Bearer " + self._private_key}
 
     @classmethod
@@ -104,6 +101,11 @@ class Token(object):
             path (str): the path to a valid token JSON file
 
         Returns:
-            An instance of Token()
+            a Token instance
         '''
         return cls(voxu.read_json(path))
+
+
+class TokenLoadError(Exception):
+    '''Exception raised when a Token fails to load.'''
+    pass
