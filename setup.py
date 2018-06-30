@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="voxel51-api-python",
-    version="1.0",
+    version="1.0.0",
     description='Python client library for the Voxel51 Vision Services API',
     author="Voxel51, LLC",
     author_email="support@voxel51.com",
@@ -23,5 +23,7 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
-    install_requires=["requests>=2.18.4", "requests-toolbelt>=0.8.0"],
+    install_requires=[
+        "requests>=2.18.4",
+    ],
 )

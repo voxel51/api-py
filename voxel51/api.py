@@ -1,82 +1,87 @@
 '''
 Main interface for the Voxel51 Vision Services API.
 
-Copyright 2017-2018, Voxel51, LLC
-voxel51.com
+| Copyright 2017-2018, Voxel51, LLC
+| `voxel51.com <https://voxel51.com/>`_
 '''
 import json
 import os
+import time
 
 import mimetypes
 import requests
-import requests_toolbelt.downloadutils.stream as rtbs
 
 import voxel51.auth as voxa
 import voxel51.jobs as voxj
 import voxel51.utils as voxu
 
 
+###############################################################################
+# @todo remove once SSL certificate is signed
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+###############################################################################
+
+
 BASE_API_URL = "https://api.voxel51.com/v1"
-VERIFY_REQUESTS = False  # @todo remove once SSL certificate is signed
+CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
 class API(object):
     '''Main class for managing a session with the Voxel51 Vision Services API.
-
-    Example usage::
-
-        from voxel51.api import API
-
-        # Start an API session
-        api = API()
-
-        # List the algorithms exposed by the API
-        algo_list = api.list_algorithms()
 
     Attributes:
         url (string): the base URL of the API
         token (voxel51.auth.Token): the authentication token for this session
     '''
 
-    def __init__(self):
-        '''Starts a new API session.'''
+    def __init__(self, token_path=None):
+        '''Starts a new API session.
+
+        Args:
+            token_path: an optional path to a valid Token JSON file. If no path
+                is provided as an argument, the ``VOXEL51_API_TOKEN``
+                environment variable is checked and, if set, the token is
+                loaded from that path. Otherwise, the token is loaded from
+                ``~/.voxel51/api-token.json``
+        '''
         self.url = BASE_API_URL
-        self.token = voxa.load_token()
+        self.token = voxa.load_token(token_path=token_path)
         self._header = self.token.get_header()
         self._session = requests.Session()
 
-    # ALGORITHM FUNCTIONS #####################################################
+    # ANALYTICS FUNCTIONS #####################################################
 
-    def list_algorithms(self):
-        '''Returns a list of all available algorithms.
+    def list_analytics(self):
+        '''Returns a list of all available analytics.
 
         Returns:
-            a list of dicts describing the available algorithms
+            a list of dicts describing the available analytics
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/algo/list"
+        endpoint = self.url + "/analytics/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
-        return _parse_json_response(res)["algorithms"]
+        return _parse_json_response(res)["analytics"]
 
-    def get_algorithm_doc(self, algo_id):
-        '''Gets documentation about the algorithm with the given ID.
+    def get_analytic_doc(self, analytic_id):
+        '''Gets documentation about the analytic with the given ID.
 
         Args:
-            algo_id (str): the algorithm ID
+            analytic_id (str): the analytic ID
 
         Returns:
-            a dictionary containing the algorithm documentation
+            a dictionary containing the analytic documentation
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/algo/" + algo_id
+        endpoint = self.url + "/analytics/" + analytic_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -93,7 +98,7 @@ class API(object):
         '''
         endpoint = self.url + "/data/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
@@ -115,7 +120,7 @@ class API(object):
         with open(path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
             res = self._session.post(endpoint,
-                files=files, headers=self._header, verify=VERIFY_REQUESTS)
+                files=files, headers=self._header)
 
         _validate_response(res)
         return _parse_json_response(res)["data"]
@@ -134,20 +139,25 @@ class API(object):
         '''
         endpoint = self.url + "/data/" + data_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
-    def download_data(self, data_id, output_path):
+    def download_data(self, data_id, output_path=None):
         '''Downloads the data with the given ID.
 
         Args:
             data_id (str): the data ID
-            output_path (str): the output path to write to
+            output_path (str, optional): the output path to write to. By
+                default, the data is written to the current working directory
+                with the same filename as the data in cloud storage
 
         Raises:
             APIError if the request was unsuccessful
         '''
+        if not output_path:
+            output_path = self.get_data_details(data_id)["filename"]
+
         endpoint = self.url + "/data/" + data_id + "/download"
         self._stream_download(endpoint, output_path)
 
@@ -162,7 +172,7 @@ class API(object):
         '''
         endpoint = self.url + "/data/" + data_id
         res = self._session.delete(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
 
     # DATASET FUNCTIONS #######################################################
@@ -176,9 +186,9 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/list"
+        endpoint = self.url + "/datasets/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["datasets"]
 
@@ -197,7 +207,7 @@ class API(object):
         endpoint = self.url + "/dataset"
         files = {"dataset_name": (None, dataset_name)}
         res = self._session.post(endpoint,
-            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+            headers=self._header, files=files)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -211,10 +221,10 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         files = {"data_id": (None, data_id)}
         res = self._session.put(endpoint,
-            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+            headers=self._header, files=files)
         _validate_response(res)
 
     def remove_data_from_dataset(
@@ -231,13 +241,13 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         files = {
             "data_id": (None, data_id),
             "delete_files": (None, str(delete_files)),
         }
         res = self._session.delete(endpoint,
-            headers=self._header, files=files, verify=VERIFY_REQUESTS)
+            headers=self._header, files=files)
         _validate_response(res)
 
     def get_dataset_details(self, dataset_id):
@@ -252,23 +262,24 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id
+        endpoint = self.url + "/datasets/" + dataset_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["dataset"]
 
-    def download_dataset(self, dataset_id, output_path):
+    def download_dataset(self, dataset_id, output_path='dataset.zip'):
         '''Downloads the dataset with the given ID as a zip file.
 
         Args:
             dataset_id (str): the dataset ID
-            output_path (str): the output path to write to
+            output_path (str, optional): the output path to write to. The
+                default is 'dataset.zip'
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/dataset/" + dataset_id + "/download"
+        endpoint = self.url + "/datasets/" + dataset_id + "/download"
         self._stream_download(endpoint, output_path)
 
     def delete_dataset(self, dataset_id, delete_files=False):
@@ -296,9 +307,9 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/list"
+        endpoint = self.url + "/jobs/list"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
 
@@ -318,14 +329,14 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job"
+        endpoint = self.url + "/jobs"
         files = {
             "file": ("job.json", str(job_request), "application/json"),
             "job_name": (None, job_name),
             "auto_start": (None, str(auto_start)),
         }
         res = self._session.post(endpoint,
-            files=files, headers=self._header, verify=VERIFY_REQUESTS)
+            files=files, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -341,9 +352,9 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id
+        endpoint = self.url + "/jobs/" + job_id
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
 
@@ -359,9 +370,9 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/request"
+        endpoint = self.url + "/jobs/" + job_id + "/request"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return voxj.JobRequest.from_dict(_parse_json_response(res))
 
@@ -374,10 +385,66 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/start"
+        endpoint = self.url + "/jobs/" + job_id + "/start"
         res = self._session.put(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
+
+    def get_job_state(self, job_id):
+        '''Gets the state of the job with the given ID.
+
+        Args:
+            job_id (str): the job ID
+
+        Returns:
+            the state of the job, which is a value in the JobState enum
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        return self.get_job_details(job_id)["state"]
+
+    def is_job_complete(self, job_id):
+        '''Determines whether the job with the given ID is complete.
+
+        Args:
+            job_id (str): the job ID
+
+        Returns:
+            True if the job is complete, and False otherwise
+
+        Raises:
+            JobExecutionError if the job failed
+            APIError if the underlying API request was unsuccessful
+        '''
+        job_state = self.get_job_state(job_id)
+        if job_state == voxj.JobState.FAILED:
+            raise voxj.JobExecutionError("Job '%s' failed" % job_id)
+
+        return job_state == voxj.JobState.COMPLETE
+
+    def wait_until_job_completes(
+            self, job_id, sleep_time=5, max_wait_time=600
+        ):
+        '''Block execution until the job with the given ID is complete.
+
+        Args:
+            job_id (str): the job ID
+            sleep_time (float, optional): the number of seconds to wait
+                between job state checks. The default is 5
+            max_wait_time (float, optional): the maximum number of seconds to
+                wait for the job to complete. The default is 600
+
+        Raises:
+            JobExecutionError if the job failed or the maximum wait time was
+                exceeded
+            APIError if an underlying API request was unsuccessful
+        '''
+        start_time = time.time()
+        while not self.is_job_complete(job_id):
+            time.sleep(sleep_time)
+            if (time.time() - start_time) > max_wait_time:
+                raise voxj.JobExecutionError("Maximum wait time exceeded")
 
     def get_job_status(self, job_id):
         '''Gets the status of the job with the given ID.
@@ -391,35 +458,92 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/status"
+        endpoint = self.url + "/jobs/" + job_id + "/status"
         res = self._session.get(
-            endpoint, headers=self._header, verify=VERIFY_REQUESTS)
+            endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
 
-    def download_job_output(self, job_id, output_path):
+    def download_job_output(self, job_id, output_path='output.zip'):
         '''Downloads the output of the job with the given ID.
 
         Args:
             job_id (str): the job ID
-            output_path (str): the output path to write to
+            output_path (str, optional): the output path to write to. The
+                default is 'output.zip'
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/job/" + job_id + "/output"
+        endpoint = self.url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
+
+    # TYPES FUNCTIONS ##########################################################
+
+    def get_types_doc(self):
+        '''Gets documentation about the types supported by the system.
+
+        Returns:
+            a dictionary containing the types documentation
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/types/"
+        res = self._session.get(
+            endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)
 
     # PRIVATE FUNCTIONS #######################################################
 
     def _stream_download(self, url, output_path):
         res = self._session.get(
-            url, headers=self._header, stream=True, verify=VERIFY_REQUESTS)
+            url, headers=self._header, stream=True)
         voxu.ensure_basedir(output_path)
         with open(output_path, "wb") as f:
-            rtbs.stream_response_to_file(res, path=f)
+            for chunk in res.iter_content(chunk_size=CHUNK_SIZE):
+                f.write(chunk)
 
         _validate_response(res)
+
+
+class APIError(Exception):
+    '''Exception raised when an API request fails.'''
+
+    def __init__(self, message, code):
+        '''Creates a new APIError object.
+
+        Args:
+            message (str): the error message
+            code (int): the error code
+        '''
+        super(APIError, self).__init__("%d: %s" % (code, message))
+
+    @classmethod
+    def from_response(cls, res):
+        '''Constructs an APIError from a requests reponse.
+
+        Args:
+            res (requests.Response): a requests response
+
+        Returns:
+            an instance of APIError
+
+        Raises:
+            ValueError: if the given response is not an error response
+            HTTPError: if the error was caused by the HTTP connection, not
+                the API itself
+        '''
+        if res.ok:
+            raise ValueError("Response is not an error")
+
+        try:
+            message = _parse_json_response(res)["error"]["message"]
+        except ValueError:
+            res.raise_for_status()
+
+        return cls(message, res.status_code)
 
 
 def _get_mime_type(path):
@@ -427,69 +551,9 @@ def _get_mime_type(path):
 
 
 def _validate_response(res):
-    if APIErrorResponse.is_error(res):
-        APIErrorResponse.from_response(res).throw()
+    if not res.ok:
+        raise APIError.from_response(res)
 
 
 def _parse_json_response(res):
     return json.loads(res.content)
-
-
-class APIErrorResponse(object):
-    '''Class encapsulating an error response from the API.
-
-    Attributes:
-        code (int): the error code
-        message (str): the error message
-    '''
-
-    def __init__(self, code, message):
-        '''Creates a new APIErrorResponse object.
-
-        Args:
-            code (int): the error code
-            message (str): the error message
-        '''
-        self.code = code
-        self.message = message
-
-    def __str__(self):
-        return "Error %d: %s" % (self.code, self.message)
-
-    def throw(self):
-        '''Throws the APIError exception defined by this object.'''
-        raise APIError(self)
-
-    @staticmethod
-    def is_error(res):
-        '''Returns True/False whether the given response is an error.
-
-        Args:
-            res (requests.Response): a requests response
-
-        Returns:
-            True/False
-        '''
-        return not res.ok
-
-    @classmethod
-    def from_response(cls, res):
-        '''Constructs an APIErrorResponse from the given Response object.
-
-        Args:
-            res (requests.Response): a requests response
-
-        Returns:
-            an instance of APIErrorResponse
-
-        Raises:
-            ValueError: if the given response is not an error response
-        '''
-        if not cls.is_error(res):
-            raise ValueError("Response is not an error")
-        message = _parse_json_response(res)["error"]["message"]
-        return cls(res.status_code, message)
-
-
-class APIError(Exception):
-    pass

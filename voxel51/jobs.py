@@ -2,29 +2,48 @@
 Job request creation and manipulation library for the Voxel51 Vision Services
 API.
 
-Copyright 2017-2018, Voxel51, LLC
-voxel51.com
+| Copyright 2017-2018, Voxel51, LLC
+| `voxel51.com <https://voxel51.com/>`_
 '''
 import voxel51.utils as voxu
+
+
+DATA_ID_FIELD = "data-id"
+SIGNED_URL_FIELD = "signed-url"
+
+
+class JobState(object):
+    '''Enum describing the possible states of a job.'''
+
+    READY = "READY"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    FAILED = "FAILED"
+    COMPLETE = "COMPLETE"
+
+
+class JobExecutionError(Exception):
+    '''Error raised when there is a problem with the execution of a job.'''
+    pass
 
 
 class JobRequest(voxu.Serializable):
     '''Class encapsulating a job request for the API.
 
     Attributes:
-        algorithm (str): the ID of the algorithm to run
+        analytic (str): the ID of the analytic to run
         inputs (dict): a dictionary mapping input names to RemoteDataPath
             instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
-    def __init__(self, algo_id):
-        '''Initializes a JobRequest instance for the given algorithm.
+    def __init__(self, analytic_id):
+        '''Initializes a JobRequest instance for the given analytic.
 
         Args:
-            algo_id (str): the ID of the algorithm to run
+            analytic_id (str): the ID of the analytic to run
         '''
-        self.algorithm = algo_id
+        self.analytic = analytic_id
         self.inputs = {}
         self.parameters = {}
 
@@ -36,9 +55,9 @@ class JobRequest(voxu.Serializable):
 
         Args:
             name (str): the input name to set
-            path (RemoteDataPath): a RemoteDataPath instance. If not specified,
-                valid kwargs must be provided
-            **kwargs: valid arguments for RemoteDataPath()
+            path (RemoteDataPath, optional): a RemoteDataPath instance. If not
+                specified, valid kwargs must be provided
+            **kwargs: valid argument(s) for RemoteDataPath()
         '''
         self.inputs[name] = path or RemoteDataPath(**kwargs)
 
@@ -52,9 +71,9 @@ class JobRequest(voxu.Serializable):
 
         Args:
             name (str): the input name to set
-            path (RemoteDataPath): a RemoteDataPath instance. If not specified,
-                valid kwargs must be provided
-            **kwargs: valid arguments for RemoteDataPath()
+            path (RemoteDataPath, optional): a RemoteDataPath instance. If not
+                specified, valid kwargs must be provided
+            **kwargs: valid argument(s) for RemoteDataPath()
         '''
         self.parameters[name] = path or RemoteDataPath(**kwargs)
 
@@ -72,10 +91,21 @@ class JobRequest(voxu.Serializable):
 
     @classmethod
     def from_dict(cls, d):
-        '''Constructs a JobRequest instance from a JSON dictionary.'''
-        job_request = cls(d["algorithm"])
+        '''Constructs a JobRequest instance from a JSON dictionary.
+
+        Args:
+            d (dict): a JSON dictionary defining a JobRequest instance
+
+        Returns:
+            a JobRequest instance
+        '''
+        job_request = cls(d["analytic"])
+
+        # Set inputs
         for name, val in d["inputs"].items():
             job_request.set_input(name, path=RemoteDataPath.from_dict(val))
+
+        # Set parameters
         for name, val in d["parameters"].items():
             if RemoteDataPath.is_remote_path_dict(val):
                 # Data parameter
@@ -96,18 +126,15 @@ class RemoteDataPath(voxu.Serializable):
             in third-party cloud storage
     '''
 
-    DATA_ID_FIELD = "data-id"
-    SIGNED_URL_FIELD = "signed-url"
-
     def __init__(self, data_id=None, signed_url=None):
         '''Creates a RemoteDataPath instance defined by the given information.
 
         Exactly one keyword value must be supplied to this constructor.
 
         Args:
-            data_id (str): the ID of the data in cloud storage
-            signed_url (str): a signed URL with access to the data of interest
-                in third-party cloud storage
+            data_id (str, optional): the ID of the data in cloud storage
+            signed_url (str, optional): a signed URL with access to the data
+                of interest in third-party cloud storage
 
         Raises:
             RemoteDataPathError if the instance creation failed
@@ -117,29 +144,70 @@ class RemoteDataPath(voxu.Serializable):
         if not self.is_valid:
             raise RemoteDataPathError("Invalid RemoteDataPath")
 
+    @classmethod
+    def from_data_id(cls, data_id):
+        '''Creates a RemoteDataPath instance defined by the given data ID.
+
+        Args:
+            data_id (str): the ID of the data in cloud storage
+
+        Returns:
+            a RemoteDataPath instance with the given data ID
+        '''
+        return cls(data_id=data_id)
+
+    @classmethod
+    def from_signed_url(cls, signed_url):
+        '''Creates a RemoteDataPath instance defined by the given signed URL.
+
+        Args:
+            signed_url (str): a signed URL with access to the data of interest
+                in third-party cloud storage
+
+        Returns:
+            a RemoteDataPath instance with the given signed URL
+        '''
+        return cls(signed_url=signed_url)
+
     @property
     def has_data_id(self):
-        '''Returns True/False whether this RemoteDataPath instance has a data
-        ID.
+        '''Determines whether this RemoteDataPath instance has a data ID.
+
+        Returns:
+            True if this instance has a data ID, and False otherwise
         '''
         return self.data_id is not None
 
     @property
     def has_signed_url(self):
-        '''Returns True/False whether this RemoteDataPath instance has a signed
-        URL.
+        '''Determines whether this RemoteDataPath instance has a signed URL.
+
+        Returns:
+            True if this instance has a signed URL, and False otherwise
         '''
         return self.signed_url is not None
 
     @property
     def is_valid(self):
-        '''Returns True/False whether this RemoteDataPath instance is valid.'''
+        '''Determines whether this RemoteDataPath instance is valid.
+
+        Returns:
+            True if this instance is valid, and False otherwise
+        '''
         return self.has_data_id ^ self.has_signed_url
 
     @staticmethod
     def is_remote_path_dict(val):
-        '''Returns True/False whether this value is a valid RemoteDataPath
+        '''Determines whether the given value defines a valid RemoteDataPath
         dictionary.
+
+        Args:
+            val: either a JSON dictionary representation of a RemoteDataPath
+                instance or another arbitrary value
+
+        Returns:
+            True if val is a valid RemoteDataPath JSON dictionary, and False
+                otherwise
         '''
         return (
             isinstance(val, dict) and RemoteDataPath.from_dict(val).is_valid
@@ -151,20 +219,24 @@ class RemoteDataPath(voxu.Serializable):
 
         Args:
             d (dict): a JSON dictionary defining a RemoteDataPath instance
+
+        Returns:
+            a RemoteDataPath instance
         '''
-        if RemoteDataPath.DATA_ID_FIELD in d:
-            return cls(data_id=d[RemoteDataPath.DATA_ID_FIELD])
-        elif RemoteDataPath.SIGNED_URL_FIELD in d:
-            return cls(signed_url=d[RemoteDataPath.SIGNED_URL_FIELD])
+        if DATA_ID_FIELD in d:
+            return cls(data_id=d[DATA_ID_FIELD])
+        elif SIGNED_URL_FIELD in d:
+            return cls(signed_url=d[SIGNED_URL_FIELD])
         raise RemoteDataPathError("Invalid RemoteDataPath dict: %s" % str(d))
 
     def _attributes(self):
         if self.has_data_id:
-            return {"data_id": RemoteDataPath.DATA_ID_FIELD}
+            return {"data_id": DATA_ID_FIELD}
         elif self.has_signed_url:
-            return {"signed_url": RemoteDataPath.SIGNED_URL_FIELD}
+            return {"signed_url": SIGNED_URL_FIELD}
         raise RemoteDataPathError("Invalid RemoteDataPath")
 
 
 class RemoteDataPathError(Exception):
+    '''Error raised when an invalid RemoteDataPath instance is found.'''
     pass

@@ -1,8 +1,8 @@
 '''
 Utility functions for the Voxel51 Vision Services API.
 
-Copyright 2017-2018, Voxel51, LLC
-voxel51.com
+| Copyright 2017-2018, Voxel51, LLC
+| `voxel51.com <https://voxel51.com/>`_
 '''
 import json
 import logging
@@ -11,31 +11,6 @@ import shutil
 
 
 logger = logging.getLogger(__name__)
-
-
-def ensure_basedir(path):
-    '''Makes the base directory of the given path, if necessary.
-
-    Args:
-        path (str): a file path
-    '''
-    dirname = os.path.dirname(path)
-    if dirname and not os.path.isdir(dirname):
-        logger.info("Making directory '%s'", dirname)
-        os.makedirs(dirname)
-
-
-def copy_file(inpath, outpath):
-    '''Copies the input file to the output location.
-
-    The base output directory is created, if necessary.
-
-    Args:
-        inpath (str): the input file
-        output (str): the output file location
-    '''
-    ensure_basedir(outpath)
-    shutil.copy(inpath, outpath)
 
 
 def read_json(path):
@@ -51,6 +26,18 @@ def read_json(path):
         return json.load(f)
 
 
+def json_to_str(obj):
+    '''Generates a string representation of the JSON object.
+
+    Args:
+        obj: an object that can be directly dumped to a JSON file
+
+    Returns:
+        a string representation of the JSON object
+    '''
+    return json.dumps(obj, indent=4)
+
+
 def write_json(obj, path):
     '''Writes JSON object to file, creating the output directory if necessary.
 
@@ -60,51 +47,105 @@ def write_json(obj, path):
     '''
     ensure_basedir(path)
     with open(path, "wt") as f:
-        f.write(json.dumps(obj, indent=4))
+        f.write(json_to_str(obj))
+
+
+def copy_file(inpath, outpath):
+    '''Copies the input file to the output location.
+
+    The base output directory is created, if necessary.
+
+    Args:
+        inpath (str): the input file
+        output (str): the output file location
+    '''
+    ensure_basedir(outpath)
+    shutil.copy(inpath, outpath)
+
+
+def ensure_basedir(path):
+    '''Makes the base directory of the given path, if necessary.
+
+    Args:
+        path (str): a file path
+    '''
+    dirname = os.path.dirname(path)
+    if dirname and not os.path.isdir(dirname):
+        logger.info("Making directory '%s'", dirname)
+        os.makedirs(dirname)
 
 
 class Serializable(object):
-    '''Base class for objects that can be serialized as JSON dictionaries.'''
+    '''Base class for objects that can be represented in JSON format.'''
 
     def __str__(self):
-        return json.dumps(self.to_dict(), indent=4)
-
-    @classmethod
-    def from_dict(cls, d):
-        '''Constructs a Serializable object from a JSON dictionary. Subclasses
-        must implement this method.
-        '''
-        raise NotImplementedError("subclass must implement from_dict()")
-
-    @classmethod
-    def from_json(cls, path):
-        '''Constructs a Serializable object from a JSON file.
-
-        Subclasses may override this method, but, by default, this method
-        simply reads the JSON and calls from_dict(), which subclasses must
-        implement.
-        '''
-        return cls.from_dict(read_json(path))
+        return self.to_string()
 
     def to_dict(self):
-        '''Serialzes the object into a JSON dictionary.
+        '''Generates a JSON dictionary representation of the object.
 
         Returns:
-            a JSON serializable dictionary representation of this object.
+            a JSON dictionary representation of the object
         '''
         return {
             v: _recurse(getattr(self, k))
             for k, v in self._attributes().items()
         }
 
+    def to_string(self):
+        '''Generates a string representation of the object.
+
+        Returns:
+            a string representation of the object
+        '''
+        return json_to_str(self.to_dict())
+
     def to_json(self, path):
-        '''Serialzes the object to disk.
+        '''Write the object to disk in JSON format.
 
         Args:
             path (str): the output JSON file path. The base output directory
                 is created, if necessary
         '''
         write_json(self.to_dict(), path)
+
+    @classmethod
+    def from_dict(cls, d):
+        '''Constructs a Serializable object from a JSON representation of it.
+        Subclasses must implement this method.
+
+        Args:
+            d (dict): a JSON dictionary representation of a Serializable
+                subclass
+
+        Returns:
+            an instance of the Serializable subclass
+        '''
+        raise NotImplementedError("subclass must implement from_dict()")
+
+    @classmethod
+    def from_string(cls, s):
+        '''Constructs a Serializable object from a string representation of it.
+
+        Args:
+            s (str): a string representation of a Serializable subclass
+
+        Returns:
+            an instance of the Serializable subclass
+        '''
+        return cls.from_dict(json.loads(s))
+
+    @classmethod
+    def from_json(cls, path):
+        '''Constructs a Serializable object from a JSON file.
+
+        Args:
+            path (str): the path to a JSON file
+
+        Returns:
+            an instance of the Serializable subclass
+        '''
+        return cls.from_dict(read_json(path))
 
     def _attributes(self):
         '''Returns a dictionary describing the class attributes to be
