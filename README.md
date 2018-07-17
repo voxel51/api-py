@@ -9,8 +9,8 @@ Services API.
 To install the library, first clone it:
 
 ```shell
-git clone https://github.com/voxel51/api-python
-cd api-python
+git clone https://github.com/voxel51/api-py
+cd api-py
 ```
 
 and then install the package:
