@@ -338,7 +338,7 @@ class API(object):
         res = self._session.post(endpoint,
             files=files, headers=self._header)
         _validate_response(res)
-        return _parse_json_response(res)
+        return _parse_json_response(res)["job"]
 
     def get_job_details(self, job_id):
         '''Gets details about the job with the given ID.
