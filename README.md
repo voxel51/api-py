@@ -22,9 +22,11 @@ pip install .
 
 ## Sign-up and Authentication
 
-To use the API, you must first create an account at [https://console.voxel51.com](
-https://console.voxel51.com) and download an API token.
-**Keep this token private**. It is your access key to the API.
+To use the API, you must first create an account at
+[https://console.voxel51.com](https://console.voxel51.com) and download an API
+token.
+
+> Keep your API token private; it is your access key to the API
 
 Each API request you make must be authenticated by your token. To activate your
 token, set the `VOXEL51_API_TOKEN` environment variable in your shell to point
@@ -61,7 +63,7 @@ api = API()
 
 # Convenience function to view JSON outputs
 def pprint(obj):
-    print json.dumps(obj, indent=4)
+    print(json.dumps(obj, indent=4))
 ```
 
 ### Analytics
@@ -105,12 +107,14 @@ pprint(api.list_jobs())
 Create a job request:
 
 ```py
+from voxel51.jobs import JobRequest
+
 job_request = JobRequest(analytic_id)
 job_request.set_input("<input>", data_id=data_id)
 job_request.set_parameter("<param1>", val1)
 job_request.set_parameter("<param2>", val2)
 
-print job_request
+print(job_request)
 ```
 
 Upload a job request:
