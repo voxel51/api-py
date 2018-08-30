@@ -109,7 +109,7 @@ Create a job request:
 ```py
 from voxel51.jobs import JobRequest
 
-job_request = JobRequest(analytic_id)
+job_request = JobRequest("<analytic>")
 job_request.set_input("<input>", data_id=data_id)
 job_request.set_parameter("<param1>", val1)
 job_request.set_parameter("<param2>", val2)
