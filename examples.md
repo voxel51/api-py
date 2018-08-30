@@ -3,7 +3,7 @@
 Example uses of the Python Client Library to run analytics in the cloud on the
 Voxel51 Vision Services Platform.
 
-All of the following examples assume that you have activiated a valid API token
+All of the following examples assume that you have activated a valid API token
 either by setting the `VOXEL51_API_TOKEN` environment variable in your shell or
 permanently activating it via `voxel51.auth.activate_token()`.
 
