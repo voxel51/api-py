@@ -31,19 +31,19 @@ class JobRequest(voxu.Serializable):
     '''Class encapsulating a job request for the API.
 
     Attributes:
-        analytic (str): the ID of the analytic to run
+        analytic (str): the name of the analytic to run
         inputs (dict): a dictionary mapping input names to RemoteDataPath
             instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
-    def __init__(self, analytic_id):
+    def __init__(self, analytic):
         '''Initializes a JobRequest instance for the given analytic.
 
         Args:
-            analytic_id (str): the ID of the analytic to run
+            analytic (str): the name of the analytic to run
         '''
-        self.analytic = analytic_id
+        self.analytic = analytic
         self.inputs = {}
         self.parameters = {}
 
