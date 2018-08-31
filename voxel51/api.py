@@ -480,6 +480,7 @@ class API(object):
 
     # TYPES FUNCTIONS ##########################################################
 
+    """
     def get_types_doc(self):
         '''Gets documentation about the types supported by the system.
 
@@ -494,6 +495,7 @@ class API(object):
             endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
+    """
 
     # PRIVATE FUNCTIONS #######################################################
 
