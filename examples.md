@@ -12,7 +12,7 @@ permanently activating it via `voxel51.auth.activate_token()`.
 
 The following code will upload the `road.mp4` video from your current working
 directory to the Voxel51 Vision Services Platform, run the `vehicle-detector`
-analytic on it, and download the output to `output-zip` when the job completes.
+analytic on it, and download the output to `output.zip` when the job completes.
 
 You can download this [dashcam video clip](
 https://drive.google.com/file/d/1gg6zJpp8j_ZiUaAy3Sdl3VvD5zUq9LX7) to use as
