@@ -16,13 +16,6 @@ import voxel51.jobs as voxj
 import voxel51.utils as voxu
 
 
-###############################################################################
-# @todo remove once SSL certificate is signed
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-###############################################################################
-
-
 BASE_API_URL = "https://api.voxel51.com/v1"
 CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
