@@ -26,7 +26,7 @@ To use the API, you must first create an account at
 [https://console.voxel51.com](https://console.voxel51.com) and download an API
 token.
 
-> Keep your API token private; it is your access key to the API
+> Keep your API token private; it is your access key to the API.
 
 Each API request you make must be authenticated by your token. To activate your
 token, set the `VOXEL51_API_TOKEN` environment variable in your shell to point
@@ -176,4 +176,5 @@ Copyright 2018, Voxel51, LLC<br>
 [voxel51.com](https://voxel51.com)
 
 Brian Moore, brian@voxel51.com<br>
-David Hodgson, david@voxel51.com
+David Hodgson, david@voxel51.com<br>
+Hima Patel, hima@voxel51.com
