@@ -36,7 +36,8 @@ to your API token file:
 export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
 ```
 
-Alternatively, you can permanently activate a token using below `Python` code. Open the `Python REPL` and run this code:
+Alternatively, you can permanently activate a token using below Python code. Execute `python`
+in your shell to open a Python REPL and run this code:
 
 ```py
 from voxel51.auth import activate_token
