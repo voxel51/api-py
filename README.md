@@ -36,7 +36,7 @@ to your API token file:
 export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
 ```
 
-Alternatively, you can permanently activate a token with below `Python` code. Run this code in `python REPL` :
+Alternatively, you can permanently activate a token using below `Python` code.Open the `Python REPL` and run this code:
 
 ```py
 from voxel51.auth import activate_token
@@ -74,7 +74,7 @@ List available analytics:
 pprint(api.list_analytics())
 ```
 
-Get documentation for an analytic. Asign certain `Analytic Id` as argument for the parameter `analytic_id`:
+Get documentation for an analytic, where the `analytic_id` variable matches the analytic's ID:
 
 ```py
 pprint(api.get_analytic_doc(analytic_id))
@@ -82,7 +82,7 @@ pprint(api.get_analytic_doc(analytic_id))
 
 ### Data
 
-Upload data to the cloud. Give path to the file along with filename to `upload_data_path`:
+Upload data to the cloud storage, where `upload_data_path` is the absolute or relative path to the local file:
 
 ```py
 upload_data_path = "/path/to/video.mp4"
@@ -104,8 +104,7 @@ List the jobs you have created:
 pprint(api.list_jobs())
 ```
 
-Create a job request to run on certain data. Assign an `Analytic-Name`(Type of analytics) as `<analytic>`, particular `Data Id` as `dataId`, data type `video` or `image` to `<input>` and related parameters & values based on analytic type you choose to run. For more information on `input` and `parameters` refer to the method `get_analytic_doc()`.
-:
+Create a job request to perform an analytic on a data, where `<analytic>` is the analytic's name, `data_id` is the desired data file's unique ID, and any `<param#>` values are any of the permitted parameters based on the analytic's documentation:
 
 ```py
 from voxel51.jobs import JobRequest
