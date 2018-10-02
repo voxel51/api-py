@@ -36,7 +36,7 @@ to your API token file:
 export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
 ```
 
-Alternatively, you can permanently activate a token with:
+Alternatively, you can permanently activate a token with below `Python` code. Run this code in python REPL :
 
 ```py
 from voxel51.auth import activate_token
@@ -53,7 +53,7 @@ After you have activated an API token, you have full access to the API.
 
 ## Example Usage
 
-To initialize an API session, issue the following commands:
+To initialize an API session, issue the following commands in Python:
 
 ```py
 import json
@@ -74,7 +74,7 @@ List available analytics:
 pprint(api.list_analytics())
 ```
 
-Get documentation for an analytic:
+Get documentation for an analytic. Asign certain `Analytic Id` as argument `analytic_id`:
 
 ```py
 pprint(api.get_analytic_doc(analytic_id))
@@ -82,7 +82,7 @@ pprint(api.get_analytic_doc(analytic_id))
 
 ### Data
 
-Upload data to the cloud:
+Upload data to the cloud. Give path to the file along with filename to `upload_data_path`:
 
 ```py
 upload_data_path = "/path/to/video.mp4"
@@ -104,7 +104,8 @@ List the jobs you have created:
 pprint(api.list_jobs())
 ```
 
-Create a job request:
+Create a job request to run on certain data. Assign a `Analytic-Name(Type)` as `<analytic>`, particular `Data Id` as `dataId`, data type `video` or `image` as `<input>` and related parameters & value base on analytic type you choose to run. For more information on `input` and `parameters` refer to the method `get_analytic_doc()`.
+:
 
 ```py
 from voxel51.jobs import JobRequest
