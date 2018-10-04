@@ -26,7 +26,7 @@ To use the API, you must first create an account at
 [https://console.voxel51.com](https://console.voxel51.com) and download an API
 token.
 
-> Keep your API token private; it is your access key to the API
+> Keep your API token private; it is your access key to the API.
 
 Each API request you make must be authenticated by your token. To activate your
 token, set the `VOXEL51_API_TOKEN` environment variable in your shell to point
@@ -36,7 +36,8 @@ to your API token file:
 export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
 ```
 
-Alternatively, you can permanently activate a token with:
+Alternatively, you can permanently activate a token using below Python code. Execute `python`
+in your shell to open a Python REPL and run this code:
 
 ```py
 from voxel51.auth import activate_token
@@ -53,7 +54,7 @@ After you have activated an API token, you have full access to the API.
 
 ## Example Usage
 
-To initialize an API session, issue the following commands:
+To initialize an API session, issue the following commands in Python:
 
 ```py
 import json
@@ -74,7 +75,7 @@ List available analytics:
 pprint(api.list_analytics())
 ```
 
-Get documentation for an analytic:
+Get documentation for an analytic, where the `analytic_id` variable matches the analytic's ID:
 
 ```py
 pprint(api.get_analytic_doc(analytic_id))
@@ -82,7 +83,7 @@ pprint(api.get_analytic_doc(analytic_id))
 
 ### Data
 
-Upload data to the cloud:
+Upload data to the cloud storage, where `upload_data_path` is the absolute or relative path to the local file:
 
 ```py
 upload_data_path = "/path/to/video.mp4"
@@ -104,7 +105,7 @@ List the jobs you have created:
 pprint(api.list_jobs())
 ```
 
-Create a job request:
+Create a job request to perform an analytic on a data, where `<analytic>` is the analytic's name, `data_id` is the desired data file's unique ID, and any `<param#>` values are any of the permitted parameters based on the analytic's documentation:
 
 ```py
 from voxel51.jobs import JobRequest
@@ -175,4 +176,5 @@ Copyright 2018, Voxel51, LLC<br>
 [voxel51.com](https://voxel51.com)
 
 Brian Moore, brian@voxel51.com<br>
-David Hodgson, david@voxel51.com
+David Hodgson, david@voxel51.com<br>
+Hima Patel, hima@voxel51.com
