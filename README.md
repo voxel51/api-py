@@ -173,10 +173,10 @@ pip install --upgrade m2r
 To generate the documentation, run:
 
 ```shell
-bash generate_docs.bash
+bash docs/generate_docs.bash
 ```
 
-To view the documentation, open the `build/html/index.html` file in
+To view the documentation, open the `docs/build/html/index.html` file in
 your browser.
 
 

@@ -2,7 +2,7 @@
 # Generate API documentation
 #
 # Usage:
-#  bash generate_docs.bash
+#  bash docs/generate_docs.bash
 #
 # Copyright 2018, Voxel51, LLC
 # voxel51.com
