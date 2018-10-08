@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Generate API documentation
+# Generate Python client library documentation
 #
 # Usage:
-#  bash docs/generate_docs.bash
+#   bash docs/generate_docs.bash
 #
 # Copyright 2018, Voxel51, LLC
 # voxel51.com
