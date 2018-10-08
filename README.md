@@ -184,7 +184,3 @@ your browser.
 
 Copyright 2018, Voxel51, LLC<br>
 [voxel51.com](https://voxel51.com)
-
-Brian Moore, brian@voxel51.com<br>
-David Hodgson, david@voxel51.com<br>
-Hima Patel, hima@voxel51.com
