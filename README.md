@@ -36,8 +36,8 @@ to your API token file:
 export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
 ```
 
-Alternatively, you can permanently activate a token using below Python code. Execute `python`
-in your shell to open a Python REPL and run this code:
+Alternatively, you can permanently activate a token by executing the following
+Python commands:
 
 ```py
 from voxel51.auth import activate_token
@@ -46,15 +46,15 @@ activate_token("/path/to/your/api-token.json")
 ```
 
 In the latter case, your token is copied to `~/.voxel51/` and will be
-automatically used in all future sessions. A token can be
-deactivated via the `voxel51.auth.deactivate_token()` method.
+automatically used in all future sessions. A token can be deactivated via the
+`voxel51.auth.deactivate_token()` method.
 
 After you have activated an API token, you have full access to the API.
 
 
 ## Example Usage
 
-To initialize an API session, issue the following commands in Python:
+To initialize an API session, issue the following Python commands:
 
 ```py
 import json
@@ -75,17 +75,21 @@ List available analytics:
 pprint(api.list_analytics())
 ```
 
-Get documentation for an analytic, where the `analytic_id` variable matches the analytic's ID:
+Get documentation for the analytic with the given ID:
 
 ```py
+# ID of the analytic
+analytic_id = "XXXXXXXX"
+
 pprint(api.get_analytic_doc(analytic_id))
 ```
 
 ### Data
 
-Upload data to the cloud storage, where `upload_data_path` is the absolute or relative path to the local file:
+Upload data to the cloud storage:
 
 ```py
+# Local path to the data
 upload_data_path = "/path/to/video.mp4"
 
 pprint(api.upload_data(upload_data_path))
@@ -105,13 +109,15 @@ List the jobs you have created:
 pprint(api.list_jobs())
 ```
 
-Create a job request to perform an analytic on a data, where `<analytic>` is the analytic's name, `data_id` is the desired data file's unique ID, and any `<param#>` values are any of the permitted parameters based on the analytic's documentation:
+Create a job request to perform an analytic on a data, where `<analytic>` is
+the name of the analytic to run, `<data-id>` is the ID of the data to process,
+and any `<param#>` values are set as necessary to configre the analytic:
 
 ```py
 from voxel51.jobs import JobRequest
 
 job_request = JobRequest("<analytic>")
-job_request.set_input("<input>", data_id=data_id)
+job_request.set_input("<input>", data_id="<data-id>")
 job_request.set_parameter("<param1>", val1)
 job_request.set_parameter("<param2>", val2)
 
@@ -121,18 +127,22 @@ print(job_request)
 Upload a job request:
 
 ```py
-pprint(api.upload_job_request(job_request, "test-job"))
+pprint(api.upload_job_request(job_request, "<job-name>"))
 ```
 
 Start a job:
 
 ```py
+# ID of the job
+job_id = "XXXXXXXX"
+
 api.start_job(job_id)
 ```
 
 Wait until a job is complete and then download its output:
 
 ```py
+# Local path to which to download the output
 job_output_path = "/path/to/output.zip"
 
 api.wait_until_job_completes(job_id)
