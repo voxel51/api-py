@@ -182,5 +182,5 @@ your browser.
 
 ## Copyright
 
-Copyright 2018, Voxel51, LLC<br>
+Copyright 2018, Voxel51, Inc.<br>
 [voxel51.com](https://voxel51.com)
