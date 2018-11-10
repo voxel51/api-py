@@ -60,6 +60,25 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["analytics"]
 
+    def query_analytics(self, analytics_query):
+        '''Performs a customized analytics query.
+
+        Args:
+            analytics_query (voxel51.query.AnalyticsQuery): an AnalyticsQuery
+                instance defining the customized analytics query to perform
+
+        Returns:
+            a list of dicts containing the query results
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/analytics"
+        res = self._session.get(
+            endpoint, headers=self._header, data=analytics_query.to_dict())
+        _validate_response(res)
+        return _parse_json_response(res)["analytics"]
+
     def get_analytic_doc(self, analytic_id):
         '''Gets documentation about the analytic with the given ID.
 
@@ -92,6 +111,25 @@ class API(object):
         endpoint = self.url + "/data/list"
         res = self._session.get(
             endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["data"]
+
+    def query_data(self, data_query):
+        '''Performs a customized data query.
+
+        Args:
+            data_query (voxel51.query.DataQuery): a DataQuery instance defining
+                the customized data query to perform
+
+        Returns:
+            a list of dicts containing the query results
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/data"
+        res = self._session.get(
+            endpoint, headers=self._header, data=data_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
@@ -182,6 +220,25 @@ class API(object):
         endpoint = self.url + "/jobs/list"
         res = self._session.get(
             endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["jobs"]
+
+    def query_jobs(self, jobs_query):
+        '''Performs a customized jobs query.
+
+        Args:
+            jobs_query (voxel51.query.JobsQuery): a JobsQuery instance defining
+                the customized jobs query to perform
+
+        Returns:
+            a list of dicts containing the query results
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/jobs"
+        res = self._session.get(
+            endpoint, headers=self._header, data=jobs_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
 
