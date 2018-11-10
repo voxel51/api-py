@@ -353,8 +353,7 @@ class API(object):
         return job_state == voxj.JobState.COMPLETE
 
     def wait_until_job_completes(
-            self, job_id, sleep_time=5, max_wait_time=600
-        ):
+            self, job_id, sleep_time=5, max_wait_time=600):
         '''Block execution until the job with the given ID is complete.
 
         Args:
@@ -393,7 +392,7 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def download_job_output(self, job_id, output_path='output.zip'):
+    def download_job_output(self, job_id, output_path="output.zip"):
         '''Downloads the output of the job with the given ID.
 
         Args:
