@@ -60,6 +60,25 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["analytics"]
 
+    def query_analytics(self, analytics_query):
+        '''Performs a customized analytics query.
+
+        Args:
+            analytics_query (voxel51.query.AnalyticsQuery): an AnalyticsQuery
+                instance defining the customized analytics query to perform
+
+        Returns:
+            a list of dicts containing the query results
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/analytics"
+        res = self._session.get(
+            endpoint, headers=self._header, params=analytics_query.to_dict())
+        _validate_response(res)
+        return _parse_json_response(res)["analytics"]
+
     def get_analytic_doc(self, analytic_id):
         '''Gets documentation about the analytic with the given ID.
 
@@ -92,6 +111,25 @@ class API(object):
         endpoint = self.url + "/data/list"
         res = self._session.get(
             endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["data"]
+
+    def query_data(self, data_query):
+        '''Performs a customized data query.
+
+        Args:
+            data_query (voxel51.query.DataQuery): a DataQuery instance defining
+                the customized data query to perform
+
+        Returns:
+            a list of dicts containing the query results
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/data"
+        res = self._session.get(
+            endpoint, headers=self._header, params=data_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
@@ -182,6 +220,25 @@ class API(object):
         endpoint = self.url + "/jobs/list"
         res = self._session.get(
             endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["jobs"]
+
+    def query_jobs(self, jobs_query):
+        '''Performs a customized jobs query.
+
+        Args:
+            jobs_query (voxel51.query.JobsQuery): a JobsQuery instance defining
+                the customized jobs query to perform
+
+        Returns:
+            a list of dicts containing the query results
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/jobs"
+        res = self._session.get(
+            endpoint, headers=self._header, params=jobs_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
 
@@ -296,8 +353,7 @@ class API(object):
         return job_state == voxj.JobState.COMPLETE
 
     def wait_until_job_completes(
-            self, job_id, sleep_time=5, max_wait_time=600
-        ):
+            self, job_id, sleep_time=5, max_wait_time=600):
         '''Block execution until the job with the given ID is complete.
 
         Args:
@@ -336,7 +392,7 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def download_job_output(self, job_id, output_path='output.zip'):
+    def download_job_output(self, job_id, output_path="output.zip"):
         '''Downloads the output of the job with the given ID.
 
         Args:
@@ -349,25 +405,6 @@ class API(object):
         '''
         endpoint = self.url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
-
-    # TYPES FUNCTIONS ##########################################################
-
-    """
-    def get_types_doc(self):
-        '''Gets documentation about the types supported by the system.
-
-        Returns:
-            a dictionary containing the types documentation
-
-        Raises:
-            APIError if the request was unsuccessful
-        '''
-        endpoint = self.url + "/types/"
-        res = self._session.get(
-            endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)
-    """
 
     # PRIVATE FUNCTIONS #######################################################
 
