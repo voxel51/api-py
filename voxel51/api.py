@@ -406,25 +406,6 @@ class API(object):
         endpoint = self.url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
 
-    # TYPES FUNCTIONS ##########################################################
-
-    """
-    def get_types_doc(self):
-        '''Gets documentation about the types supported by the system.
-
-        Returns:
-            a dictionary containing the types documentation
-
-        Raises:
-            APIError if the request was unsuccessful
-        '''
-        endpoint = self.url + "/types/"
-        res = self._session.get(
-            endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)
-    """
-
     # PRIVATE FUNCTIONS #######################################################
 
     def _stream_download(self, url, output_path):
