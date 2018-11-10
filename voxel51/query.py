@@ -66,7 +66,7 @@ class BaseQuery(object):
         Returns:
             the updated BaseQuery instance
         '''
-        this.add_fields(self._supported_fields)
+        self.add_fields(self._supported_fields)
         return self
 
     def add_search(self, field, search_str):
@@ -80,7 +80,7 @@ class BaseQuery(object):
             the updated BaseQuery instance
         '''
         if self._is_supported_field(field):
-            this.search.append("%s:%s" % (field, search_str))
+            self.search.append("%s:%s" % (field, search_str))
         return self
 
     def sort_by(self, field, descending=True):
