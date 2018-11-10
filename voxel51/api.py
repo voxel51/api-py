@@ -75,7 +75,7 @@ class API(object):
         '''
         endpoint = self.url + "/analytics"
         res = self._session.get(
-            endpoint, headers=self._header, data=analytics_query.to_dict())
+            endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)["analytics"]
 
@@ -129,7 +129,7 @@ class API(object):
         '''
         endpoint = self.url + "/data"
         res = self._session.get(
-            endpoint, headers=self._header, data=data_query.to_dict())
+            endpoint, headers=self._header, params=data_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
@@ -238,7 +238,7 @@ class API(object):
         '''
         endpoint = self.url + "/jobs"
         res = self._session.get(
-            endpoint, headers=self._header, data=jobs_query.to_dict())
+            endpoint, headers=self._header, params=jobs_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
 
