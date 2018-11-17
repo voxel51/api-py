@@ -45,8 +45,13 @@ class API(object):
 
     # ANALYTICS FUNCTIONS #####################################################
 
-    def list_analytics(self):
+    def list_analytics(self, all_versions=False):
         '''Returns a list of all available analytics.
+
+        Args:
+            all_versions (bool, optional): whether to return all versions of
+                each analytic or only the latest version. By default, this is
+                False
 
         Returns:
             a list of dicts describing the available analytics
@@ -55,8 +60,8 @@ class API(object):
             APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/analytics/list"
-        res = self._session.get(
-            endpoint, headers=self._header)
+        params = {"all_versions": all_versions}
+        res = self._session.get(endpoint, headers=self._header, params=params)
         _validate_response(res)
         return _parse_json_response(res)["analytics"]
 
