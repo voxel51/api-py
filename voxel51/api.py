@@ -254,8 +254,8 @@ class API(object):
             job_request (voxel51.jobs.JobRequest): a JobRequest instance
                 describing the job
             job_name (str): a name for the job
-            auto_start (bool): whether to automatically start the job upon
-                creation. By default, this is False
+            auto_start (bool, optional): whether to automatically start the job
+                upon creation. By default, this is False
 
         Returns:
             a dictionary containing metadata about the job
