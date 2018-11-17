@@ -143,7 +143,9 @@ class AnalyticsQuery(BaseQuery):
     sorting, substring searching, and record limits.
 
     Attributes:
-        fields (list): the list of fields to include in the returned records
+        fields (list): the list of fields to include in the returned records.
+            The supported query fields are `id`, `name`, `version`, `date`, and
+            `description`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         limit (int): the maximum number of records to return
@@ -162,7 +164,9 @@ class DataQuery(BaseQuery):
     sorting, substring searching, and record limits.
 
     Attributes:
-        fields (list): the list of fields to include in the returned records
+        fields (list): the list of fields to include in the returned records.
+            The supported query fields are `id`, `name`, `encoding`, `type`,
+            `size`, `date`, and `expires`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         limit (int): the maximum number of records to return
@@ -181,7 +185,9 @@ class JobsQuery(BaseQuery):
     sorting, substring searching, and record limits.
 
     Attributes:
-        fields (list): the list of fields to include in the returned records
+        fields (list): the list of fields to include in the returned records.
+            The supported query fields are `id`, `name`, `state`, `archived`,
+            and `date`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         limit (int): the maximum number of records to return
@@ -191,4 +197,3 @@ class JobsQuery(BaseQuery):
         '''Initializes a JobsQuery instance.'''
         super(JobsQuery, self).__init__(
             ["id", "name", "state", "archived", "date"])
-
