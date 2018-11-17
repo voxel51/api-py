@@ -152,7 +152,7 @@ class AnalyticsQuery(BaseQuery):
     def __init__(self):
         '''Initializes a AnalyticsQuery instance.'''
         super(AnalyticsQuery, self).__init__(
-            ["id", "name", "description", "date"])
+            ["id", "name" "version", "date", "description"])
 
 
 class DataQuery(BaseQuery):
