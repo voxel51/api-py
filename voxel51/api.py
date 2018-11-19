@@ -350,8 +350,33 @@ class API(object):
             APIError if the request was unsuccessful
         '''
         endpoint = self.url + "/jobs/" + job_id + "/start"
-        res = self._session.put(
-            endpoint, headers=self._header)
+        res = self._session.put(endpoint, headers=self._header)
+        _validate_response(res)
+
+    def archive_job(self, job_id):
+        '''Archives the job with the given ID.
+
+        Args:
+            job_id (str): the job ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/jobs/" + job_id + "/archive"
+        res = self._session.put(endpoint, headers=self._header)
+        _validate_response(res)
+
+    def unarchive_job(self, job_id):
+        '''Unarchives the job with the given ID.
+
+        Args:
+            job_id (str): the job ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/jobs/" + job_id + "/unarchive"
+        res = self._session.put(endpoint, headers=self._header)
         _validate_response(res)
 
     def get_job_state(self, job_id):
