@@ -24,7 +24,7 @@ class API(object):
     '''Main class for managing a session with the Voxel51 Vision Services API.
 
     Attributes:
-        url (string): the base URL of the API
+        base_url (string): the base URL of the API
         token (voxel51.auth.Token): the authentication token for this session
     '''
 
@@ -38,7 +38,7 @@ class API(object):
                 path. Otherwise, the token is loaded from
                 ``~/.voxel51/api-token.json``
         '''
-        self.url = BASE_API_URL
+        self.base_url = BASE_API_URL
         self.token = voxa.load_token(token_path=token_path)
         self._header = self.token.get_header()
         self._session = requests.Session()
@@ -59,7 +59,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/analytics/list"
+        endpoint = self.base_url + "/analytics/list"
         params = {"all_versions": all_versions}
         res = self._session.get(endpoint, headers=self._header, params=params)
         _validate_response(res)
@@ -78,7 +78,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/analytics"
+        endpoint = self.base_url + "/analytics"
         res = self._session.get(
             endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
@@ -96,7 +96,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/analytics/" + analytic_id
+        endpoint = self.base_url + "/analytics/" + analytic_id
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
@@ -112,7 +112,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data/list"
+        endpoint = self.base_url + "/data/list"
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
@@ -130,7 +130,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data"
+        endpoint = self.base_url + "/data"
         res = self._session.get(
             endpoint, headers=self._header, params=data_query.to_dict())
         _validate_response(res)
@@ -148,7 +148,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data"
+        endpoint = self.base_url + "/data"
         filename = os.path.basename(path)
         mime_type = _get_mime_type(path)
         with open(path, "rb") as df:
@@ -171,7 +171,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data/" + data_id
+        endpoint = self.base_url + "/data/" + data_id
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
@@ -191,7 +191,7 @@ class API(object):
         if not output_path:
             output_path = self.get_data_details(data_id)["filename"]
 
-        endpoint = self.url + "/data/" + data_id + "/download"
+        endpoint = self.base_url + "/data/" + data_id + "/download"
         self._stream_download(endpoint, output_path)
 
     def get_data_download_url(self, data_id):
@@ -201,12 +201,12 @@ class API(object):
             data_id (str): the data ID
 
         Returns:
-            url (str): a signed URL with read access to download the data
+            base_url (str): a signed URL with read access to download the data
 
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data/" + data_id + "/download-url"
+        endpoint = self.base_url + "/data/" + data_id + "/download-url"
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["url"]
@@ -227,7 +227,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data/" + data_id + "/extend"
+        endpoint = self.base_url + "/data/" + data_id + "/extend"
         files = {"days": (None, str(days))}
         res = self._session.post(endpoint, files=files, headers=self._header)
         _validate_response(res)
@@ -241,7 +241,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/data/" + data_id
+        endpoint = self.base_url + "/data/" + data_id
         res = self._session.delete(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -256,7 +256,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/list"
+        endpoint = self.base_url + "/jobs/list"
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
@@ -274,7 +274,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs"
+        endpoint = self.base_url + "/jobs"
         res = self._session.get(
             endpoint, headers=self._header, params=jobs_query.to_dict())
         _validate_response(res)
@@ -296,7 +296,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs"
+        endpoint = self.base_url + "/jobs"
         files = {
             "file": ("job.json", str(job_request), "application/json"),
             "job_name": (None, job_name),
@@ -318,7 +318,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id
+        endpoint = self.base_url + "/jobs/" + job_id
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
@@ -335,7 +335,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id + "/request"
+        endpoint = self.base_url + "/jobs/" + job_id + "/request"
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return voxj.JobRequest.from_dict(_parse_json_response(res))
@@ -349,7 +349,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id + "/start"
+        endpoint = self.base_url + "/jobs/" + job_id + "/start"
         res = self._session.put(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -362,7 +362,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id + "/archive"
+        endpoint = self.base_url + "/jobs/" + job_id + "/archive"
         res = self._session.put(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -375,7 +375,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id + "/unarchive"
+        endpoint = self.base_url + "/jobs/" + job_id + "/unarchive"
         res = self._session.put(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -446,7 +446,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id + "/status"
+        endpoint = self.base_url + "/jobs/" + job_id + "/status"
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
@@ -462,7 +462,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id + "/output"
+        endpoint = self.base_url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
 
     def get_job_output_download_url(self, job_id):
@@ -478,7 +478,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id + "/output-url"
+        endpoint = self.base_url + "/jobs/" + job_id + "/output-url"
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["url"]
@@ -492,7 +492,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/jobs/" + job_id
+        endpoint = self.base_url + "/jobs/" + job_id
         res = self._session.delete(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -507,7 +507,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/statements/list"
+        endpoint = self.base_url + "/statements/list"
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["statements"]
@@ -524,7 +524,7 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.url + "/statements/" + statement_id
+        endpoint = self.base_url + "/statements/" + statement_id
         res = self._session.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["statement"]
