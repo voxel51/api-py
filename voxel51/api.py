@@ -194,6 +194,44 @@ class API(object):
         endpoint = self.url + "/data/" + data_id + "/download"
         self._stream_download(endpoint, output_path)
 
+    def get_data_download_url(self, data_id):
+        '''Gets a signed download URL for the data with the given ID.
+
+        Args:
+            data_id (str): the data ID
+
+        Returns:
+            url (str): a signed URL with read access to download the data
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/data/" + data_id + "/download-url"
+        res = self._session.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["url"]
+
+    def extend_data_ttl(self, data_id, days):
+        '''Extends the expiration date of the data by the specified number of
+        days.
+
+        To decrease the lifespan of the data, provide a negative number. Note
+        that if the expiration date of the data after modification is in the
+        past, the data will be deleted.
+
+        Args:
+            data_id (str): the data ID
+            days (float): the number of days by which to extend the lifespan
+                of the data
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/data/" + data_id + "/extend"
+        files = {"days": (None, str(days))}
+        res = self._session.post(endpoint, files=files, headers=self._header)
+        _validate_response(res)
+
     def delete_data(self, data_id):
         '''Deletes the data with the given ID.
 
