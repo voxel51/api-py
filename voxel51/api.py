@@ -32,10 +32,10 @@ class API(object):
         '''Starts a new API session.
 
         Args:
-            token_path: an optional path to a valid Token JSON file. If no path
-                is provided as an argument, the ``VOXEL51_API_TOKEN``
-                environment variable is checked and, if set, the token is
-                loaded from that path. Otherwise, the token is loaded from
+            token_path (str, optional): the path to a valid Token JSON file.
+                If no path is provided, the ``VOXEL51_API_TOKEN`` environment
+                variable is checked and, if set, the token is loaded from that
+                path. Otherwise, the token is loaded from
                 ``~/.voxel51/api-token.json``
         '''
         self.url = BASE_API_URL
