@@ -465,7 +465,38 @@ class API(object):
         endpoint = self.url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
 
-    # PRIVATE FUNCTIONS #######################################################
+    def get_job_output_download_url(self, job_id):
+        '''Gets a signed download URL for the output of the job with the given
+        ID.
+
+        Args:
+            job_id (str): the job ID
+
+        Returns:
+            url (str): a signed URL with read access to download the job output
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/jobs/" + job_id + "/output-url"
+        res = self._session.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["url"]
+
+    def delete_job(self, job_id):
+        '''Deletes the job with the given ID, which must not have been started.
+
+        Args:
+            job_id (str): the job ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.url + "/jobs/" + job_id
+        res = self._session.delete(endpoint, headers=self._header)
+        _validate_response(res)
+
+    # PRIVATE METHODS #########################################################
 
     def _stream_download(self, url, output_path):
         res = self._session.get(
