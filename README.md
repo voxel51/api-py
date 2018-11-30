@@ -1,7 +1,7 @@
 # Voxel51 API Python Client Library
 
-This package defines a Python client library for accessing the Voxel51 Vision
-Services API.
+This package defines a Python client library for interacting with the Voxel51
+Vision Services Platform.
 
 
 ## Installation
@@ -20,7 +20,20 @@ pip install .
 ```
 
 
-## Sign-up and Authentication
+## Documentation
+
+For full documentation of the Voxel51 Vision Services API, including usage of
+this client library, see
+[https://voxel51.com/docs/api](https://voxel51.com/docs/api).
+
+To learn how to use this client library to create and run jobs that execute
+each of the analytics exposed on the Voxel51 Vision Services Platform, see
+[https://voxel51.com/docs/analytics](https://voxel51.com/docs/analytics).
+
+
+## Quickstart
+
+### Sign-up and Authentication
 
 To use the API, you must first create an account at
 [https://console.voxel51.com](https://console.voxel51.com) and download an API
@@ -51,8 +64,7 @@ automatically used in all future sessions. A token can be deactivated via the
 
 After you have activated an API token, you have full access to the API.
 
-
-## Example Usage
+### Creating an API Session
 
 To initialize an API session, issue the following Python commands:
 
