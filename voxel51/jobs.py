@@ -9,7 +9,6 @@ import voxel51.utils as voxu
 
 
 DATA_ID_FIELD = "data-id"
-SIGNED_URL_FIELD = "signed-url"
 
 
 class JobState(object):
@@ -122,25 +121,18 @@ class RemoteDataPath(voxu.Serializable):
 
     Attributes:
         data_id (str): the ID of the data in cloud storage
-        signed_url (str): a signed URL with access to the data of interest
-            in third-party cloud storage
     '''
 
-    def __init__(self, data_id=None, signed_url=None):
-        '''Creates a RemoteDataPath instance defined by the given information.
-
-        Exactly one keyword value must be supplied to this constructor.
+    def __init__(self, data_id=None):
+        '''Creates a RemoteDataPath instance.
 
         Args:
-            data_id (str, optional): the ID of the data in cloud storage
-            signed_url (str, optional): a signed URL with access to the data
-                of interest in third-party cloud storage
+            data_id (str): the ID of the data in cloud storage
 
         Raises:
             RemoteDataPathError if the instance creation failed
         '''
         self.data_id = data_id
-        self.signed_url = signed_url
         if not self.is_valid:
             raise RemoteDataPathError("Invalid RemoteDataPath")
 
@@ -156,19 +148,6 @@ class RemoteDataPath(voxu.Serializable):
         '''
         return cls(data_id=data_id)
 
-    @classmethod
-    def from_signed_url(cls, signed_url):
-        '''Creates a RemoteDataPath instance defined by the given signed URL.
-
-        Args:
-            signed_url (str): a signed URL with access to the data of interest
-                in third-party cloud storage
-
-        Returns:
-            a RemoteDataPath instance with the given signed URL
-        '''
-        return cls(signed_url=signed_url)
-
     @property
     def has_data_id(self):
         '''Determines whether this RemoteDataPath instance has a data ID.
@@ -179,22 +158,13 @@ class RemoteDataPath(voxu.Serializable):
         return self.data_id is not None
 
     @property
-    def has_signed_url(self):
-        '''Determines whether this RemoteDataPath instance has a signed URL.
-
-        Returns:
-            True if this instance has a signed URL, and False otherwise
-        '''
-        return self.signed_url is not None
-
-    @property
     def is_valid(self):
         '''Determines whether this RemoteDataPath instance is valid.
 
         Returns:
             True if this instance is valid, and False otherwise
         '''
-        return self.has_data_id ^ self.has_signed_url
+        return self.has_data_id
 
     @staticmethod
     def is_remote_path_dict(val):
@@ -209,9 +179,11 @@ class RemoteDataPath(voxu.Serializable):
             True if val is a valid RemoteDataPath JSON dictionary, and False
                 otherwise
         '''
-        return (
-            isinstance(val, dict) and RemoteDataPath.from_dict(val).is_valid
-        )
+        try:
+            RemoteDataPath.from_dict(val)
+            return True
+        except:
+            return False
 
     @classmethod
     def from_dict(cls, d):
@@ -222,18 +194,17 @@ class RemoteDataPath(voxu.Serializable):
 
         Returns:
             a RemoteDataPath instance
+
+        Raises:
+            RemoteDataPathError if the instance creation failed
         '''
         if DATA_ID_FIELD in d:
-            return cls(data_id=d[DATA_ID_FIELD])
-        elif SIGNED_URL_FIELD in d:
-            return cls(signed_url=d[SIGNED_URL_FIELD])
+            return cls.from_data_id(d[DATA_ID_FIELD])
         raise RemoteDataPathError("Invalid RemoteDataPath dict: %s" % str(d))
 
     def _attributes(self):
         if self.has_data_id:
             return {"data_id": DATA_ID_FIELD}
-        elif self.has_signed_url:
-            return {"signed_url": SIGNED_URL_FIELD}
         raise RemoteDataPathError("Invalid RemoteDataPath")
 
 
