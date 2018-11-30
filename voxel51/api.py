@@ -201,7 +201,7 @@ class API(object):
             data_id (str): the data ID
 
         Returns:
-            base_url (str): a signed URL with read access to download the data
+            url (str): a signed URL with read access to download the data
 
         Raises:
             APIError if the request was unsuccessful
