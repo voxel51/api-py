@@ -211,8 +211,8 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["url"]
 
-    def extend_data_ttl(self, data_id, days):
-        '''Extends the expiration date of the data by the specified number of
+    def update_data_ttl(self, data_id, days):
+        '''Updates the expiration date of the data by the specified number of
         days.
 
         To decrease the lifespan of the data, provide a negative number. Note
@@ -227,9 +227,9 @@ class API(object):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data/" + data_id + "/extend"
-        files = {"days": (None, str(days))}
-        res = self._session.post(endpoint, files=files, headers=self._header)
+        endpoint = self.base_url + "/data/" + data_id + "/ttl"
+        data = {"days": str(days)}
+        res = self._session.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
 
     def delete_data(self, data_id):
