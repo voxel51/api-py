@@ -174,9 +174,9 @@ class DataQuery(BaseQuery):
 
     def __init__(self):
         '''Initializes a DataQuery instance.'''
-        super(DataQuery, self).__init__(
-            ["id", "name", "encoding", "type", "size", "upload_date",
-             "expiration_date"])
+        super(DataQuery, self).__init__([
+            "id", "name", "encoding", "type", "size", "upload_date",
+            "expiration_date"])
 
 
 class JobsQuery(BaseQuery):
