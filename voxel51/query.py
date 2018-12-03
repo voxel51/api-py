@@ -154,7 +154,7 @@ class AnalyticsQuery(BaseQuery):
     def __init__(self):
         '''Initializes a AnalyticsQuery instance.'''
         super(AnalyticsQuery, self).__init__(
-            ["id", "name" "version", "date", "description"])
+            ["id", "name" "version", "upload_date", "description"])
 
 
 class DataQuery(BaseQuery):
@@ -175,7 +175,8 @@ class DataQuery(BaseQuery):
     def __init__(self):
         '''Initializes a DataQuery instance.'''
         super(DataQuery, self).__init__(
-            ["id", "name", "encoding", "type", "size", "date", "expires"])
+            ["id", "name", "encoding", "type", "size", "upload_date",
+             "expiration_date"])
 
 
 class JobsQuery(BaseQuery):
@@ -196,4 +197,4 @@ class JobsQuery(BaseQuery):
     def __init__(self):
         '''Initializes a JobsQuery instance.'''
         super(JobsQuery, self).__init__(
-            ["id", "name", "state", "archived", "date"])
+            ["id", "name", "state", "archived", "upload_date"])
