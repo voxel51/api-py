@@ -197,4 +197,4 @@ class JobsQuery(BaseQuery):
     def __init__(self):
         '''Initializes a JobsQuery instance.'''
         super(JobsQuery, self).__init__(
-            ["id", "name", "state", "archived", "upload_date"])
+            ["id", "name", "state", "archived", "upload_date", "analytic_id"])
