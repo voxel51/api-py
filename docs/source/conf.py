@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python Client Library Voxel51 API documentation build configuration file, created by
-# sphinx-quickstart on Thu Jan 18 14:53:03 2018.
+# Python Client Library Voxel51 API documentation build configuration file,
+# created by sphinx-quickstart on Thu Jan 18 14:53:03 2018.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -55,7 +55,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'Vision Services API'
 copyright = '2018, Voxel51, Inc.'
-author = 'Brian Moore'
+author = 'Voxel51, Inc.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -150,7 +150,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'PythonClientLibraryVoxel51API.tex', 'Python Client Library Voxel51 API Documentation',
-     'D. Hodgson', 'manual'),
+     'Voxel51, Inc.', 'manual'),
 ]
 
 
