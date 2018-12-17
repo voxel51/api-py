@@ -280,7 +280,8 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
 
-    def upload_job_request(self, job_request, job_name, auto_start=False):
+    def upload_job_request(
+            self, job_request, job_name, auto_start=False, use_gpu=False):
         '''Uploads a job request.
 
         Args:
@@ -289,6 +290,8 @@ class API(object):
             job_name (str): a name for the job
             auto_start (bool, optional): whether to automatically start the job
                 upon creation. By default, this is False
+            use_gpu (bool, optional): whether to use GPU resources when running
+                the job. By default, this is False
 
         Returns:
             a dictionary containing metadata about the job
@@ -301,6 +304,7 @@ class API(object):
             "file": ("job.json", str(job_request), "application/json"),
             "job_name": (None, job_name),
             "auto_start": (None, str(auto_start)),
+            "use_gpu": (None, str(use_gpu)),
         }
         res = self._session.post(endpoint, files=files, headers=self._header)
         _validate_response(res)
