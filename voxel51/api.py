@@ -543,21 +543,19 @@ class API(object):
             APIError if the request was unsuccessful
         '''
         endpoint = self.base_url + "/statements/" + statement_id
-        res = self._session.get(endpoint, headers=self._header)
+        res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["statement"]
 
     # PRIVATE METHODS #########################################################
 
     def _stream_download(self, url, output_path):
-        res = self._session.get(
-            url, headers=self._header, stream=True)
         voxu.ensure_basedir(output_path)
-        with open(output_path, "wb") as f:
-            for chunk in res.iter_content(chunk_size=CHUNK_SIZE):
-                f.write(chunk)
-
-        _validate_response(res)
+        with self._requests.get(url, headers=self._header, stream=True) as res:
+            with open(output_path, "wb") as f:
+                for chunk in res.iter_content(chunk_size=CHUNK_SIZE):
+                    f.write(chunk)
+            _validate_response(res)
 
 
 class APIError(Exception):
