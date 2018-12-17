@@ -85,6 +85,21 @@ pygments_style = 'sphinx'
 todo_include_todos = True
 
 
+# Generate docstrings for __init__()
+# https://stackoverflow.com/questions/5599254/how-to-use-sphinxs-autodoc-to-document-a-classs-init-self-method
+def skip(app, what, name, obj, skip, options):
+    if name == "__init__":
+        return False
+    return skip
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
+
+
+# Sort methods in same order they appear in the source
+autodoc_member_order = 'bysource'
+
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
