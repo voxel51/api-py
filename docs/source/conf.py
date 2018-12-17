@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python Client Library Voxel51 API documentation build configuration file, created by
-# sphinx-quickstart on Thu Jan 18 14:53:03 2018.
+# Python Client Library Voxel51 API documentation build configuration file,
+# created by sphinx-quickstart on Thu Jan 18 14:53:03 2018.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -55,7 +55,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'Vision Services API'
 copyright = '2018, Voxel51, Inc.'
-author = 'Brian Moore'
+author = 'Voxel51, Inc.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -83,6 +83,21 @@ pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+
+# Generate docstrings for __init__()
+# https://stackoverflow.com/questions/5599254/how-to-use-sphinxs-autodoc-to-document-a-classs-init-self-method
+def skip(app, what, name, obj, skip, options):
+    if name == "__init__":
+        return False
+    return skip
+
+def setup(app):
+    app.connect("autodoc-skip-member", skip)
+
+
+# Sort methods in same order they appear in the source
+autodoc_member_order = 'bysource'
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -150,7 +165,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'PythonClientLibraryVoxel51API.tex', 'Python Client Library Voxel51 API Documentation',
-     'D. Hodgson', 'manual'),
+     'Voxel51, Inc.', 'manual'),
 ]
 
 
