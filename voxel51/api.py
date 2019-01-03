@@ -161,7 +161,7 @@ class API(object):
         Args:
             path (str): the path to the data file
             ttl (datetime|str, optional): a TTL for the data. If none is
-                provided, the default TTL is used. If string is provided, it
+                provided, the default TTL is used. If a string is provided, it
                 must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
 
         Returns:
