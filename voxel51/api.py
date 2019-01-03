@@ -391,6 +391,27 @@ class API(object):
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
+    def update_job_ttl(self, job_id, days):
+        '''Updates the expiration date of the job by the specified number of
+        days.
+
+        To decrease the lifespan of the job, provide a negative number. Note
+        that if the expiration date of the job after modification is in the
+        past, the job will be deleted.
+
+        Args:
+            job_id (str): the job ID
+            days (float): the number of days by which to extend the lifespan
+                of the job
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/jobs/" + job_id + "/ttl"
+        data = {"days": str(days)}
+        res = self._requests.put(endpoint, headers=self._header, data=data)
+        _validate_response(res)
+
     def archive_job(self, job_id):
         '''Archives the job with the given ID.
 
