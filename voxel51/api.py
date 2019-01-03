@@ -4,6 +4,7 @@ Main interface for the Voxel51 Vision Services API.
 | Copyright 2017-2018, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 '''
+from datetime import datetime
 import json
 import os
 import time
@@ -154,11 +155,14 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def upload_data(self, path):
+    def upload_data(self, path, ttl=None):
         '''Uploads the given data.
 
         Args:
             path (str): the path to the data file
+            ttl (datetime|str, optional): a TTL for the data. If none is
+                provided, the default TTL is used. If string is provided, it
+                must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
 
         Returns:
             a dictionary containing metadata about the uploaded data
@@ -171,6 +175,10 @@ class API(object):
         mime_type = _get_mime_type(path)
         with open(path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
+            if ttl is not None:
+                if isinstance(ttl, datetime):
+                    ttl = ttl.isoformat()
+                files["data_ttl"] = (None, str(ttl))
             res = self._requests.post(
                 endpoint, files=files, headers=self._header)
 
@@ -299,7 +307,8 @@ class API(object):
         return _parse_json_response(res)
 
     def upload_job_request(
-            self, job_request, job_name, auto_start=False, use_gpu=False):
+            self, job_request, job_name, auto_start=False, use_gpu=False,
+            ttl=None):
         '''Uploads a job request.
 
         Args:
@@ -310,6 +319,9 @@ class API(object):
                 upon creation. By default, this is False
             use_gpu (bool, optional): whether to use GPU resources when running
                 the job. By default, this is False
+            ttl (datetime|str, optional): a TTL for the job output. If none
+                is provided, the default TTL is used. If a string is provided,
+                it must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
 
         Returns:
             a dictionary containing metadata about the job
@@ -324,6 +336,10 @@ class API(object):
             "auto_start": (None, str(auto_start)),
             "use_gpu": (None, str(use_gpu)),
         }
+        if ttl is not None:
+            if isinstance(ttl, datetime):
+                ttl = ttl.isoformat()
+            files["job_ttl"] = (None, str(ttl))
         res = self._requests.post(endpoint, files=files, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
