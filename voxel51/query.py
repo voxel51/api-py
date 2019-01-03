@@ -15,12 +15,13 @@ class BaseQuery(object):
     '''Base class for API queries.
 
     Provides support for queries with fully-customizable return fields,
-    sorting, substring searching, and record limits.
+    sorting, substring searching, and record offset/limits.
 
     Attributes:
         fields (list): the list of fields to include in the returned records
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
+        offset (int): an offset index for the returned records list
         limit (int): the maximum number of records to return
     '''
 
@@ -29,6 +30,7 @@ class BaseQuery(object):
         self.fields = []
         self.search = []
         self.sort = None
+        self.offset = None
         self.limit = None
 
     def __str__(self):
@@ -97,6 +99,19 @@ class BaseQuery(object):
             self.sort = "%s:%s" % (field, "desc" if descending else "asc")
         return self
 
+    def set_offset(self, offset):
+        '''Sets the record offset of the query.
+
+        Args:
+            offset (int): the desired record offset
+
+        Returns:
+            the updated BaseQuery instance
+        '''
+        if isinstance(offset, int) and offset >= 0:
+            self.offset = offset
+        return self
+
     def set_limit(self, limit):
         '''Sets the record limit of the query.
 
@@ -140,7 +155,7 @@ class AnalyticsQuery(BaseQuery):
     '''Class representing an analytics query for the API.
 
     Provides support for queries with fully-customizable return fields,
-    sorting, substring searching, and record limits.
+    sorting, substring searching, and record offset/limits.
 
     Attributes:
         fields (list): the list of fields to include in the returned records.
@@ -148,6 +163,7 @@ class AnalyticsQuery(BaseQuery):
             `description`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
+        offset (int): an offset index for the returned records list
         limit (int): the maximum number of records to return
     '''
 
@@ -161,7 +177,7 @@ class DataQuery(BaseQuery):
     '''Class representing a data query for the API.
 
     Provides support for queries with fully-customizable return fields,
-    sorting, substring searching, and record limits.
+    sorting, substring searching, and record offset/limits.
 
     Attributes:
         fields (list): the list of fields to include in the returned records.
@@ -169,6 +185,7 @@ class DataQuery(BaseQuery):
             `size`, `date`, and `expires`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
+        offset (int): an offset index for the returned records list
         limit (int): the maximum number of records to return
     '''
 
@@ -183,7 +200,7 @@ class JobsQuery(BaseQuery):
     '''Class representing a jobs query for the API.
 
     Provides support for queries with fully-customizable return fields,
-    sorting, substring searching, and record limits.
+    sorting, substring searching, and record offset/limits.
 
     Attributes:
         fields (list): the list of fields to include in the returned records.
@@ -191,6 +208,7 @@ class JobsQuery(BaseQuery):
             and `date`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
+        offset (int): an offset index for the returned records list
         limit (int): the maximum number of records to return
     '''
 
