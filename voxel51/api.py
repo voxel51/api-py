@@ -91,7 +91,7 @@ class API(object):
                 instance defining the customized analytics query to perform
 
         Returns:
-            a list of dicts containing the query results
+            a dict containing the query results and total number of records
 
         Raises:
             APIError if the request was unsuccessful
@@ -100,7 +100,7 @@ class API(object):
         res = self._requests.get(
             endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
-        return _parse_json_response(res)["analytics"]
+        return _parse_json_response(res)
 
     def get_analytic_doc(self, analytic_id):
         '''Gets documentation about the analytic with the given ID.
@@ -143,7 +143,7 @@ class API(object):
                 the customized data query to perform
 
         Returns:
-            a list of dicts containing the query results
+            a dict containing the query results and total number of records
 
         Raises:
             APIError if the request was unsuccessful
@@ -152,7 +152,7 @@ class API(object):
         res = self._requests.get(
             endpoint, headers=self._header, params=data_query.to_dict())
         _validate_response(res)
-        return _parse_json_response(res)["data"]
+        return _parse_json_response(res)
 
     def upload_data(self, path):
         '''Uploads the given data.
@@ -287,7 +287,7 @@ class API(object):
                 the customized jobs query to perform
 
         Returns:
-            a list of dicts containing the query results
+            a dict containing the query results and total number of records
 
         Raises:
             APIError if the request was unsuccessful
@@ -296,7 +296,7 @@ class API(object):
         res = self._requests.get(
             endpoint, headers=self._header, params=jobs_query.to_dict())
         _validate_response(res)
-        return _parse_json_response(res)["jobs"]
+        return _parse_json_response(res)
 
     def upload_job_request(
             self, job_request, job_name, auto_start=False, use_gpu=False):
