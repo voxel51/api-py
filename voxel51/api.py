@@ -4,6 +4,7 @@ Main interface for the Voxel51 Vision Services API.
 | Copyright 2017-2018, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 '''
+from datetime import datetime
 import json
 import os
 import time
@@ -91,7 +92,7 @@ class API(object):
                 instance defining the customized analytics query to perform
 
         Returns:
-            a list of dicts containing the query results
+            a dict containing the query results and total number of records
 
         Raises:
             APIError if the request was unsuccessful
@@ -100,7 +101,7 @@ class API(object):
         res = self._requests.get(
             endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
-        return _parse_json_response(res)["analytics"]
+        return _parse_json_response(res)
 
     def get_analytic_doc(self, analytic_id):
         '''Gets documentation about the analytic with the given ID.
@@ -143,7 +144,7 @@ class API(object):
                 the customized data query to perform
 
         Returns:
-            a list of dicts containing the query results
+            a dict containing the query results and total number of records
 
         Raises:
             APIError if the request was unsuccessful
@@ -152,13 +153,16 @@ class API(object):
         res = self._requests.get(
             endpoint, headers=self._header, params=data_query.to_dict())
         _validate_response(res)
-        return _parse_json_response(res)["data"]
+        return _parse_json_response(res)
 
-    def upload_data(self, path):
+    def upload_data(self, path, ttl=None):
         '''Uploads the given data.
 
         Args:
             path (str): the path to the data file
+            ttl (datetime|str, optional): a TTL for the data. If none is
+                provided, the default TTL is used. If a string is provided, it
+                must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
 
         Returns:
             a dictionary containing metadata about the uploaded data
@@ -171,6 +175,10 @@ class API(object):
         mime_type = _get_mime_type(path)
         with open(path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
+            if ttl is not None:
+                if isinstance(ttl, datetime):
+                    ttl = ttl.isoformat()
+                files["data_ttl"] = (None, str(ttl))
             res = self._requests.post(
                 endpoint, files=files, headers=self._header)
 
@@ -287,7 +295,7 @@ class API(object):
                 the customized jobs query to perform
 
         Returns:
-            a list of dicts containing the query results
+            a dict containing the query results and total number of records
 
         Raises:
             APIError if the request was unsuccessful
@@ -296,10 +304,11 @@ class API(object):
         res = self._requests.get(
             endpoint, headers=self._header, params=jobs_query.to_dict())
         _validate_response(res)
-        return _parse_json_response(res)["jobs"]
+        return _parse_json_response(res)
 
     def upload_job_request(
-            self, job_request, job_name, auto_start=False, use_gpu=False):
+            self, job_request, job_name, auto_start=False, use_gpu=False,
+            ttl=None):
         '''Uploads a job request.
 
         Args:
@@ -310,6 +319,9 @@ class API(object):
                 upon creation. By default, this is False
             use_gpu (bool, optional): whether to use GPU resources when running
                 the job. By default, this is False
+            ttl (datetime|str, optional): a TTL for the job output. If none
+                is provided, the default TTL is used. If a string is provided,
+                it must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
 
         Returns:
             a dictionary containing metadata about the job
@@ -324,6 +336,10 @@ class API(object):
             "auto_start": (None, str(auto_start)),
             "use_gpu": (None, str(use_gpu)),
         }
+        if ttl is not None:
+            if isinstance(ttl, datetime):
+                ttl = ttl.isoformat()
+            files["job_ttl"] = (None, str(ttl))
         res = self._requests.post(endpoint, files=files, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
@@ -373,6 +389,27 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/start"
         res = self._requests.put(endpoint, headers=self._header)
+        _validate_response(res)
+
+    def update_job_ttl(self, job_id, days):
+        '''Updates the expiration date of the job by the specified number of
+        days.
+
+        To decrease the lifespan of the job, provide a negative number. Note
+        that if the expiration date of the job after modification is in the
+        past, the job will be deleted.
+
+        Args:
+            job_id (str): the job ID
+            days (float): the number of days by which to extend the lifespan
+                of the job
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/jobs/" + job_id + "/ttl"
+        data = {"days": str(days)}
+        res = self._requests.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
 
     def archive_job(self, job_id):
