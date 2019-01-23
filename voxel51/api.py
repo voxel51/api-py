@@ -207,7 +207,7 @@ class API(object):
             mimetype is None or
             size is None or
             encoding is None):
-            pass
+            raise ValueError("Missing required field(s)")
 
         endpoint = self.base_url + "/data/url"
         payload = {
