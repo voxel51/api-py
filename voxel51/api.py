@@ -185,6 +185,43 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
+    def upload_signed_url(self, url, filename, mimetype, size, encoding):
+        '''Uploads data using signed url as pointer.
+
+        Args:
+            url (str): Signed url
+            filename (str): the filename of the signed url
+            mimetype (str): the mimetype of the data
+            size (num): the data size in bytes
+            encoding (str): the file encoding
+
+        Returns:
+            a dictionary containing metadata about the uploaded data
+
+        Raises:
+            APIError if the request was unsuccessful
+
+        '''
+        if (url is None or
+            filename is None or
+            mimetype is None or
+            size is None or
+            encoding is None):
+            pass
+
+        endpoint = self.base_url + "/data/url"
+        payload = {
+            "signed_url": url,
+            "filename": filename,
+            "mimetype": mimetype,
+            "size": size,
+            "encoding": encoding,
+        }
+        res = self._requests.post(
+            endpoint, json=payload, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["data"]
+
     def get_data_details(self, data_id):
         '''Gets details about the data with the given ID.
 
