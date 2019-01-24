@@ -202,23 +202,15 @@ class API(object):
             APIError if the request was unsuccessful
 
         '''
-        if (url is None or
-            filename is None or
-            mimetype is None or
-            size is None or
-            encoding is None):
-            raise ValueError("Missing required field(s)")
-
         endpoint = self.base_url + "/data/url"
-        payload = {
+        data = {
             "signed_url": url,
             "filename": filename,
-            "mimetype": mimetype,
+            "mimetype": mime_type,
             "size": size,
             "encoding": encoding,
         }
-        res = self._requests.post(
-            endpoint, json=payload, headers=self._header)
+        res = self._requests.post(endpoint, json=data, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
