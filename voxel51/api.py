@@ -185,22 +185,28 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
-    def upload_signed_url(self, url, filename, mimetype, size, encoding):
-        '''Uploads data using signed url as pointer.
+    def post_data_as_url(
+            self, url, filename, mime_type, size, encoding):
+        '''Posts data "virtually" to the platform via URL.
+
+        The data is not actually accessed nor uploaded at this time. Instead,
+        the provided URL and metadata are stored as a reference to the file.
+
+        The URL must be accessible via an HTTP GET request.
 
         Args:
-            url (str): Signed url
-            filename (str): the filename of the signed url
-            mimetype (str): the mimetype of the data
-            size (num): the data size in bytes
-            encoding (str): the file encoding
+            url (str): a URL (typically a signed URL) that can be accessed
+                publicly via an HTTP GET request
+            filename (str): the filename of the data
+            mime_type (str): the MIME type of the data
+            size (int): the size of the data, in bytes
+            encoding (str): the encoding of the file
 
         Returns:
-            a dictionary containing metadata about the uploaded data
+            a dictionary containing metadata about the posted data
 
         Raises:
             APIError if the request was unsuccessful
-
         '''
         endpoint = self.base_url + "/data/url"
         data = {
