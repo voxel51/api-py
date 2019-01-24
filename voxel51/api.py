@@ -185,12 +185,11 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
-    def post_data_as_url(
-            self, url, filename, mime_type, size, encoding):
-        '''Posts data "virtually" to the platform via URL.
+    def post_data_as_url(self, url, filename, mime_type, size, encoding):
+        '''Posts data via URL.
 
-        The data is not actually accessed nor uploaded at this time. Instead,
-        the provided URL and metadata are stored as a reference to the file.
+        The data is not accessed nor uploaded at this time. Instead, the
+        provided URL and metadata are stored as a reference to the file.
 
         The URL must be accessible via an HTTP GET request.
 
