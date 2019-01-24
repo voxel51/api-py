@@ -17,7 +17,10 @@ import voxel51.jobs as voxj
 import voxel51.utils as voxu
 
 
-BASE_API_URL = "https://api.voxel51.com/v1"
+BASE_API_URL = "https://api.voxel51.com/v1"  # production
+#BASE_API_URL = "https://staging.api.voxel51.com/v1"  # staging
+#BASE_API_URL = "https://dev.api.voxel51.com/v1"  # developement
+
 CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
@@ -182,6 +185,40 @@ class API(object):
             res = self._requests.post(
                 endpoint, files=files, headers=self._header)
 
+        _validate_response(res)
+        return _parse_json_response(res)["data"]
+
+    def post_data_as_url(self, url, filename, mime_type, size, encoding):
+        '''Posts data via URL.
+
+        The data is not accessed nor uploaded at this time. Instead, the
+        provided URL and metadata are stored as a reference to the file.
+
+        The URL must be accessible via an HTTP GET request.
+
+        Args:
+            url (str): a URL (typically a signed URL) that can be accessed
+                publicly via an HTTP GET request
+            filename (str): the filename of the data
+            mime_type (str): the MIME type of the data
+            size (int): the size of the data, in bytes
+            encoding (str): the encoding of the file
+
+        Returns:
+            a dictionary containing metadata about the posted data
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/data/url"
+        data = {
+            "signed_url": url,
+            "filename": filename,
+            "mimetype": mime_type,
+            "size": size,
+            "encoding": encoding,
+        }
+        res = self._requests.post(endpoint, json=data, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
