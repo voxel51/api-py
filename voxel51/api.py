@@ -185,7 +185,7 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["data"]
 
-    def post_data_as_url(self, url, filename, mime_type, size, encoding):
+    def post_data_as_url(self, url, filename, mime_type, size, encoding=None, ttl=None):
         '''Posts data via URL.
 
         The data is not accessed nor uploaded at this time. Instead, the
@@ -199,7 +199,10 @@ class API(object):
             filename (str): the filename of the data
             mime_type (str): the MIME type of the data
             size (int): the size of the data, in bytes
-            encoding (str): the encoding of the file
+            encoding (str, optional): the encoding of the file
+            ttl (datetime|str, optional): a TTL for the data. If none is
+                provided, the default TTL is used. If a string is provided, it
+                must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
 
         Returns:
             a dictionary containing metadata about the posted data
@@ -208,12 +211,17 @@ class API(object):
             APIError if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/url"
+        if ttl is not None:
+            if isinstance(ttl, datetime):
+                ttl = ttl.isoformat()
+
         data = {
             "signed_url": url,
             "filename": filename,
             "mimetype": mime_type,
             "size": size,
             "encoding": encoding,
+            "data_ttl": ttl,
         }
         res = self._requests.post(endpoint, json=data, headers=self._header)
         _validate_response(res)
