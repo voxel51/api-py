@@ -17,10 +17,7 @@ import voxel51.jobs as voxj
 import voxel51.utils as voxu
 
 
-BASE_API_URL = "https://api.voxel51.com/v1"  # production
-#BASE_API_URL = "https://staging.api.voxel51.com/v1"  # staging
-#BASE_API_URL = "https://dev.api.voxel51.com/v1"  # developement
-
+BASE_API_URL = "https://api.voxel51.com/v1"
 CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
