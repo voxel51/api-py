@@ -212,18 +212,19 @@ class API(object):
             APIError if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/url"
-        if ttl is not None:
-            if isinstance(ttl, datetime):
-                ttl = ttl.isoformat()
-
         data = {
             "signed_url": url,
             "filename": filename,
             "mimetype": mime_type,
             "size": size,
-            "encoding": encoding,
-            "data_ttl": ttl,
         }
+        if encoding:
+            data["encoding"] = encoding
+        if ttl is not None:
+            if isinstance(ttl, datetime):
+                ttl = ttl.isoformat()
+            data["data_ttl"] = ttl
+
         res = self._requests.post(endpoint, json=data, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
