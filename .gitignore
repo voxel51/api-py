@@ -6,5 +6,6 @@ __pycache__
 *.egg-info
 
 /docs/build/
-/docs/source/modules.rst
-/docs/source/voxel51.rst
+/docs/source/*.rst
+!/docs/source/index.rst
+!/docs/source/readme.rst
