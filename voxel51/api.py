@@ -62,6 +62,19 @@ class API(object):
         if self.keep_alive:
             self._requests.close()
 
+    @classmethod
+    def from_json(cls, token_path):
+        '''Creates an API instance from the given Token JSON file.
+
+        Args:
+            token_path: the path to a Token JSON file
+
+        Returns:
+            an API instance
+        '''
+        token = voxa.load_token(token_path=token_path)
+        return cls(token=token)
+
     # ANALYTICS ###############################################################
 
     def list_analytics(self, all_versions=False):
