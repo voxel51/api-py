@@ -1,7 +1,7 @@
 '''
 Main interface for the Voxel51 Vision Services API.
 
-| Copyright 2017-2018, Voxel51, Inc.
+| Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 '''
 from datetime import datetime
@@ -92,8 +92,8 @@ class API(object):
             APIError if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics/list"
-        params = {"all_versions": all_versions}
-        res = self._requests.get(endpoint, headers=self._header, params=params)
+        data = {"all_versions": all_versions}
+        res = self._requests.get(endpoint, headers=self._header, json=data)
         _validate_response(res)
         return _parse_json_response(res)["analytics"]
 
