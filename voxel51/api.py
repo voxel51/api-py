@@ -567,13 +567,12 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def download_job_output(self, job_id, output_path="output.zip"):
+    def download_job_output(self, job_id, output_path):
         '''Downloads the output of the job with the given ID.
 
         Args:
             job_id (str): the job ID
-            output_path (str, optional): the output path to write to. The
-                default is 'output.zip'
+            output_path (str): the output path to write to
 
         Raises:
             APIError if the request was unsuccessful
