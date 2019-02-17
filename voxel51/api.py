@@ -31,12 +31,12 @@ class API(object):
             between requests
     '''
 
-    def __init__(self, token_path=None, keep_alive=False):
+    def __init__(self, token=None, keep_alive=False):
         '''Starts a new API session.
 
         Args:
-            token_path (str, optional): the path to a valid Token JSON file.
-                If no path is provided, the ``VOXEL51_API_TOKEN`` environment
+            token (voxel51.auth.Token, optional): an optional Token to use.
+                If no token is provided, the ``VOXEL51_API_TOKEN`` environment
                 variable is checked and, if set, the token is loaded from that
                 path. Otherwise, the token is loaded from
                 ``~/.voxel51/api-token.json``
@@ -44,7 +44,7 @@ class API(object):
                 alive between requests. By default, this is False
         '''
         self.base_url = BASE_API_URL
-        self.token = voxa.load_token(token_path=token_path)
+        self.token = token if token is not None else voxa.load_token()
         self.keep_alive = keep_alive
         self._header = self.token.get_header()
         self._requests = requests.Session() if keep_alive else requests
