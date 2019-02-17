@@ -23,12 +23,11 @@ pip install .
 ## Documentation
 
 For full documentation of the Voxel51 Vision Services API, including usage of
-this client library, see
-[https://voxel51.com/docs/api](https://voxel51.com/docs/api).
+this client library, see https://console.voxel51.com/docs/api.
 
 To learn how to use this client library to create and run jobs that execute
 each of the analytics exposed on the Voxel51 Vision Services Platform, see
-[https://voxel51.com/docs/analytics](https://voxel51.com/docs/analytics).
+https://console.voxel51.com/docs/analytics.
 
 
 ## Quickstart
@@ -194,5 +193,5 @@ your browser.
 
 ## Copyright
 
-Copyright 2018, Voxel51, Inc.<br>
+Copyright 2017-2019, Voxel51, Inc.<br>
 [voxel51.com](https://voxel51.com)
