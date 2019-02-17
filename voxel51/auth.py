@@ -1,7 +1,7 @@
 '''
 Authentication module for the Voxel51 Vision Services API.
 
-| Copyright 2017-2018, Voxel51, Inc.
+| Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 '''
 import logging
@@ -21,11 +21,10 @@ PRIVATE_KEY_FIELD = "private_key"
 
 
 def activate_token(path):
-    '''Activates the given token by copying it to
-    ``~/.voxel51/api-token.json``.
+    '''Activates the token by copying it to ``~/.voxel51/api-token.json``.
 
-    Subsequent voxel51.api.API() instances created will now use this token
-    for authentication.
+    Subsequent API instances created will now use this token for
+    authentication.
 
     Args:
         path (str): the path to an API token JSON file
