@@ -64,7 +64,7 @@ def load_token(token_path=None):
     '''
     path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
-        return Token.from_disk(path)
+        return Token.from_json(path)
     except IOError:
         raise TokenLoadError("No token found")
 
@@ -94,11 +94,11 @@ class Token(object):
         return {"Authorization": "Bearer " + self._private_key}
 
     @classmethod
-    def from_disk(cls, path):
-        '''Loads a token from disk.
+    def from_json(cls, path):
+        '''Loads a Token from JSON.
 
         Args:
-            path (str): the path to a valid token JSON file
+            path (str): the path to a Token JSON file
 
         Returns:
             a Token instance
