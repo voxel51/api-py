@@ -364,7 +364,7 @@ class API(object):
         return _parse_json_response(res)
 
     def upload_job_request(
-            self, job_request, job_name, auto_start=False, use_gpu=False,
+            self, job_request, job_name, auto_start=False, use_gpu=True,
             ttl=None):
         '''Uploads a job request.
 
@@ -375,7 +375,7 @@ class API(object):
             auto_start (bool, optional): whether to automatically start the job
                 upon creation. By default, this is False
             use_gpu (bool, optional): whether to use GPU resources when running
-                the job. By default, this is False
+                the job. By default, this is True
             ttl (datetime|str, optional): a TTL for the job output. If none
                 is provided, the default TTL is used. If a string is provided,
                 it must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
