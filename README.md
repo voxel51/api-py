@@ -30,13 +30,15 @@ each of the analytics exposed on the Voxel51 Vision Services Platform, see
 https://console.voxel51.com/docs/analytics.
 
 
-## Quickstart
+## User Quickstart
+
+This section provides a brief guide to using the Vision Services API with your
+user account.
 
 ### Sign-up and Authentication
 
-To use the API, you must first create an account at
-[https://console.voxel51.com](https://console.voxel51.com) and download an API
-token.
+To use the API, you must first create an account at https://console.voxel51.com
+and download an API token.
 
 > Keep your API token private; it is your access key to the API.
 
@@ -49,7 +51,7 @@ export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
 ```
 
 Alternatively, you can permanently activate a token by executing the following
-Python commands:
+commands:
 
 ```py
 from voxel51.auth import activate_token
@@ -65,17 +67,12 @@ After you have activated an API token, you have full access to the API.
 
 ### Creating an API Session
 
-To initialize an API session, issue the following Python commands:
+To initialize an API session, issue the following commands:
 
 ```py
-import json
 from voxel51.api import API
 
 api = API()
-
-# Convenience function to view JSON outputs
-def pprint(obj):
-    print(json.dumps(obj, indent=4))
 ```
 
 ### Analytics
@@ -83,7 +80,7 @@ def pprint(obj):
 List available analytics:
 
 ```py
-pprint(api.list_analytics())
+analytics = api.list_analytics()
 ```
 
 Get documentation for the analytic with the given ID:
@@ -92,7 +89,7 @@ Get documentation for the analytic with the given ID:
 # ID of the analytic
 analytic_id = "XXXXXXXX"
 
-pprint(api.get_analytic_doc(analytic_id))
+doc = api.get_analytic_doc(analytic_id)
 ```
 
 ### Data
@@ -101,15 +98,15 @@ Upload data to the cloud storage:
 
 ```py
 # Local path to the data
-upload_data_path = "/path/to/video.mp4"
+data_path = "/path/to/video.mp4"
 
-pprint(api.upload_data(upload_data_path))
+api.upload_data(data_path)
 ```
 
 List uploaded data:
 
 ```py
-pprint(api.list_data())
+data = api.list_data()
 ```
 
 ### Jobs
@@ -117,7 +114,7 @@ pprint(api.list_data())
 List the jobs you have created:
 
 ```py
-pprint(api.list_jobs())
+jobs = api.list_jobs()
 ```
 
 Create a job request to perform an analytic on a data, where `<analytic>` is
@@ -138,7 +135,7 @@ print(job_request)
 Upload a job request:
 
 ```py
-pprint(api.upload_job_request(job_request, "<job-name>"))
+api.upload_job_request(job_request, "<job-name>")
 ```
 
 Start a job:
@@ -154,10 +151,10 @@ Wait until a job is complete and then download its output:
 
 ```py
 # Local path to which to download the output
-job_output_path = "/path/to/output.zip"
+output_path = "/path/to/output.zip"
 
 api.wait_until_job_completes(job_id)
-api.download_job_output(job_id, job_output_path)
+api.download_job_output(job_id, output_path)
 ```
 
 Get the status of a job:
