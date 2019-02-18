@@ -34,7 +34,7 @@ class ApplicationAPI(API):
     '''
 
     def __init__(self, token=None, keep_alive=False):
-        '''Starts a new API session.
+        '''Creates a new ApplicationAPI instance.
 
         Args:
             token (voxel51.apps.auth.ApplicationToken, optional): an optional
@@ -53,7 +53,7 @@ class ApplicationAPI(API):
     def with_user(self, username):
         '''Activates the given user.
 
-        When finished peforming actions for the user, call :func:`exit_user`.
+        When finished performing actions for the user, call :func:`exit_user`.
 
         Args:
             username: the name of a user

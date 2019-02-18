@@ -80,8 +80,7 @@ class ApplicationToken(Token):
 
         Args:
             username: an optional username for which the requests are being
-                performed. By default, no username is included (admin-specific)
-                requests
+                performed. By default, no username is included
 
         Returns:
             a header dictionary
