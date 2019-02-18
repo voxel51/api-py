@@ -124,7 +124,7 @@ class ApplicationAPI(API):
         '''
         endpoint = self.base_url + "/apps/users/%s/limits" % username
         data = {"limits": {k: str(v) for k, v in iteritems(kwargs)}}
-        res = self._requests.get(endpoint, headers=self._header, json=data)
+        res = self._requests.post(endpoint, headers=self._header, json=data)
         _validate_response(res)
 
     # STATEMENTS ##############################################################
