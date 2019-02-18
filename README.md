@@ -206,7 +206,6 @@ To initialize an API session for your application, issue the following
 commands:
 
 ```py
-import json
 from voxel51.apps.api import ApplicationAPI
 
 api = ApplicationAPI()
@@ -269,7 +268,7 @@ from voxel51.jobs import JobRequest
 
 job_request = JobRequest("<analytic>")
 job_request.set_input("<input>", data_id="<data-id>")
-job_request.set_parameter("<param1>", val1)
+job_request.set_parameter("<param>", val)
 api.upload_job_request(job_request, "<job-name>", auto_start=True)
 ```
 
