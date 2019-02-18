@@ -166,15 +166,15 @@ status = api.get_job_status(job_id)
 ## Application Quickstart
 
 This section provides a brief guide to using the Vision Services API with your
-application admin account.
+application.
 
 ### Sign-up and Authentication
 
-To use the API with your application, you must first download an API token from
-your application admin account at https://console.voxel51.com/admin and
-download an API token.
+To use the API with your application, you must first login to your application
+admin account at https://console.voxel51.com/admin and create an API token
+for your application.
 
-> Keep your API token private; it is your access key to the API.
+> Keep your application API token private; it is your access key to the API.
 
 Each API request you make must be authenticated by your application token. To
 activate your application token, set the `VOXEL51_APP_TOKEN` environment
