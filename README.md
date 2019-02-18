@@ -119,15 +119,14 @@ jobs = api.list_jobs()
 
 Create a job request to perform an analytic on a data, where `<analytic>` is
 the name of the analytic to run, `<data-id>` is the ID of the data to process,
-and any `<param#>` values are set as necessary to configre the analytic:
+and any `<param>` values are set as necessary to configre the analytic:
 
 ```py
 from voxel51.jobs import JobRequest
 
 job_request = JobRequest("<analytic>")
 job_request.set_input("<input>", data_id="<data-id>")
-job_request.set_parameter("<param1>", val1)
-job_request.set_parameter("<param2>", val2)
+job_request.set_parameter("<param>", val)
 
 print(job_request)
 ```
