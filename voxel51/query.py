@@ -172,7 +172,7 @@ class AnalyticsQuery(BaseQuery):
     def __init__(self):
         '''Initializes an AnalyticsQuery instance.'''
         super(AnalyticsQuery, self).__init__(
-            ["id", "name" "version", "upload_date", "description"])
+            ["id", "name", "version", "upload_date", "description"])
         self.all_versions = False
 
     def set_all_versions(self, all_versions):
