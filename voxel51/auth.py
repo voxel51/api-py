@@ -1,7 +1,7 @@
 '''
 Authentication module for the Voxel51 Vision Services API.
 
-| Copyright 2017-2018, Voxel51, Inc.
+| Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 '''
 import logging
@@ -21,11 +21,10 @@ PRIVATE_KEY_FIELD = "private_key"
 
 
 def activate_token(path):
-    '''Activates the given token by copying it to
-    ``~/.voxel51/api-token.json``.
+    '''Activates the token by copying it to ``~/.voxel51/api-token.json``.
 
-    Subsequent voxel51.api.API() instances created will now use this token
-    for authentication.
+    Subsequent API instances created will now use this token for
+    authentication.
 
     Args:
         path (str): the path to an API token JSON file
@@ -64,7 +63,7 @@ def load_token(token_path=None):
     '''
     path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
-        return Token.from_disk(path)
+        return Token.from_json(path)
     except IOError:
         raise TokenLoadError("No token found")
 
@@ -94,11 +93,11 @@ class Token(object):
         return {"Authorization": "Bearer " + self._private_key}
 
     @classmethod
-    def from_disk(cls, path):
-        '''Loads a token from disk.
+    def from_json(cls, path):
+        '''Loads a Token from JSON.
 
         Args:
-            path (str): the path to a valid token JSON file
+            path (str): the path to a Token JSON file
 
         Returns:
             a Token instance

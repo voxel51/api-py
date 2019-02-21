@@ -1,7 +1,7 @@
 '''
 Main interface for the Voxel51 Vision Services API.
 
-| Copyright 2017-2018, Voxel51, Inc.
+| Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 '''
 from datetime import datetime
@@ -31,12 +31,12 @@ class API(object):
             between requests
     '''
 
-    def __init__(self, token_path=None, keep_alive=False):
+    def __init__(self, token=None, keep_alive=False):
         '''Starts a new API session.
 
         Args:
-            token_path (str, optional): the path to a valid Token JSON file.
-                If no path is provided, the ``VOXEL51_API_TOKEN`` environment
+            token (voxel51.auth.Token, optional): an optional Token to use.
+                If no token is provided, the ``VOXEL51_API_TOKEN`` environment
                 variable is checked and, if set, the token is loaded from that
                 path. Otherwise, the token is loaded from
                 ``~/.voxel51/api-token.json``
@@ -44,7 +44,7 @@ class API(object):
                 alive between requests. By default, this is False
         '''
         self.base_url = BASE_API_URL
-        self.token = voxa.load_token(token_path=token_path)
+        self.token = token if token is not None else voxa.load_token()
         self.keep_alive = keep_alive
         self._header = self.token.get_header()
         self._requests = requests.Session() if keep_alive else requests
@@ -61,6 +61,19 @@ class API(object):
         '''
         if self.keep_alive:
             self._requests.close()
+
+    @classmethod
+    def from_json(cls, token_path):
+        '''Creates an API instance from the given Token JSON file.
+
+        Args:
+            token_path: the path to a Token JSON file
+
+        Returns:
+            an API instance
+        '''
+        token = voxa.load_token(token_path=token_path)
+        return cls(token=token)
 
     # ANALYTICS ###############################################################
 
@@ -79,8 +92,8 @@ class API(object):
             APIError if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics/list"
-        params = {"all_versions": all_versions}
-        res = self._requests.get(endpoint, headers=self._header, params=params)
+        data = {"all_versions": all_versions}
+        res = self._requests.get(endpoint, headers=self._header, json=data)
         _validate_response(res)
         return _parse_json_response(res)["analytics"]
 
@@ -351,7 +364,7 @@ class API(object):
         return _parse_json_response(res)
 
     def upload_job_request(
-            self, job_request, job_name, auto_start=False, use_gpu=False,
+            self, job_request, job_name, auto_start=False, use_gpu=True,
             ttl=None):
         '''Uploads a job request.
 
@@ -362,7 +375,7 @@ class API(object):
             auto_start (bool, optional): whether to automatically start the job
                 upon creation. By default, this is False
             use_gpu (bool, optional): whether to use GPU resources when running
-                the job. By default, this is False
+                the job. By default, this is True
             ttl (datetime|str, optional): a TTL for the job output. If none
                 is provided, the default TTL is used. If a string is provided,
                 it must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
@@ -554,13 +567,12 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def download_job_output(self, job_id, output_path="output.zip"):
+    def download_job_output(self, job_id, output_path):
         '''Downloads the output of the job with the given ID.
 
         Args:
             job_id (str): the job ID
-            output_path (str, optional): the output path to write to. The
-                default is 'output.zip'
+            output_path (str): the output path to write to
 
         Raises:
             APIError if the request was unsuccessful
