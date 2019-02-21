@@ -31,18 +31,22 @@ class JobRequest(voxu.Serializable):
 
     Attributes:
         analytic (str): the name of the analytic to run
+        version (str): the version of the analytic to run (None = latest)
         inputs (dict): a dictionary mapping input names to RemoteDataPath
             instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
-    def __init__(self, analytic):
-        '''Initializes a JobRequest instance for the given analytic.
+    def __init__(self, analytic, version=None):
+        '''Creates a JobRequest instance.
 
         Args:
             analytic (str): the name of the analytic to run
+            version (str, optional): the version of the analytic to run. If not
+                specified, the latest available version is used
         '''
         self.analytic = analytic
+        self.version = version
         self.inputs = {}
         self.parameters = {}
 

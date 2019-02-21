@@ -159,18 +159,34 @@ class AnalyticsQuery(BaseQuery):
 
     Attributes:
         fields (list): the list of fields to include in the returned records.
-            The supported query fields are `id`, `name`, `version`, `date`, and
-            `description`
+            The supported query fields are `id`, `name`, `version`,
+            `upload_date`, and `description`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
         limit (int): the maximum number of records to return
+        all_versions (bool): whether to include all versions of each analytic
+            in the query response. By default, this is False
     '''
 
     def __init__(self):
-        '''Initializes a AnalyticsQuery instance.'''
+        '''Initializes an AnalyticsQuery instance.'''
         super(AnalyticsQuery, self).__init__(
-            ["id", "name" "version", "upload_date", "description"])
+            ["id", "name", "version", "upload_date", "description"])
+        self.all_versions = False
+
+    def set_all_versions(self, all_versions):
+        '''Sets the `all_versions` parameter of the query.
+
+        Args:
+            all_versions (bool): whether to include all versions of each
+                analytic in the query
+
+        Returns:
+            the updated AnalyticsQuery instance
+        '''
+        self.all_versions = all_versions
+        return self
 
 
 class DataQuery(BaseQuery):
@@ -182,7 +198,7 @@ class DataQuery(BaseQuery):
     Attributes:
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `encoding`, `type`,
-            `size`, `date`, and `expires`
+            `size`, `upload_date`, and `expires`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
@@ -205,7 +221,8 @@ class JobsQuery(BaseQuery):
     Attributes:
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `state`, `archived`,
-            and `date`
+            `upload_date`, `analytic_id`, `analytic_version`, `auto_start`,
+            and `use_gpu`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
@@ -216,4 +233,4 @@ class JobsQuery(BaseQuery):
         '''Initializes a JobsQuery instance.'''
         super(JobsQuery, self).__init__([
             "id", "name", "state", "archived", "upload_date", "analytic_id",
-            "auto_start", "use_gpu"])
+            "analytic_version", "auto_start", "use_gpu"])
