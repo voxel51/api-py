@@ -47,7 +47,8 @@ class ApplicationAPI(API):
         '''
         if token is None:
             token = voxa.load_application_token()
-        super(ApplicationAPI, self).__init__(token=token, keep_alive=keep_alive)
+        super(ApplicationAPI, self).__init__(
+            token=token, keep_alive=keep_alive)
         self.active_user = None
 
     def with_user(self, username):
