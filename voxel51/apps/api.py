@@ -112,22 +112,6 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)["users"]
 
-    def update_user_usage_limits(self, username, **kwargs):
-        '''Updates the usage limits for the given user to the given values.
-
-        Args:
-            username: the name of the user to modify
-            **kwargs: key-value pairs specifying the limit names and
-                corresponding values to set
-
-        Raises:
-            voxel51.api.APIError: if the request was unsuccessful
-        '''
-        endpoint = self.base_url + "/apps/users/%s/limits" % username
-        data = {"limits": {k: str(v) for k, v in iteritems(kwargs)}}
-        res = self._requests.post(endpoint, headers=self._header, json=data)
-        _validate_response(res)
-
     # STATEMENTS ##############################################################
 
     def list_statements(self):
