@@ -49,7 +49,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Vision Services API"
-copyright = "2018, Voxel51, Inc."
+copyright = "2017-2019, Voxel51, Inc"
 author = "Voxel51, Inc."
 
 # The version info for the project you're documenting, acts as replacement for
