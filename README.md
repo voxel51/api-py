@@ -221,22 +221,10 @@ For example, you can list the current users of your application:
 usernames = api.list_users()
 ```
 
-Create a new user:
+and create a new user:
 
 ```py
 api.create_user("<username>")
-```
-
-And update the usage limits of a user:
-
-```py
-# The new limits to apply for the user
-limits = {
-    "<limit-name>": <limit-value>,
-    ...
-}
-
-api.update_user_usage_limits("<username>", **limits)
 ```
 
 ### Performing User Actions
