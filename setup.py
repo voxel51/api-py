@@ -2,7 +2,7 @@
 '''
 Installs the Python client library for the Voxel51 Vision Services API.
 
-Copyright 2018, Voxel51, Inc.
+Copyright 2017-2019, Voxel51, Inc.
 voxel51.com
 '''
 from setuptools import setup, find_packages
@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 setup(
     name="voxel51-api-python",
     version="1.0.0",
-    description='Python client library for the Voxel51 Vision Services API',
+    description="Python client library for the Voxel51 Vision Services API",
     author="Voxel51, Inc.",
     author_email="support@voxel51.com",
     url="https://github.com/voxel51/api-python",

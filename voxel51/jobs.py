@@ -2,7 +2,7 @@
 Job request creation and manipulation library for the Voxel51 Vision Services
 API.
 
-| Copyright 2017-2018, Voxel51, Inc.
+| Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 '''
 import voxel51.utils as voxu
