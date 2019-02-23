@@ -265,15 +265,7 @@ api.upload_job_request(job_request, "<job-name>", auto_start=True)
 
 This project uses
 [Sphinx-Napoleon](https://pypi.python.org/pypi/sphinxcontrib-napoleon)
-to generate its documentation from source. To install the necessary
-dependencies to generate the documentation, run:
-
-```shell
-pip install --upgrade sphinx
-pip install --upgrade sphinx_rtd_theme
-pip install --upgrade sphinxcontrib-napoleon
-pip install --upgrade m2r
-```
+to generate its documentation from source.
 
 To generate the documentation, run:
 
