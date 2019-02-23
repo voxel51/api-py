@@ -119,11 +119,11 @@ class JobRequest(voxu.Serializable):
         job_request = cls(d["analytic"])
 
         # Set inputs
-        for name, val in d["inputs"].items():
+        for name, val in iteritems(d["inputs"]):
             job_request.set_input(name, path=RemoteDataPath.from_dict(val))
 
         # Set parameters
-        for name, val in d["parameters"].items():
+        for name, val in iteritems(d["parameters"]):
             if RemoteDataPath.is_remote_path_dict(val):
                 # Data parameter
                 job_request.set_data_parameter(

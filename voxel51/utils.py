@@ -103,7 +103,7 @@ class Serializable(object):
         '''
         return {
             v: _recurse(getattr(self, k))
-            for k, v in self._attributes().items()
+            for k, v in iteritems(self._attributes())
         }
 
     def to_string(self):
@@ -180,7 +180,7 @@ def _recurse(v):
     if isinstance(v, list):
         return [_recurse(vi) for vi in v]
     elif isinstance(v, dict):
-        return {ki: _recurse(vi) for ki, vi in v.items()}
+        return {ki: _recurse(vi) for ki, vi in iteritems(v)}
     elif isinstance(v, Serializable):
         return v.to_dict()
     return v
