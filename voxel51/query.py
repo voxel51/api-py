@@ -235,8 +235,7 @@ class JobsQuery(BaseQuery):
     Attributes:
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `state`, `archived`,
-            `upload_date`, `analytic_id`, `analytic_version`, `auto_start`,
-            and `use_gpu`
+            `upload_date`, `analytic_id`, `auto_start`, and `use_gpu`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
@@ -247,4 +246,4 @@ class JobsQuery(BaseQuery):
         '''Initializes a JobsQuery instance.'''
         super(JobsQuery, self).__init__([
             "id", "name", "state", "archived", "upload_date", "analytic_id",
-            "analytic_version", "auto_start", "use_gpu"])
+            "auto_start", "use_gpu"])
