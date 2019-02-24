@@ -17,3 +17,4 @@ make html
 cd ..
 
 echo "**** Documentation complete"
+printf "To view the docs, run:\n\nopen docs/build/html/index.html\n\n"
