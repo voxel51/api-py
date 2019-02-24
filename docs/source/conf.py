@@ -27,11 +27,11 @@ needs_sphinx = "1.7.2"
 # extensions coming with Sphinx (named "sphinx.ext.*") or your custom
 # ones.
 extensions = [
-  "sphinx.ext.autodoc",
-  "sphinx.ext.intersphinx",
-  "sphinx.ext.viewcode",
-  "sphinx.ext.napoleon",
-  "m2r",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "m2r",
 ]
 
 # Types of class members to generate documentation for
