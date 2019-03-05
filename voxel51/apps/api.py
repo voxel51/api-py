@@ -125,18 +125,6 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)["users"]
 
-    # STATEMENTS ##############################################################
-
-    def list_statements(self):
-        '''Not yet implemented for applications.'''
-        raise NotImplementedError(
-            "list_statements() is not yet implemented for applications")
-
-    def get_statement_details(self, statement_id):
-        '''Not yet implemented for applications.'''
-        raise NotImplementedError(
-            "get_statement_details() is not yet implemented for applications")
-
 
 def _validate_response(res):
     if not res.ok:
