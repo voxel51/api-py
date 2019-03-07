@@ -146,6 +146,20 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
+    def delete_analytic(self, analytic_id):
+        '''Deletes private analytic and its associated image(s) for the
+        private analytic with the given ID.
+
+        Args:
+            analytic_id (str): the analytic ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "analytics/" + analytic_id
+        res = self._requests.delete(endpoint, headers=self._header)
+        _validate_response(res)
+
     # DATA ####################################################################
 
     def list_data(self):
