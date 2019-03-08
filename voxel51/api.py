@@ -624,39 +624,6 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
-    # STATEMENTS ##############################################################
-
-    def list_statements(self):
-        '''Returns a list of all statements.
-
-        Returns:
-            a list of dictionaries describing the statements
-
-        Raises:
-            APIError if the request was unsuccessful
-        '''
-        endpoint = self.base_url + "/statements/list"
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["statements"]
-
-    def get_statement_details(self, statement_id):
-        '''Gets details about the statement with the given ID.
-
-        Args:
-            statement_id (str): the statement ID
-
-        Returns:
-            a dictionary containing metadata about the statement
-
-        Raises:
-            APIError if the request was unsuccessful
-        '''
-        endpoint = self.base_url + "/statements/" + statement_id
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["statement"]
-
     # PRIVATE METHODS #########################################################
 
     def _stream_download(self, url, output_path):
