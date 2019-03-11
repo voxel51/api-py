@@ -118,7 +118,8 @@ class API(object):
                 instance defining the customized analytics query to perform
 
         Returns:
-            a dict containing the query results and total number of records
+            a dictionary containing the query results and total number of
+                records
 
         Raises:
             APIError if the request was unsuccessful
@@ -146,6 +147,65 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
+    def upload_analytic(self, doc_json_path):
+        '''Uploads the analytic documentation JSON file that describes a new
+        private analytic to deploy.
+
+        Args:
+            doc_json_path (str): the path to the analytic JSON
+
+        Returns:
+            a dictionary containing metadata about the posted analytic
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "analytics"
+        filename = os.path.basename(path)
+        mime_type = _get_mime_type(doc_json_path)
+        with open(doc_json_path, "rb") as df:
+            files = {"file": (filename, df, mime_type)}
+            res = self._requests.post(
+                endpoint, files=files, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["analytic"]
+
+    def upload_analytic_image(self, analytic_id, image_tar_path, image_type):
+        '''Uploads the Docker image for a private analytic.
+
+        The Docker image must be uploaded as a `.tar`, `.tar.gz`, or `.tar.bz`.
+
+        Args:
+            analytic_id (str): the analytic ID
+            image_tar_path (str): the path to the image tarfile
+            image_type (str): the image computation type, "cpu" or "gpu"
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "analytics/" + analytic_id + "/images"
+        filename = os.path.basename(image_tar_path)
+        mime_type = _get_mime_type(image_tar_path)
+        with open(image_tar_path, "rb") as df:
+            files = {"file": (filename, df, mime_type)}
+            params = {"type": image_type.lower()}
+            res = self._requests.post(
+                endpoint, files=files, headers=self._header, params=params)
+        _validate_response(res)
+
+    def delete_analytic(self, analytic_id):
+        '''Deletes the (private) analytic with the given ID.
+
+        Args:
+            analytic_id (str): the analytic ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "analytics/" + analytic_id
+        res = self._requests.delete(endpoint, headers=self._header)
+        _validate_response(res)
+
     # DATA ####################################################################
 
     def list_data(self):
@@ -170,7 +230,8 @@ class API(object):
                 the customized data query to perform
 
         Returns:
-            a dict containing the query results and total number of records
+            a dictionary containing the query results and total number of
+                records
 
         Raises:
             APIError if the request was unsuccessful
@@ -365,7 +426,8 @@ class API(object):
                 the customized jobs query to perform
 
         Returns:
-            a dict containing the query results and total number of records
+            a dictionary containing the query results and total number of
+                records
 
         Raises:
             APIError if the request was unsuccessful
