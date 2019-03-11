@@ -125,6 +125,71 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)["users"]
 
+    def upload_analytic(self, doc_json_path, supports_cpu, supports_gpu):
+        '''Uploads the analytic documentation JSON file that describes a new
+        private analytic to deploy.
+
+        Args:
+            doc_json_path (str): the path to the analytic JSON
+            supports_cpu (bool): whether the analytic supports CPU execution
+            supports_gpu (bool): whether the analytic supports GPU execution
+
+        Returns:
+            a dictionary containing metadata about the posted analytic
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "apps/analytics"
+        params = {
+            "supports_cpu": supports_cpu,
+            "supports_gpu": supports_gpu,
+        }
+        filename = os.path.basename(path)
+        mime_type = _get_mime_type(doc_json_path)
+        with open(doc_json_path, "rb") as df:
+            files = {"file": (filename, df, mime_type)}
+            res = self._requests.post(
+                endpoint, headers=self._header, files=files, params=params)
+        _validate_response(res)
+        return _parse_json_response(res)["analytic"]
+
+    def upload_analytic_image(self, analytic_id, image_tar_path, image_type):
+        '''Uploads the Docker image for a private analytic.
+
+        The Docker image must be uploaded as a `.tar`, `.tar.gz`, or `.tar.bz`.
+
+        Args:
+            analytic_id (str): the analytic ID
+            image_tar_path (str): the path to the image tarfile
+            image_type (str): the image computation type, "cpu" or "gpu"
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "apps/analytics/" + analytic_id + "/images"
+        params = {"type": image_type.lower()}
+        filename = os.path.basename(image_tar_path)
+        mime_type = _get_mime_type(image_tar_path)
+        with open(image_tar_path, "rb") as df:
+            files = {"file": (filename, df, mime_type)}
+            res = self._requests.post(
+                endpoint, headers=self._header, files=files, params=params)
+        _validate_response(res)
+
+    def delete_analytic(self, analytic_id):
+        '''Deletes the private analytic with the given ID.
+
+        Args:
+            analytic_id (str): the analytic ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "apps/analytics/" + analytic_id
+        res = self._requests.delete(endpoint, headers=self._header)
+        _validate_response(res)
+
 
 def _validate_response(res):
     if not res.ok:
