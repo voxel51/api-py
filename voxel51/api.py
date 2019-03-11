@@ -200,7 +200,7 @@ class API(object):
         _validate_response(res)
 
     def delete_analytic(self, analytic_id):
-        '''Deletes the (private) analytic with the given ID.
+        '''Deletes the private analytic with the given ID.
 
         Args:
             analytic_id (str): the analytic ID
