@@ -118,7 +118,8 @@ class API(object):
                 instance defining the customized analytics query to perform
 
         Returns:
-            a dict containing the query results and total number of records
+            a dictionary containing the query results and total number of
+                records
 
         Raises:
             APIError if the request was unsuccessful
@@ -230,7 +231,8 @@ class API(object):
                 the customized data query to perform
 
         Returns:
-            a dict containing the query results and total number of records
+            a dictionary containing the query results and total number of
+                records
 
         Raises:
             APIError if the request was unsuccessful
@@ -425,7 +427,8 @@ class API(object):
                 the customized jobs query to perform
 
         Returns:
-            a dict containing the query results and total number of records
+            a dictionary containing the query results and total number of
+                records
 
         Raises:
             APIError if the request was unsuccessful
