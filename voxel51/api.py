@@ -147,12 +147,14 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def upload_analytic(self, doc_json_path):
+    def upload_analytic(self, doc_json_path, supports_cpu, supports_gpu):
         '''Uploads the analytic documentation JSON file that describes a new
         private analytic to deploy.
 
         Args:
             doc_json_path (str): the path to the analytic JSON
+            supports_cpu (bool): does the analytic support CPU computation
+            supports_gpu (bool): does the analytic support GPU computation
 
         Returns:
             a dictionary containing metadata about the posted analytic
@@ -164,7 +166,11 @@ class API(object):
         filename = os.path.basename(path)
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
-            files = {"file": (filename, df, mime_type)}
+            files = {
+                "file": (filename, df, mime_type),
+                "supports_cpu": (None, supports_cpu),
+                "supports_gpu": (None, supports_gpu),
+            }
             res = self._requests.post(
                 endpoint, files=files, headers=self._header)
         _validate_response(res)
