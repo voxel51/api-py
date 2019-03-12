@@ -186,7 +186,7 @@ class AnalyticsQuery(BaseQuery):
         '''Initializes an AnalyticsQuery instance.'''
         super(AnalyticsQuery, self).__init__([
             "id", "name", "version", "upload_date", "description",
-            "scope_name", "supports_cpu", "supports_gpu"])
+            "scope_name", "supports_cpu", "supports_gpu", "pending"])
         self.all_versions = False
 
     def set_all_versions(self, all_versions):
