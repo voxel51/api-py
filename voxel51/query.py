@@ -172,8 +172,8 @@ class AnalyticsQuery(BaseQuery):
     Attributes:
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `version`,
-            `upload_date`, `description`, `scope_name`, `supports_cpu`,
-            `supports_gpu`
+            `upload_date`, `description`, `scope`, `supports_cpu`,
+            `supports_gpu`, and `pending`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
@@ -186,7 +186,7 @@ class AnalyticsQuery(BaseQuery):
         '''Initializes an AnalyticsQuery instance.'''
         super(AnalyticsQuery, self).__init__([
             "id", "name", "version", "upload_date", "description",
-            "scope_name", "supports_cpu", "supports_gpu", "pending"])
+            "scope", "supports_cpu", "supports_gpu", "pending"])
         self.all_versions = False
 
     def set_all_versions(self, all_versions):
