@@ -692,6 +692,37 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    def download_job_logfile(self, job_id, output_path):
+        '''Downloads logfile of the job with the given ID.
+
+        This function is available only for private analytics.
+
+        Args:
+            job_id (str): the job ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/jobs/" + job_id + "/log"
+        self._stream_download(endpoint, output_path)
+
+    def get_job_logfile_download_url(self, job_id):
+        '''Gets a signed download url for the logfile of the job with the given
+        ID.
+
+        This function is available only for private analytics.
+
+        Args:
+            job_id (str): the job ID
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/jobs/" + job_id + "/log-url"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["url"]
+
     # PRIVATE METHODS #########################################################
 
     def _stream_download(self, url, output_path):
