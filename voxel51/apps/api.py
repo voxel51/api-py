@@ -95,35 +95,7 @@ class ApplicationAPI(API):
         token = voxa.load_application_token(token_path=token_path)
         return cls(token=token)
 
-    # USERS ###################################################################
-
-    def create_user(self, username):
-        '''Creates a new application user with the given username.
-
-        Args:
-            username: a username for the new user
-
-        Raises:
-            voxel51.api.APIError: if the request was unsuccessful
-        '''
-        endpoint = self.base_url + "/apps/users"
-        data = {"username": username}
-        res = self._requests.post(endpoint, headers=self._header, json=data)
-        _validate_response(res)
-
-    def list_users(self):
-        '''Returns a list of all application users.
-
-        Returns:
-            a list of usernames of the application users
-
-        Raises:
-            voxel51.api.APIError: if the request was unsuccessful
-        '''
-        endpoint = self.base_url + "/apps/users/list"
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["users"]
+    # ANALYTICS ###############################################################
 
     def upload_analytic(self, doc_json_path):
         '''Uploads the analytic documentation JSON file that describes a new
@@ -183,6 +155,36 @@ class ApplicationAPI(API):
         endpoint = self.base_url + "apps/analytics/" + analytic_id
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
+
+    # USERS ###################################################################
+
+    def create_user(self, username):
+        '''Creates a new application user with the given username.
+
+        Args:
+            username: a username for the new user
+
+        Raises:
+            voxel51.api.APIError: if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/apps/users"
+        data = {"username": username}
+        res = self._requests.post(endpoint, headers=self._header, json=data)
+        _validate_response(res)
+
+    def list_users(self):
+        '''Returns a list of all application users.
+
+        Returns:
+            a list of usernames of the application users
+
+        Raises:
+            voxel51.api.APIError: if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/apps/users/list"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["users"]
 
 
 def _validate_response(res):
