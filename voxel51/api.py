@@ -681,6 +681,7 @@ class API(object):
 
         Args:
             job_id (str): the job ID
+            output_path (str): the path to write the logfile
 
         Raises:
             APIError if the request was unsuccessful
@@ -697,6 +698,10 @@ class API(object):
 
         Args:
             job_id (str): the job ID
+
+        Returns:
+            url (str): a signed URL with read access to download the job
+                logfile
 
         Raises:
             APIError if the request was unsuccessful
