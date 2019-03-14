@@ -95,7 +95,70 @@ class ApplicationAPI(API):
         token = voxa.load_application_token(token_path=token_path)
         return cls(token=token)
 
+    #
     # ANALYTICS ###############################################################
+    #
+    # Note that all analytic methods override the inherited methods from API,
+    # because analytic listing has different behavior for applications than it
+    # does for individual platform users
+    #
+
+    def list_analytics(self, all_versions=False):
+        '''Returns a list of all available analytics.
+
+        Args:
+            all_versions (bool, optional): whether to return all versions of
+                each analytic or only the latest version. By default, this is
+                False
+
+        Returns:
+            a list of dictionaries describing the available analytics
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/apps/analytics/list"
+        data = {"all_versions": all_versions}
+        res = self._requests.get(endpoint, headers=self._header, json=data)
+        _validate_response(res)
+        return _parse_json_response(res)["analytics"]
+
+    def query_analytics(self, analytics_query):
+        '''Performs a customized analytics query.
+
+        Args:
+            analytics_query (voxel51.query.AnalyticsQuery): an AnalyticsQuery
+                instance defining the customized analytics query to perform
+
+        Returns:
+            a dictionary containing the query results and total number of
+                records
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/apps/analytics"
+        res = self._requests.get(
+            endpoint, headers=self._header, params=analytics_query.to_dict())
+        _validate_response(res)
+        return _parse_json_response(res)
+
+    def get_analytic_doc(self, analytic_id):
+        '''Gets documentation about the analytic with the given ID.
+
+        Args:
+            analytic_id (str): the analytic ID
+
+        Returns:
+            a dictionary containing the analytic documentation
+
+        Raises:
+            APIError if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/apps/analytics/" + analytic_id
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)
 
     def upload_analytic(self, doc_json_path):
         '''Uploads the analytic documentation JSON file that describes a new
