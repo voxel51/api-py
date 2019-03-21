@@ -20,7 +20,7 @@ from builtins import *
 import logging
 import os
 
-from voxel51.auth import Token
+from voxel51.auth import Token, TokenLoadError
 import voxel51.utils as voxu
 
 
