@@ -79,8 +79,6 @@ def load_application_token(token_path=None):
     '''
     path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
-        logger.info('\n\n\nPATH:')
-        logger.info(path)
         return ApplicationToken.from_json(path)
     except IOError:
         raise TokenLoadError("No application token found")
