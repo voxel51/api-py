@@ -30,9 +30,19 @@ class JobState(object):
 
     READY = "READY"
     QUEUED = "QUEUED"
+    SCHEDULED = "SCHEDULED"
     RUNNING = "RUNNING"
-    FAILED = "FAILED"
     COMPLETE = "COMPLETE"
+    FAILED = "FAILED"
+
+
+class JobFailureType(object):
+    '''Enum describing the possible failure types of a job.'''
+
+    USER = "USER"
+    ANALYTIC = "ANALYTIC"
+    PLATFORM = "PLATFORM"
+    NONE = "NONE"
 
 
 class JobExecutionError(Exception):
