@@ -249,6 +249,19 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)["users"]
 
+    # STATUS ##################################################################
+
+    def get_platform_status(self):
+        '''Gets the current status of the platform.
+
+        Returns:
+            a dictionary describing the current platform status
+        '''
+        endpoint = self.base_url + "/apps/platform-status/all"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["statuses"]
+
 
 def _validate_response(res):
     if not res.ok:

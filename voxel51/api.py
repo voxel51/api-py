@@ -724,6 +724,19 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    # STATUS ##################################################################
+
+    def get_platform_status(self):
+        '''Gets the current status of the platform.
+
+        Returns:
+            a dictionary describing the current platform status
+        '''
+        endpoint = self.base_url + "/platform-status/all"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["statuses"]
+
     # PRIVATE METHODS #########################################################
 
     def _stream_download(self, url, output_path):
