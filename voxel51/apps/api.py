@@ -95,6 +95,22 @@ class ApplicationAPI(API):
         token = voxa.load_application_token(token_path=token_path)
         return cls(token=token)
 
+    def platform_status(self):
+        '''Queries for current platform status.
+
+        Args:
+            n/a
+
+        Returns:
+            a dictionary with the current platform status(es), where
+            True indicates running
+        '''
+        endpoint = self.base_url + "/apps/platform-status/all"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["statuses"]
+
+
     #
     # ANALYTICS ###############################################################
     #
