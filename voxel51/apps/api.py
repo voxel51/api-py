@@ -80,21 +80,6 @@ class ApplicationAPI(API):
         self.active_user = None
         self._header = self.token.get_header()
 
-    @classmethod
-    def from_json(cls, token_path):
-        '''Creates an :class:`ApplicationAPI` instance from the given
-        :class:`ApplicationToken` JSON file.
-
-        Args:
-            token_path: the path to an
-                :class:`voxel51.apps.auth.ApplicationToken` JSON file
-
-        Returns:
-            an :class:`ApplicationAPI` instance
-        '''
-        token = voxa.load_application_token(token_path=token_path)
-        return cls(token=token)
-
     def platform_status(self):
         '''Queries for current platform status.
 
@@ -110,6 +95,20 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)["statuses"]
 
+    @classmethod
+    def from_json(cls, token_path):
+        '''Creates an :class:`ApplicationAPI` instance from the given
+        :class:`ApplicationToken` JSON file.
+
+        Args:
+            token_path: the path to an
+                :class:`voxel51.apps.auth.ApplicationToken` JSON file
+
+        Returns:
+            an :class:`ApplicationAPI` instance
+        '''
+        token = voxa.load_application_token(token_path=token_path)
+        return cls(token=token)
 
     #
     # ANALYTICS ###############################################################
