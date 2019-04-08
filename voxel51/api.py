@@ -75,21 +75,6 @@ class API(object):
         if self.keep_alive:
             self._requests.close()
 
-    def platform_status(self):
-        '''Queries for current platform status.
-
-        Args:
-            n/a
-
-        Returns:
-            a dictionary with the current platform status(es), where
-            True indicates running
-        '''
-        endpoint = self.base_url + "/platform-status/all"
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["statuses"]
-
     @classmethod
     def from_json(cls, token_path):
         '''Creates an API instance from the given Token JSON file.
@@ -738,6 +723,19 @@ class API(object):
         endpoint = self.base_url + "/jobs/" + job_id
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
+
+    # STATUS ##################################################################
+
+    def get_platform_status(self):
+        '''Gets the current status of the platform.
+
+        Returns:
+            a dictionary describing the current platform status
+        '''
+        endpoint = self.base_url + "/platform-status/all"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["statuses"]
 
     # PRIVATE METHODS #########################################################
 

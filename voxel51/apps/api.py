@@ -80,21 +80,6 @@ class ApplicationAPI(API):
         self.active_user = None
         self._header = self.token.get_header()
 
-    def platform_status(self):
-        '''Queries for current platform status.
-
-        Args:
-            n/a
-
-        Returns:
-            a dictionary with the current platform status(es), where
-            True indicates running
-        '''
-        endpoint = self.base_url + "/apps/platform-status/all"
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["statuses"]
-
     @classmethod
     def from_json(cls, token_path):
         '''Creates an :class:`ApplicationAPI` instance from the given
@@ -263,6 +248,19 @@ class ApplicationAPI(API):
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["users"]
+
+    # STATUS ##################################################################
+
+    def get_platform_status(self):
+        '''Gets the current status of the platform.
+
+        Returns:
+            a dictionary describing the current platform status
+        '''
+        endpoint = self.base_url + "/apps/platform-status/all"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["statuses"]
 
 
 def _validate_response(res):
