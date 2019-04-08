@@ -257,7 +257,7 @@ class ApplicationAPI(API):
         Returns:
             a dictionary describing the current platform status
         '''
-        endpoint = self.base_url + "/apps/platform-status/all"
+        endpoint = self.base_url + "/apps/status/all"
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["statuses"]
