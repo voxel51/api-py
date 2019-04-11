@@ -174,7 +174,7 @@ class ApplicationAPI(API):
             APIError if the request was unsuccessful
         '''
         endpoint = self.base_url + "apps/analytics"
-        filename = os.path.basename(path)
+        filename = os.path.basename(doc_json_path)
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
