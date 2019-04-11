@@ -173,7 +173,7 @@ class ApplicationAPI(API):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.base_url + "apps/analytics"
+        endpoint = self.base_url + "/apps/analytics"
         filename = os.path.basename(doc_json_path)
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
@@ -196,7 +196,7 @@ class ApplicationAPI(API):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.base_url + "apps/analytics/" + analytic_id + "/images"
+        endpoint = self.base_url + "/apps/analytics/" + analytic_id + "/images"
         params = {"type": image_type.lower()}
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
@@ -215,7 +215,7 @@ class ApplicationAPI(API):
         Raises:
             APIError if the request was unsuccessful
         '''
-        endpoint = self.base_url + "apps/analytics/" + analytic_id
+        endpoint = self.base_url + "/apps/analytics/" + analytic_id
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
