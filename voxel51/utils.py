@@ -147,7 +147,7 @@ class Serializable(object):
         Returns:
             an instance of the Serializable subclass
         '''
-        return cls.from_dict(json.loads(s))
+        return cls.from_dict(json.loads(str(s)))
 
     @classmethod
     def from_json(cls, path):
