@@ -40,6 +40,22 @@ def read_json(path):
         return json.load(f)
 
 
+def load_json(str_or_bytes):
+    '''Loads JSON from string.
+
+    Args:
+        str_or_bytes (str): the input string or bytes
+
+    Returns:
+        a JSON list/dictionary
+    '''
+    try:
+        return json.loads(str_or_bytes)
+    except TypeError:
+        # Must be a Python version for which json.loads() cannot handle bytes
+        return json.loads(str_or_bytes.decode("utf-8"))
+
+
 def json_to_str(obj):
     '''Generates a string representation of the JSON object.
 
@@ -147,7 +163,7 @@ class Serializable(object):
         Returns:
             an instance of the Serializable subclass
         '''
-        return cls.from_dict(json.loads(str(s)))
+        return cls.from_dict(load_json(s))
 
     @classmethod
     def from_json(cls, path):

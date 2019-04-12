@@ -794,4 +794,4 @@ def _validate_response(res):
 
 
 def _parse_json_response(res):
-    return json.loads(res.content.decode("utf-8"))
+    return voxu.load_json(res.content)
