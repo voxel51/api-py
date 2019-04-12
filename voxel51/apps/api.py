@@ -23,6 +23,7 @@ import requests
 
 from voxel51.api import API, APIError
 import voxel51.apps.auth as voxa
+import voxel51.utils as voxu
 
 
 class ApplicationAPI(API):
@@ -269,4 +270,4 @@ def _validate_response(res):
 
 
 def _parse_json_response(res):
-    return json.loads(res.content)
+    return voxu.load_json(res.content)
