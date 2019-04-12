@@ -18,7 +18,6 @@ from builtins import *
 # pragma pylint: enable=wildcard-import
 
 from datetime import datetime
-import json
 import os
 import time
 
