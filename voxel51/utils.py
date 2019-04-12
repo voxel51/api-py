@@ -109,7 +109,7 @@ class Serializable(object):
     '''Base class for objects that can be represented in JSON format.'''
 
     def __str__(self):
-        return self.to_string()
+        return self.to_str()
 
     def to_dict(self):
         '''Generates a JSON dictionary representation of the object.
@@ -122,7 +122,7 @@ class Serializable(object):
             for k, v in iteritems(self._attributes())
         }
 
-    def to_string(self):
+    def to_str(self):
         '''Generates a string representation of the object.
 
         Returns:
@@ -154,7 +154,7 @@ class Serializable(object):
         raise NotImplementedError("subclass must implement from_dict()")
 
     @classmethod
-    def from_string(cls, s):
+    def from_str(cls, s):
         '''Constructs a Serializable object from a string representation of it.
 
         Args:

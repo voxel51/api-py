@@ -46,7 +46,7 @@ class BaseQuery(object):
         self.limit = None
 
     def __str__(self):
-        return self.to_string()
+        return self.to_str()
 
     def add_field(self, field):
         '''Adds the given field to the query.
@@ -151,7 +151,7 @@ class BaseQuery(object):
                 obj[key] = val
         return obj
 
-    def to_string(self):
+    def to_str(self):
         '''Converts the query instance into a string.
 
         Returns:
