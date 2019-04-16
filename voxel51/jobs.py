@@ -56,21 +56,25 @@ class JobRequest(voxu.Serializable):
     Attributes:
         analytic (str): the name of the analytic to run
         version (str): the version of the analytic to run (None = latest)
+        use_gpu (bool): whether the job will be executed with GPU (None = CPU)
         inputs (dict): a dictionary mapping input names to RemoteDataPath
             instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
-    def __init__(self, analytic, version=None):
+    def __init__(self, analytic, version=None, use_gpu=None):
         '''Creates a JobRequest instance.
 
         Args:
             analytic (str): the name of the analytic to run
             version (str, optional): the version of the analytic to run. If not
                 specified, the latest available version is used
+            use_gpu (bool, optional): whether to use GPU resources when running
+                the job. By default, CPU is used
         '''
         self.analytic = analytic
         self.version = version
+        self.use_gpu = use_gpu
         self.inputs = {}
         self.parameters = {}
 
@@ -126,7 +130,10 @@ class JobRequest(voxu.Serializable):
         Returns:
             a JobRequest instance
         '''
-        job_request = cls(d["analytic"])
+        analytic = d["analytic"]
+        version = d.get("version", None)
+        use_gpu = d.get("use_gpu", None)
+        job_request = cls(analytic, version=version, use_gpu=use_gpu)
 
         # Set inputs
         for name, val in iteritems(d["inputs"]):
@@ -141,6 +148,7 @@ class JobRequest(voxu.Serializable):
             else:
                 # Non-data parameter
                 job_request.set_parameter(name, val)
+
         return job_request
 
 
