@@ -439,8 +439,7 @@ class API(object):
         return _parse_json_response(res)
 
     def upload_job_request(
-            self, job_request, job_name, auto_start=False, use_gpu=None,
-            ttl=None):
+            self, job_request, job_name, auto_start=False, ttl=None):
         '''Uploads a job request.
 
         Args:
@@ -449,8 +448,6 @@ class API(object):
             job_name (str): a name for the job
             auto_start (bool, optional): whether to automatically start the job
                 upon creation. By default, this is False
-            use_gpu (bool, optional): whether to use GPU resources when running
-                the job. By default, GPU is used if the analytic supports it
             ttl (datetime|str, optional): a TTL for the job output. If none
                 is provided, the default TTL is used. If a string is provided,
                 it must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
@@ -467,8 +464,6 @@ class API(object):
             "job_name": (None, job_name),
             "auto_start": (None, str(auto_start)),
         }
-        if use_gpu is not None:
-            files["use_gpu"] = (None, str(use_gpu))
         if ttl is not None:
             if isinstance(ttl, datetime):
                 ttl = ttl.isoformat()
