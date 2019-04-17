@@ -27,6 +27,14 @@ import voxel51.utils as voxu
 DATA_ID_FIELD = "data-id"
 
 
+class JobComputeMode(object):
+    '''Enum describing the possible compute modes of a job.'''
+
+    CPU = "cpu"
+    GPU = "gpu"
+    BEST = "best"
+
+
 class JobState(object):
     '''Enum describing the possible states of a job.'''
 
@@ -57,26 +65,26 @@ class JobRequest(voxu.Serializable):
 
     Attributes:
         analytic (str): the name of the analytic to run
-        version (str): the version of the analytic to run (None = latest)
-        use_gpu (bool): whether the job will be executed with GPU (None = CPU)
+        version (str): the version of the analytic to run
+        compute_mode (JobComputeMode): the compute mode for the job
         inputs (dict): a dictionary mapping input names to RemoteDataPath
             instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
-    def __init__(self, analytic, version=None, use_gpu=None):
+    def __init__(self, analytic, version=None, compute_mode=None):
         '''Creates a JobRequest instance.
 
         Args:
             analytic (str): the name of the analytic to run
             version (str, optional): the version of the analytic to run. If not
                 specified, the latest available version is used
-            use_gpu (bool, optional): whether to use GPU resources when running
-                the job. By default, CPU is used
+            compute_mode (JobComputeMode, optional): the compute mode to use
+                for the job. By default, JobComputeMode.BEST is used
         '''
         self.analytic = analytic
         self.version = version
-        self.use_gpu = use_gpu
+        self.compute_mode = compute_mode
         self.inputs = {}
         self.parameters = {}
 
@@ -134,8 +142,8 @@ class JobRequest(voxu.Serializable):
         '''
         analytic = d["analytic"]
         version = d.get("version", None)
-        use_gpu = d.get("use_gpu", None)
-        job_request = cls(analytic, version=version, use_gpu=use_gpu)
+        compute_mode = d.get("compute_mode", None)
+        job_request = cls(analytic, version=version, compute_mode=compute_mode)
 
         # Set inputs
         for name, val in iteritems(d["inputs"]):
@@ -158,8 +166,8 @@ class JobRequest(voxu.Serializable):
         attrs["analytic"] = "analytic"
         if self.version is not None:
             attrs["version"] = "version"
-        if self.use_gpu is not None:
-            attrs["use_gpu"] = "use_gpu"
+        if self.compute_mode is not None:
+            attrs["compute_mode"] = "compute_mode"
         attrs["inputs"] = "inputs"
         attrs["parameters"] = "parameters"
         return attrs
