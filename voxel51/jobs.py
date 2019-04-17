@@ -19,6 +19,8 @@ from future.utils import iteritems
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
+from collections import OrderedDict
+
 import voxel51.utils as voxu
 
 
@@ -150,6 +152,17 @@ class JobRequest(voxu.Serializable):
                 job_request.set_parameter(name, val)
 
         return job_request
+
+    def _attributes(self):
+        attrs = OrderedDict()
+        attrs["analytic"] = "analytic"
+        if self.version is not None:
+            attrs["version"] = "version"
+        if self.use_gpu is not None:
+            attrs["use_gpu"] = "use_gpu"
+        attrs["inputs"] = "inputs"
+        attrs["parameters"] = "parameters"
+        return attrs
 
 
 class RemoteDataPath(voxu.Serializable):
