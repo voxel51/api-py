@@ -19,10 +19,20 @@ from future.utils import iteritems
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
+from collections import OrderedDict
+
 import voxel51.utils as voxu
 
 
 DATA_ID_FIELD = "data-id"
+
+
+class JobComputeMode(object):
+    '''Enum describing the possible compute modes of a job.'''
+
+    CPU = "CPU"
+    GPU = "GPU"
+    BEST = "BEST"
 
 
 class JobState(object):
@@ -55,22 +65,26 @@ class JobRequest(voxu.Serializable):
 
     Attributes:
         analytic (str): the name of the analytic to run
-        version (str): the version of the analytic to run (None = latest)
+        version (str): the version of the analytic to run
+        compute_mode (JobComputeMode): the compute mode for the job
         inputs (dict): a dictionary mapping input names to RemoteDataPath
             instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
-    def __init__(self, analytic, version=None):
+    def __init__(self, analytic, version=None, compute_mode=None):
         '''Creates a JobRequest instance.
 
         Args:
             analytic (str): the name of the analytic to run
             version (str, optional): the version of the analytic to run. If not
                 specified, the latest available version is used
+            compute_mode (JobComputeMode, optional): the compute mode to use
+                for the job. By default, JobComputeMode.BEST is used
         '''
         self.analytic = analytic
         self.version = version
+        self.compute_mode = compute_mode
         self.inputs = {}
         self.parameters = {}
 
@@ -126,7 +140,10 @@ class JobRequest(voxu.Serializable):
         Returns:
             a JobRequest instance
         '''
-        job_request = cls(d["analytic"])
+        analytic = d["analytic"]
+        version = d.get("version", None)
+        compute_mode = d.get("compute_mode", None)
+        job_request = cls(analytic, version=version, compute_mode=compute_mode)
 
         # Set inputs
         for name, val in iteritems(d["inputs"]):
@@ -141,7 +158,19 @@ class JobRequest(voxu.Serializable):
             else:
                 # Non-data parameter
                 job_request.set_parameter(name, val)
+
         return job_request
+
+    def _attributes(self):
+        attrs = OrderedDict()
+        attrs["analytic"] = "analytic"
+        if self.version is not None:
+            attrs["version"] = "version"
+        if self.compute_mode is not None:
+            attrs["compute_mode"] = "compute_mode"
+        attrs["inputs"] = "inputs"
+        attrs["parameters"] = "parameters"
+        return attrs
 
 
 class RemoteDataPath(voxu.Serializable):
