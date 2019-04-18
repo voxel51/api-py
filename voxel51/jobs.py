@@ -30,9 +30,9 @@ DATA_ID_FIELD = "data-id"
 class JobComputeMode(object):
     '''Enum describing the possible compute modes of a job.'''
 
-    CPU = "cpu"
-    GPU = "gpu"
-    BEST = "best"
+    CPU = "CPU"
+    GPU = "GPU"
+    BEST = "BEST"
 
 
 class JobState(object):
