@@ -1,6 +1,5 @@
 '''
-Job request creation and manipulation library for the Voxel51 Vision Services
-API.
+Job request creation and manipulation library for the Voxel51 Platform API.
 
 | Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
@@ -106,9 +105,9 @@ class JobRequest(voxu.Serializable):
         '''Sets the data parameter of the given name.
 
         Data parameters are parameters that are defined by a RemoteDataPath
-        instance and are read from cloud storage at runtime by the Vision
-        Engine. The parameter can be specified either as a RemoteDataPath
-        instance or as valid keyword arguments to construct one.
+        instance and are read from cloud storage at runtime by the job. The
+        parameter can be specified either as a RemoteDataPath instance or as
+        valid keyword arguments to construct one.
 
         Args:
             name (str): the input name to set

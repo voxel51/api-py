@@ -1,7 +1,6 @@
-# Voxel51 API Python Client Library
+# Voxel51 Platform API Python Client Library
 
-A Python client library for interacting with the Voxel51 Vision Services
-Platform.
+A Python client library for interacting with the Voxel51 Platform.
 
 <img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
 
@@ -25,18 +24,18 @@ pip install .
 
 ## Documentation
 
-For full documentation of the Voxel51 Vision Services API, including usage of
-this client library, see the [API Documentation](https://console.voxel51.com/docs/api).
+For full documentation of the Voxel51 Platform API, including usage of this
+client library, see the [API Documentation](https://console.voxel51.com/docs/api).
 
 To learn how to use this client library to create and run jobs that execute
-each of the analytics exposed on the Voxel51 Vision Services Platform, see
+each of the analytics exposed on the Voxel51 Platform, see
 the [Analytics Documentation](https://console.voxel51.com/docs/analytics).
 
 
 ## User Quickstart
 
-This section provides a brief guide to using the Vision Services API with your
-user account.
+This section provides a brief guide to using the Platform API with your user
+account.
 
 ### Sign-up and Authentication
 
@@ -168,7 +167,7 @@ status = api.get_job_status(job_id)
 
 ## Application Quickstart
 
-This section provides a brief guide to using the Vision Services API with your
+This section provides a brief guide to using the Platform API with your
 application.
 
 ### Sign-up and Authentication

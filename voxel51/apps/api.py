@@ -1,5 +1,5 @@
 '''
-Applications interface for the Voxel51 Vision Services API.
+Applications interface for the Voxel51 Platform API.
 
 | Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
@@ -27,8 +27,8 @@ import voxel51.utils as voxu
 
 
 class ApplicationAPI(API):
-    '''Main class for managing an application session with the Voxel51 Vision
-    Services API.
+    '''Main class for managing an application session with the Voxel51 Platform
+    API.
 
     Note that :class:`voxel51.apps.api.ApplicationAPI` is a subclass of
     :class:`voxel51.api.API`, which implies that, unless specifically

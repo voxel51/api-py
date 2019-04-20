@@ -1,5 +1,5 @@
 '''
-Main interface for the Voxel51 Vision Services API.
+Main interface for the Voxel51 Platform API.
 
 | Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
@@ -34,7 +34,7 @@ CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
 class API(object):
-    '''Main class for managing a session with the Voxel51 Vision Services API.
+    '''Main class for managing a session with the Voxel51 Platform API.
 
     Attributes:
         base_url (string): the base URL of the API

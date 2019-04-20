@@ -1,5 +1,5 @@
 '''
-Query interface for the Voxel51 Vision Services API.
+Query interface for the Voxel51 Platform API.
 
 | Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
