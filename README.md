@@ -2,6 +2,8 @@
 
 A Python client library for interacting with the Voxel51 Platform.
 
+Available at [https://github.com/voxel51/api-py](https://github.com/voxel51/api-py).
+
 <img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
 
 
