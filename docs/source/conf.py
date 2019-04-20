@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Build configuration file for the Voxel51 API Python Client Library.
+# Build configuration file for the Voxel51 Platform API Python Client Library.
 #
 # Copyright 2017-2019, Voxel51, Inc.
 # voxel51.com
@@ -49,7 +49,7 @@ m2r_parse_relative_links = True
 master_doc = "index"
 
 # General information about the project.
-project = "Voxel51 API Python Client Library"
+project = "Voxel51 Platform API Python Client Library"
 copyright = "2017-2019, Voxel51, Inc"
 author = "Voxel51, Inc."
 
@@ -133,7 +133,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "Voxel51APIPythonClientLibrary"
+htmlhelp_basename = "Voxel51PlatformAPIPythonClientLibrary"
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -161,8 +161,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [(
     master_doc,
-    "Voxel51APIPythonClientLibrary.tex",
-    "Voxel51 API Python Client Library",
+    "Voxel51PlatformAPIPythonClientLibrary.tex",
+    "Voxel51 Platform API Python Client Library",
     "Voxel51, Inc.",
     "manual",
 )]
@@ -175,7 +175,7 @@ latex_documents = [(
 man_pages = [(
     master_doc,
     "voxel51apipythonclientlibrary",
-    "Voxel51 API Python Client Library",
+    "Voxel51 Platform API Python Client Library",
     [author],
     1,
 )]
@@ -188,11 +188,11 @@ man_pages = [(
 #  dir menu entry, description, category)
 texinfo_documents = [(
     master_doc,
-    "Voxel51APIPythonClientLibrary",
-    "Voxel51 API Python Client Library",
+    "Voxel51PlatformAPIPythonClientLibrary",
+    "Voxel51 Platform API Python Client Library",
     author,
-    "Voxel51APIPythonClientLibrary",
-    "Voxel51 API Python Client Library",
+    "Voxel51PlatformAPIPythonClientLibrary",
+    "Voxel51 Platform API Python Client Library",
     "Miscellaneous",
 )]
 
