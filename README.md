@@ -25,11 +25,11 @@ pip install .
 ## Documentation
 
 For full documentation of the Voxel51 Platform API, including usage of this
-client library, see the [API Documentation](https://console.voxel51.com/docs/api).
+client library, see the [API Documentation](https://voxel51.com/docs/api).
 
 To learn how to use this client library to create and run jobs that execute
 each of the analytics exposed on the Voxel51 Platform, see
-the [Analytics Documentation](https://console.voxel51.com/docs/analytics).
+the [Analytics Documentation](https://voxel51.com/docs/analytics).
 
 
 ## User Quickstart
