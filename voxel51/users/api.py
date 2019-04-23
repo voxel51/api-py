@@ -24,13 +24,13 @@ import time
 import mimetypes
 import requests
 
-import voxel51.auth as voxa
-import voxel51.jobs as voxj
-import voxel51.utils as voxu
+import voxel51.users.auth as voxa
+import voxel51.users.jobs as voxj
+import voxel51.users.utils as voxu
 
 
-BASE_API_URL = "https://api.voxel51.com/v1"
-CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
+_BASE_API_URL = "https://api.voxel51.com/v1"
+_CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
 class API(object):
@@ -38,7 +38,8 @@ class API(object):
 
     Attributes:
         base_url (string): the base URL of the API
-        token (voxel51.auth.Token): the authentication token for this session
+        token (voxel51.users.auth.Token): the authentication token for this
+            session
         keep_alive (bool): whether the request session should be kept alive
             between requests
     '''
@@ -47,15 +48,15 @@ class API(object):
         '''Starts a new API session.
 
         Args:
-            token (voxel51.auth.Token, optional): an optional Token to use.
-                If no token is provided, the ``VOXEL51_API_TOKEN`` environment
+            token (voxel51.users.auth.Token, optional): a Token to use. If no
+                token is provided, the ``VOXEL51_API_TOKEN`` environment
                 variable is checked and, if set, the token is loaded from that
                 path. Otherwise, the token is loaded from
                 ``~/.voxel51/api-token.json``
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''
-        self.base_url = BASE_API_URL
+        self.base_url = _BASE_API_URL
         self.token = token if token is not None else voxa.load_token()
         self.keep_alive = keep_alive
         self._header = self.token.get_header()
@@ -79,7 +80,8 @@ class API(object):
         '''Creates an API instance from the given Token JSON file.
 
         Args:
-            token_path: the path to a Token JSON file
+            token_path: the path to a :class:`voxel51.users.auth.Token` JSON
+                file
 
         Returns:
             an API instance
@@ -101,7 +103,7 @@ class API(object):
             a list of dictionaries describing the available analytics
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics/list"
         data = {"all_versions": all_versions}
@@ -113,15 +115,16 @@ class API(object):
         '''Performs a customized analytics query.
 
         Args:
-            analytics_query (voxel51.query.AnalyticsQuery): an AnalyticsQuery
-                instance defining the customized analytics query to perform
+            analytics_query (voxel51.users.query.AnalyticsQuery): an
+                AnalyticsQuery instance defining the customized analytics query
+                to perform
 
         Returns:
             a dictionary containing the query results and total number of
-                records
+            records
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics"
         res = self._requests.get(
@@ -139,7 +142,7 @@ class API(object):
             a dictionary containing the analytic documentation
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics/" + analytic_id
         res = self._requests.get(endpoint, headers=self._header)
@@ -148,7 +151,10 @@ class API(object):
 
     def upload_analytic(self, doc_json_path):
         '''Uploads the analytic documentation JSON file that describes a new
-        private analytic to deploy.
+        analytic to deploy.
+
+        See `this page <https://voxel51.com/docs/api/#analytics-upload-analytic/>`_
+        for a description of the JSON format to use.
 
         Args:
             doc_json_path (str): the path to the analytic JSON
@@ -157,7 +163,7 @@ class API(object):
             a dictionary containing metadata about the posted analytic
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics"
         filename = os.path.basename(doc_json_path)
@@ -170,9 +176,13 @@ class API(object):
         return _parse_json_response(res)["analytic"]
 
     def upload_analytic_image(self, analytic_id, image_tar_path, image_type):
-        '''Uploads the Docker image for a private analytic.
+        '''Uploads the Docker image for an analytic.
 
         The Docker image must be uploaded as a `.tar`, `.tar.gz`, or `.tar.bz`.
+
+        See `this page <https://voxel51.com/docs/api/#analytics-upload-docker-image/>`_
+        for more information about building and deploying Docker images to the
+        platform.
 
         Args:
             analytic_id (str): the analytic ID
@@ -180,7 +190,7 @@ class API(object):
             image_type (str): the image computation type, "cpu" or "gpu"
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics/" + analytic_id + "/images"
         params = {"type": image_type.lower()}
@@ -193,13 +203,14 @@ class API(object):
         _validate_response(res)
 
     def delete_analytic(self, analytic_id):
-        '''Deletes the private analytic with the given ID.
+        '''Deletes the analytic with the given ID. Only analytics that you
+        own can be deleted.
 
         Args:
             analytic_id (str): the analytic ID
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics/" + analytic_id
         res = self._requests.delete(endpoint, headers=self._header)
@@ -214,7 +225,7 @@ class API(object):
             a list of dictionaries describing the data
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/list"
         res = self._requests.get(endpoint, headers=self._header)
@@ -225,15 +236,15 @@ class API(object):
         '''Performs a customized data query.
 
         Args:
-            data_query (voxel51.query.DataQuery): a DataQuery instance defining
-                the customized data query to perform
+            data_query (voxel51.users.query.DataQuery): a DataQuery instance
+                defining the customized data query to perform
 
         Returns:
             a dictionary containing the query results and total number of
-                records
+            records
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data"
         res = self._requests.get(
@@ -254,7 +265,7 @@ class API(object):
             a dictionary containing metadata about the uploaded data
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data"
         filename = os.path.basename(path)
@@ -295,7 +306,7 @@ class API(object):
             a dictionary containing metadata about the posted data
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/url"
         data = {
@@ -325,7 +336,7 @@ class API(object):
             a dictionary containing metadata about the data
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/" + data_id
         res = self._requests.get(endpoint, headers=self._header)
@@ -342,7 +353,7 @@ class API(object):
                 with the same filename as the uploaded data
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         if not output_path:
             output_path = self.get_data_details(data_id)["filename"]
@@ -360,7 +371,7 @@ class API(object):
             url (str): a signed URL with read access to download the data
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/" + data_id + "/download-url"
         res = self._requests.get(endpoint, headers=self._header)
@@ -381,7 +392,7 @@ class API(object):
                 of the data
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/" + data_id + "/ttl"
         data = {"days": str(days)}
@@ -395,7 +406,7 @@ class API(object):
             data_id (str): the data ID
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/data/" + data_id
         res = self._requests.delete(endpoint, headers=self._header)
@@ -410,7 +421,7 @@ class API(object):
             a list of dictionaries describing the jobs
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/list"
         res = self._requests.get(endpoint, headers=self._header)
@@ -421,15 +432,15 @@ class API(object):
         '''Performs a customized jobs query.
 
         Args:
-            jobs_query (voxel51.query.JobsQuery): a JobsQuery instance defining
-                the customized jobs query to perform
+            jobs_query (voxel51.users.query.JobsQuery): a JobsQuery instance
+                defining the customized jobs query to perform
 
         Returns:
             a dictionary containing the query results and total number of
                 records
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs"
         res = self._requests.get(
@@ -442,7 +453,7 @@ class API(object):
         '''Uploads a job request.
 
         Args:
-            job_request (voxel51.jobs.JobRequest): a JobRequest instance
+            job_request (voxel51.users.jobs.JobRequest): a JobRequest instance
                 describing the job
             job_name (str): a name for the job
             auto_start (bool, optional): whether to automatically start the job
@@ -455,7 +466,7 @@ class API(object):
             a dictionary containing metadata about the job
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs"
         files = {
@@ -481,7 +492,7 @@ class API(object):
             a dictionary containing metadata about the job
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id
         res = self._requests.get(endpoint, headers=self._header)
@@ -495,10 +506,11 @@ class API(object):
             job_id (str): the job ID
 
         Returns:
-            a voxel51.jobs.JobRequest instance describing the job
+            a :class:`voxel51.users.jobs.JobRequest` instance describing the
+            job
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/request"
         res = self._requests.get(endpoint, headers=self._header)
@@ -512,7 +524,7 @@ class API(object):
             job_id (str): the job ID
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/start"
         res = self._requests.put(endpoint, headers=self._header)
@@ -532,7 +544,7 @@ class API(object):
                 of the job
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/ttl"
         data = {"days": str(days)}
@@ -546,7 +558,7 @@ class API(object):
             job_id (str): the job ID
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/archive"
         res = self._requests.put(endpoint, headers=self._header)
@@ -559,7 +571,7 @@ class API(object):
             job_id (str): the job ID
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/unarchive"
         res = self._requests.put(endpoint, headers=self._header)
@@ -572,10 +584,10 @@ class API(object):
             job_id (str): the job ID
 
         Returns:
-            the state of the job, which is a value in the JobState enum
+            the :class:`voxel51.users.jobs.JobState` of the job
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         return self.get_job_details(job_id)["state"]
 
@@ -589,8 +601,8 @@ class API(object):
             True if the job is complete, and False otherwise
 
         Raises:
-            JobExecutionError if the job failed
-            APIError if the underlying API request was unsuccessful
+            :class:`voxel51.users.jobs.JobExecutionError` if the job failed
+            :class:`APIError` if the underlying API request was unsuccessful
         '''
         job_state = self.get_job_state(job_id)
         if job_state == voxj.JobState.FAILED:
@@ -610,9 +622,8 @@ class API(object):
                 wait for the job to complete. The default is 600
 
         Raises:
-            JobExecutionError if the job failed or the maximum wait time was
-                exceeded
-            APIError if an underlying API request was unsuccessful
+            :class:`voxel51.users.jobs.JobExecutionError` if the job failed
+            :class:`APIError` if an underlying API request was unsuccessful
         '''
         start_time = time.time()
         while not self.is_job_complete(job_id):
@@ -630,7 +641,7 @@ class API(object):
             a dictionary describing the status of the job
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/status"
         res = self._requests.get(endpoint, headers=self._header)
@@ -645,7 +656,7 @@ class API(object):
             output_path (str): the output path to write to
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/output"
         self._stream_download(endpoint, output_path)
@@ -661,7 +672,7 @@ class API(object):
             url (str): a signed URL with read access to download the job output
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/output-url"
         res = self._requests.get(endpoint, headers=self._header)
@@ -679,7 +690,7 @@ class API(object):
             output_path (str): the path to write the logfile
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/log"
         self._stream_download(endpoint, output_path)
@@ -696,10 +707,10 @@ class API(object):
 
         Returns:
             url (str): a signed URL with read access to download the job
-                logfile
+            logfile
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/log-url"
         res = self._requests.get(endpoint, headers=self._header)
@@ -713,7 +724,7 @@ class API(object):
             job_id (str): the job ID
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/jobs/" + job_id
         res = self._requests.delete(endpoint, headers=self._header)
@@ -726,6 +737,9 @@ class API(object):
 
         Returns:
             a dictionary describing the current platform status
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/status/all"
         res = self._requests.get(endpoint, headers=self._header)
@@ -738,13 +752,13 @@ class API(object):
         voxu.ensure_basedir(output_path)
         with self._requests.get(url, headers=self._header, stream=True) as res:
             with open(output_path, "wb") as f:
-                for chunk in res.iter_content(chunk_size=CHUNK_SIZE):
+                for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
                     f.write(chunk)
             _validate_response(res)
 
 
 class APIError(Exception):
-    '''Exception raised when an API request fails.'''
+    '''Exception raised when an :class:`API` request fails.'''
 
     def __init__(self, message, code):
         '''Creates a new APIError object.
@@ -763,10 +777,10 @@ class APIError(Exception):
             res (requests.Response): a requests response
 
         Returns:
-            an instance of APIError
+            an APIError instance
 
         Raises:
-            ValueError: if the given response is not an error response
+            ValueError if the given response is not an error response
         '''
         if res.ok:
             raise ValueError("Response is not an error")

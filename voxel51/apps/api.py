@@ -21,29 +21,28 @@ import json
 
 import requests
 
-from voxel51.api import API, APIError
+from voxel51.users.api import API, APIError
 import voxel51.apps.auth as voxa
-import voxel51.utils as voxu
+import voxel51.users.utils as voxu
 
 
 class ApplicationAPI(API):
     '''Main class for managing an application session with the Voxel51 Platform
     API.
 
-    Note that :class:`voxel51.apps.api.ApplicationAPI` is a subclass of
-    :class:`voxel51.api.API`, which implies that, unless specifically
+    Note that :class:`ApplicationAPI` is a subclass of
+    :class:`voxel51.users.api.API`, which implies that, unless specifically
     overridden, applications can access all methods exposed for regular
     platform users. In order to use these user-specific methods, however, you
-    must first activate a user via
-    :func:`voxel51.apps.api.ApplicationAPI.with_user`.
+    must first activate a user via :func:`ApplicationAPI.with_user`.
 
     Attributes:
-        base_url (string): the base URL of the API
+        base_url (str): the base URL of the API
         token (voxel51.apps.auth.ApplicationToken): the authentication token
             for this session
         keep_alive (bool): whether the request session should be kept alive
             between requests
-        active_user (string): the currently active username, or None if no user
+        active_user (str): the currently active username, or None if no user
             is activated
     '''
 
@@ -71,7 +70,7 @@ class ApplicationAPI(API):
         When finished performing actions for the user, call :func:`exit_user`.
 
         Args:
-            username: the name of a user
+            username (str): the name of a user
         '''
         self.active_user = username
         self._header = self.token.get_header(username=username)
@@ -87,7 +86,7 @@ class ApplicationAPI(API):
         :class:`ApplicationToken` JSON file.
 
         Args:
-            token_path: the path to an
+            token_path (str): the path to an
                 :class:`voxel51.apps.auth.ApplicationToken` JSON file
 
         Returns:
@@ -116,7 +115,7 @@ class ApplicationAPI(API):
             a list of dictionaries describing the available analytics
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/analytics/list"
         data = {"all_versions": all_versions}
@@ -128,15 +127,16 @@ class ApplicationAPI(API):
         '''Performs a customized analytics query.
 
         Args:
-            analytics_query (voxel51.query.AnalyticsQuery): an AnalyticsQuery
-                instance defining the customized analytics query to perform
+            analytics_query (voxel51.users.query.AnalyticsQuery): an
+                AnalyticsQuery instance defining the customized analytics query
+                to perform
 
         Returns:
             a dictionary containing the query results and total number of
-                records
+            records
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/analytics"
         res = self._requests.get(
@@ -154,7 +154,7 @@ class ApplicationAPI(API):
             a dictionary containing the analytic documentation
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/analytics/" + analytic_id
         res = self._requests.get(endpoint, headers=self._header)
@@ -163,7 +163,10 @@ class ApplicationAPI(API):
 
     def upload_analytic(self, doc_json_path):
         '''Uploads the analytic documentation JSON file that describes a new
-        private analytic to deploy.
+        analytic to deploy.
+
+        See `this page <https://voxel51.com/docs/applications/#analytics-upload-analytic/>`_
+        for a description of the JSON format to use.
 
         Args:
             doc_json_path (str): the path to the analytic JSON
@@ -172,7 +175,7 @@ class ApplicationAPI(API):
             a dictionary containing metadata about the posted analytic
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/analytics"
         filename = os.path.basename(doc_json_path)
@@ -185,9 +188,12 @@ class ApplicationAPI(API):
         return _parse_json_response(res)["analytic"]
 
     def upload_analytic_image(self, analytic_id, image_tar_path, image_type):
-        '''Uploads the Docker image for a private analytic.
+        '''Uploads the Docker image for an analytic.
 
         The Docker image must be uploaded as a `.tar`, `.tar.gz`, or `.tar.bz`.
+
+        See `this page <https://voxel51.com/docs/applications/#analytics-upload-docker-image/>`_
+        for a description of the JSON format to use.
 
         Args:
             analytic_id (str): the analytic ID
@@ -195,7 +201,7 @@ class ApplicationAPI(API):
             image_type (str): the image computation type, "cpu" or "gpu"
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/analytics/" + analytic_id + "/images"
         params = {"type": image_type.lower()}
@@ -208,13 +214,14 @@ class ApplicationAPI(API):
         _validate_response(res)
 
     def delete_analytic(self, analytic_id):
-        '''Deletes the private analytic with the given ID.
+        '''Deletes the analytic with the given ID. Only analytics that your
+        application owns can be deleted.
 
         Args:
             analytic_id (str): the analytic ID
 
         Raises:
-            APIError if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/analytics/" + analytic_id
         res = self._requests.delete(endpoint, headers=self._header)
@@ -226,10 +233,10 @@ class ApplicationAPI(API):
         '''Creates a new application user with the given username.
 
         Args:
-            username: a username for the new user
+            username (str): a username for the new user
 
         Raises:
-            voxel51.api.APIError: if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/users"
         data = {"username": username}
@@ -243,7 +250,7 @@ class ApplicationAPI(API):
             a list of usernames of the application users
 
         Raises:
-            voxel51.api.APIError: if the request was unsuccessful
+            :class:`ApplicationAPIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/users/list"
         res = self._requests.get(endpoint, headers=self._header)
@@ -257,6 +264,9 @@ class ApplicationAPI(API):
 
         Returns:
             a dictionary describing the current platform status
+
+        Raises:
+            :class:`ApplicationAPIError`: if the request was unsuccessful
         '''
         endpoint = self.base_url + "/apps/status/all"
         res = self._requests.get(endpoint, headers=self._header)
@@ -264,9 +274,14 @@ class ApplicationAPI(API):
         return _parse_json_response(res)["statuses"]
 
 
+class ApplicationAPIError(APIError):
+    '''Exception raised when an :class:`ApplicationAPI` request fails.'''
+    pass
+
+
 def _validate_response(res):
     if not res.ok:
-        raise APIError.from_response(res)
+        raise ApplicationAPIError.from_response(res)
 
 
 def _parse_json_response(res):

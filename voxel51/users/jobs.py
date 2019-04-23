@@ -20,7 +20,7 @@ from future.utils import iteritems
 
 from collections import OrderedDict
 
-import voxel51.utils as voxu
+import voxel51.users.utils as voxu
 
 
 DATA_ID_FIELD = "data-id"
@@ -66,8 +66,8 @@ class JobRequest(voxu.Serializable):
         analytic (str): the name of the analytic to run
         version (str): the version of the analytic to run
         compute_mode (JobComputeMode): the compute mode for the job
-        inputs (dict): a dictionary mapping input names to RemoteDataPath
-            instances
+        inputs (dict): a dictionary mapping input names to
+            :class:`voxel51.users.utils.RemoteDataPath` instances
         parameters (dict): a dictionary mapping parameter names to values
     '''
 
@@ -90,30 +90,35 @@ class JobRequest(voxu.Serializable):
     def set_input(self, name, path=None, **kwargs):
         '''Sets the input of the given name.
 
-        The input value can be specified either as a RemoteDataPath instance
-        or as valid keyword arguments to construct one.
+        The input value can be specified either as a
+        :class:`voxel51.users.utils.RemoteDataPath` instance or as valid
+        keyword arguments to construct one.
 
         Args:
             name (str): the input name to set
-            path (RemoteDataPath, optional): a RemoteDataPath instance. If not
+            path (RemoteDataPath, optional): a
+                :class:`voxel51.users.utils.RemoteDataPath` instance. If not
                 specified, valid kwargs must be provided
-            **kwargs: valid argument(s) for RemoteDataPath()
+            **kwargs: valid constructor argument(s) for
+                :class:`voxel51.users.utils.RemoteDataPath`
         '''
         self.inputs[name] = path or RemoteDataPath(**kwargs)
 
     def set_data_parameter(self, name, path=None, **kwargs):
         '''Sets the data parameter of the given name.
 
-        Data parameters are parameters that are defined by a RemoteDataPath
-        instance and are read from cloud storage at runtime by the job. The
-        parameter can be specified either as a RemoteDataPath instance or as
+        Data parameters are parameters that are defined by a
+        :class:`voxel51.users.utils.RemoteDataPath` instance and are read from
+        cloud storage at runtime by the job. The parameter can be specified
+        either as a :class:`voxel51.users.utils.RemoteDataPath` instance or as
         valid keyword arguments to construct one.
 
         Args:
             name (str): the input name to set
             path (RemoteDataPath, optional): a RemoteDataPath instance. If not
                 specified, valid kwargs must be provided
-            **kwargs: valid argument(s) for RemoteDataPath()
+            **kwargs: valid constructor argument(s) for
+                :class:`voxel51.users.utils.RemoteDataPath`
         '''
         self.parameters[name] = path or RemoteDataPath(**kwargs)
 
@@ -186,7 +191,7 @@ class RemoteDataPath(voxu.Serializable):
             data_id (str): the ID of the data in cloud storage
 
         Raises:
-            RemoteDataPathError if the instance creation failed
+            :class:`RemoteDataPathError` if the instance creation failed
         '''
         self.data_id = data_id
         if not self.is_valid:
@@ -233,7 +238,7 @@ class RemoteDataPath(voxu.Serializable):
 
         Returns:
             True if val is a valid RemoteDataPath JSON dictionary, and False
-                otherwise
+            otherwise
         '''
         try:
             RemoteDataPath.from_dict(val)
@@ -252,7 +257,7 @@ class RemoteDataPath(voxu.Serializable):
             a RemoteDataPath instance
 
         Raises:
-            RemoteDataPathError if the instance creation failed
+            :class:`RemoteDataPathError` if the instance creation failed
         '''
         if DATA_ID_FIELD in d:
             return cls.from_data_id(d[DATA_ID_FIELD])
@@ -265,5 +270,7 @@ class RemoteDataPath(voxu.Serializable):
 
 
 class RemoteDataPathError(Exception):
-    '''Error raised when an invalid RemoteDataPath instance is found.'''
+    '''Error raised when an invalid :class:`RemoteDataPath` instance is
+    found.
+    '''
     pass

@@ -187,7 +187,7 @@ class Serializable(object):
 
         Returns:
             a dictionary mapping attribute names to field names (as they
-                should appear in the JSON file)
+            should appear in the JSON file)
         '''
         return {a: a for a in vars(self) if not a.startswith("_")}
 

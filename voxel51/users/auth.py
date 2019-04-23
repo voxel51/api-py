@@ -20,7 +20,7 @@ from builtins import *
 import logging
 import os
 
-import voxel51.utils as voxu
+import voxel51.users.utils as voxu
 
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ def activate_token(path):
     authentication.
 
     Args:
-        path (str): the path to an API token JSON file
+        path (str): the path to a :class:`Token` JSON file
     '''
     voxu.copy_file(path, TOKEN_PATH)
     logger.info("Token successfully activated")
@@ -62,17 +62,17 @@ def load_token(token_path=None):
     '''Loads the active API token.
 
     Args:
-        token_path: an optional path to a valid Token JSON file. If no path is
-            provided as an argument, the ``VOXEL51_API_TOKEN`` environment
+        token_path (str, optional): the path to a valid :class:`Token` JSON
+            file. If no path is provided, the ``VOXEL51_API_TOKEN`` environment
             variable is checked and, if set, the token is loaded from that
             path. Otherwise, the token is loaded from
             ``~/.voxel51/api-token.json``
 
     Returns:
-        a Token instance
+        a :class:`Token` instance
 
     Raises:
-        TokenLoadError if no valid token was found
+        :class:`TokenLoadError` if no valid token was found
     '''
     path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
@@ -119,5 +119,5 @@ class Token(object):
 
 
 class TokenLoadError(Exception):
-    '''Exception raised when a Token fails to load.'''
+    '''Exception raised when a :class:`Token` fails to load.'''
     pass
