@@ -55,7 +55,7 @@ class BaseQuery(object):
             field (str): a query field to add
 
         Returns:
-            the updated BaseQuery instance
+            the updated query instance
         '''
         if self._is_supported_field(field):
             self.fields.append(field)
@@ -68,7 +68,7 @@ class BaseQuery(object):
             field (list): a list of query fields to add
 
         Returns:
-            the updated BaseQuery instance
+            the updated query instance
         '''
         for field in fields:
             self.add_field(field)
@@ -78,7 +78,7 @@ class BaseQuery(object):
         '''Adds all supported fields to the query.
 
         Returns:
-            the updated BaseQuery instance
+            the updated query instance
         '''
         self.add_fields(self._supported_fields)
         return self
@@ -91,7 +91,7 @@ class BaseQuery(object):
             search_str (str): the search string
 
         Returns:
-            the updated BaseQuery instance
+            the updated query instance
         '''
         if self._is_supported_field(field):
             self.search.append("%s:%s" % (field, search_str))
@@ -105,7 +105,7 @@ class BaseQuery(object):
             descending (bool, optional): whether to sort in descending order
 
         Returns:
-            the updated BaseQuery instance
+            the updated query instance
         '''
         if self._is_supported_field(field):
             self.sort = "%s:%s" % (field, "desc" if descending else "asc")
@@ -118,7 +118,7 @@ class BaseQuery(object):
             offset (int): the desired record offset
 
         Returns:
-            the updated BaseQuery instance
+            the updated query instance
         '''
         if isinstance(offset, int) and offset >= 0:
             self.offset = offset
@@ -131,7 +131,7 @@ class BaseQuery(object):
             limit (int): the desired record limit
 
         Returns:
-            the updated BaseQuery instance
+            the updated query instance
         '''
         if isinstance(limit, int) and limit > 0:
             self.limit = limit
@@ -197,7 +197,7 @@ class AnalyticsQuery(BaseQuery):
                 analytic in the query
 
         Returns:
-            the updated AnalyticsQuery instance
+            the updated query instance
         '''
         self.all_versions = all_versions
         return self

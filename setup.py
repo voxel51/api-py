@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="voxel51-api-python",
-    version="1.0.0",
+    version="0.1.0",
     description="Python client library for the Voxel51 Platform API",
     author="Voxel51, Inc.",
     author_email="support@voxel51.com",

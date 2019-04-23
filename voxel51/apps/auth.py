@@ -20,8 +20,8 @@ from builtins import *
 import logging
 import os
 
-from voxel51.auth import Token, TokenLoadError
-import voxel51.utils as voxu
+from voxel51.users.auth import Token
+import voxel51.users.utils as voxu
 
 
 logger = logging.getLogger(__name__)
@@ -65,8 +65,8 @@ def load_application_token(token_path=None):
     '''Loads the active application token.
 
     Args:
-        token_path: an optional path to an :class:`ApplicationToken` JSON file.
-            If no path is provided, the ``VOXEL51_APP_TOKEN`` environment
+        token_path (str, optional): a path to an :class:`ApplicationToken` JSON
+            file. If no path is provided, the ``VOXEL51_APP_TOKEN`` environment
             variable is checked and, if set, the token is loaded from that
             path. Otherwise, the token is loaded from
             ``~/.voxel51/app-token.json``
@@ -75,13 +75,13 @@ def load_application_token(token_path=None):
         an :class:`ApplicationToken` instance
 
     Raises:
-        voxel51.auth.TokenLoadError: if no valid token was found
+        :class:`ApplicationTokenLoadError` if no valid token was found
     '''
     path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
         return ApplicationToken.from_json(path)
     except IOError:
-        raise TokenLoadError("No application token found")
+        raise ApplicationTokenLoadError("No application token found")
 
 
 class ApplicationToken(Token):
@@ -92,8 +92,8 @@ class ApplicationToken(Token):
         this application token.
 
         Args:
-            username: an optional username for which the requests are being
-                performed. By default, no username is included
+            username (str, optional): a username for which the requests are
+                being performed. By default, no username is included
 
         Returns:
             a header dictionary
@@ -102,3 +102,8 @@ class ApplicationToken(Token):
         if username:
             header[USER_HEADER] = username
         return header
+
+
+class ApplicationTokenLoadError(Exception):
+    '''Exception raised when a :class:`ApplicationToken` fails to load.'''
+    pass
