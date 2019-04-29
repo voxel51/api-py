@@ -65,7 +65,7 @@ activate_token("/path/to/your/api-token.json")
 
 In the latter case, your token is copied to `~/.voxel51/` and will be
 automatically used in all future sessions. A token can be deactivated via the
-:func:`voxel51.users.auth.deactivate_token` method.
+`voxel51.users.auth.deactivate_token()` method.
 
 After you have activated an API token, you have full access to the API.
 
@@ -199,8 +199,7 @@ activate_application_token("/path/to/your/app-token.json")
 
 In the latter case, your token is copied to `~/.voxel51/` and will be
 automatically used in all future sessions. An application token can be
-deactivated via the :func:`voxel51.apps.auth.deactivate_application_token`
-method.
+deactivated via the `voxel51.apps.auth.deactivate_application_token()` method.
 
 After you have activated an application API token, you have full access to the
 API.
