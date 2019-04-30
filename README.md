@@ -20,7 +20,7 @@ and then install the package:
 
 ```shell
 pip install -r requirements.txt
-pip install .
+pip install -e .
 ```
 
 
