@@ -730,6 +730,19 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    def kill_job(self, job_id):
+        '''Force kills the job with the given ID, which must not have been started.
+
+        Args:
+            job_id (str): the job ID
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/jobs/" + job_id + "/kill"
+        res = self._requests.put(endpoint, headers=self._header)
+        _validate_response(res)
+
     # STATUS ##################################################################
 
     def get_platform_status(self):
