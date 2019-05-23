@@ -23,6 +23,7 @@ import time
 
 import mimetypes
 import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 import voxel51.users.auth as voxa
 import voxel51.users.jobs as voxj
@@ -197,9 +198,11 @@ class API(object):
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
         with open(image_tar_path, "rb") as df:
-            files = {"file": (filename, df, mime_type)}
+            data = MultipartEncoder({"file": (filename, df, mime_type)})
+            file_headers = self._header.copy()
+            file_headers["Content-Type"] = data.content_type
             res = self._requests.post(
-                endpoint, headers=self._header, files=files, params=params)
+                endpoint, headers=file_headers, data=data, params=params)
         _validate_response(res)
 
     def delete_analytic(self, analytic_id):
