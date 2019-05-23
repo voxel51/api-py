@@ -731,7 +731,7 @@ class API(object):
         _validate_response(res)
 
     def kill_job(self, job_id):
-        '''Force kills the job with the given ID, which must not have been started.
+        '''Force kills the job with the given ID,  Only available for jobs in a queued or scheduled state.
 
         Args:
             job_id (str): the job ID
