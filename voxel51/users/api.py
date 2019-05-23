@@ -718,7 +718,9 @@ class API(object):
         return _parse_json_response(res)["url"]
 
     def delete_job(self, job_id):
-        '''Deletes the job with the given ID, which must not have been started.
+        '''Deletes the job with the given ID.
+
+        Only available for jobs that have not been started.
 
         Args:
             job_id (str): the job ID
@@ -731,7 +733,9 @@ class API(object):
         _validate_response(res)
 
     def kill_job(self, job_id):
-        '''Force kills the job with the given ID,  Only available for jobs in a queued or scheduled state.
+        '''Force kills the job with the given ID.
+
+        Only available for jobs that are queued or scheduled.
 
         Args:
             job_id (str): the job ID
