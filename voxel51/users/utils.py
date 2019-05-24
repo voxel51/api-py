@@ -205,9 +205,10 @@ def _recurse(v):
 
 
 def upload_files(requests, url, files, headers, **kwargs):
-    '''Upload one or more files using a streaming upload.
+    '''Upload one or more files of any size using a streaming upload.
 
-    This supports files larger than 2GB.
+    This is intended as an alternative to using ``requests`` directly for files
+    larger than 2GB.
 
     Args:
         requests (requests|requests.Session): an existing session to use, or
@@ -221,7 +222,10 @@ def upload_files(requests, url, files, headers, **kwargs):
     Returns:
         a ``requests.Response``
     '''
+    # note: this is limited to 8K chunk size. If this becomes an issue,
+    # monkey-patching data.read to ignore the given chunk size is an option.
     data = MultipartEncoder(files)
+    # add the necessary content-type without modifying the original headers
     headers = headers.copy()
     headers["Content-Type"] = data.content_type
     return requests.post(url, headers=headers, data=data, **kwargs)

@@ -209,8 +209,9 @@ class ApplicationAPI(API):
         mime_type = _get_mime_type(image_tar_path)
         with open(image_tar_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
-            res = voxu.upload_files(self._requests, endpoint, files,
-                headers=self._header, params=params)
+            res = voxu.upload_files(
+                self._requests, endpoint, files, headers=self._header,
+                params=params)
         _validate_response(res)
 
     def delete_analytic(self, analytic_id):
