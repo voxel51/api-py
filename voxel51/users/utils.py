@@ -23,6 +23,8 @@ import logging
 import os
 import shutil
 
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 
 logger = logging.getLogger(__name__)
 
@@ -200,3 +202,26 @@ def _recurse(v):
     elif isinstance(v, Serializable):
         return v.to_dict()
     return v
+
+
+def upload_files(requests, url, files, headers, **kwargs):
+    '''Upload one or more files using a streaming upload.
+
+    This supports files larger than 2GB.
+
+    Args:
+        requests (requests|requests.Session): an existing session to use, or
+            the ``requests`` module
+        url (str): the request endpoint
+        files (dict): files to upload, in the same format as the ``files``
+            argument to ``requests``
+        headers (dict): headers to include
+        kwargs: any other arguments to pass to ``requests``
+
+    Returns:
+        a ``requests.Response``
+    '''
+    data = MultipartEncoder(files)
+    headers = headers.copy()
+    headers["Content-Type"] = data.content_type
+    return requests.post(url, headers=headers, data=data, **kwargs)
