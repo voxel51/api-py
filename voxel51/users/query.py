@@ -97,6 +97,18 @@ class BaseQuery(object):
             self.search.append("%s:%s" % (field, search_str))
         return self
 
+    def add_search_or(self, field, search_strs):
+        '''Adds the given "OR" search to the query.
+
+        Args:
+            field (str): the query field on which to search
+            search_strs (list): a list of search strings to form an "or" query
+
+        Returns:
+            the updated query instance
+        '''
+        return self.add_search(field, "|".join(search_strs))
+
     def sort_by(self, field, descending=True):
         '''Adds the given search to the query.
 
