@@ -231,8 +231,10 @@ class ApplicationAPI(API):
     # DATA ####################################################################
 
     def query_application_data(self, data_query):
-        '''Performs a customized data query at the application level (e.g.
-            includes all application users sans application admins).
+        '''Performs a customized data query at the application level.
+
+        Queries using this route return results for all
+            users of the application.
 
         Args:
             data_query (voxel51.users.query.DataQuery): a DataQuery instance
@@ -254,8 +256,10 @@ class ApplicationAPI(API):
     # JOBS ####################################################################
 
     def query_application_jobs(self, jobs_query):
-        '''Performs a customized jobs query at the application level (e.g.
-            includes all application users sans application admins).
+        '''Performs a customized jobs query at the application level.
+
+        Queries using this route return results for all
+            users of the application.
 
         Args:
             jobs_query (voxel51.users.query.JobsQuery): a JobsQuery instance
