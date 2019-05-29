@@ -228,6 +228,56 @@ class ApplicationAPI(API):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    # DATA ####################################################################
+
+    def query_application_data(self, data_query):
+        '''Performs a customized data query at the application level.
+
+        Queries using this route return results for all
+            users of the application.
+
+        Args:
+            data_query (voxel51.users.query.DataQuery): a DataQuery instance
+                defining the customized data query to perform
+
+        Returns:
+            a dictionary containing the query results and total number of
+            records
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/apps/data"
+        res = self._requests.get(
+            endpoint, headers=self._header, params=data_query.to_dict())
+        _validate_response(res)
+        return _parse_json_response(res)
+
+    # JOBS ####################################################################
+
+    def query_application_jobs(self, jobs_query):
+        '''Performs a customized jobs query at the application level.
+
+        Queries using this route return results for all
+            users of the application.
+
+        Args:
+            jobs_query (voxel51.users.query.JobsQuery): a JobsQuery instance
+                defining the customized jobs query to perform
+
+        Returns:
+            a dictionary containing the query results and total number of
+                records
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/apps/jobs"
+        res = self._requests.get(
+            endpoint, headers=self._header, params=jobs_query.to_dict())
+        _validate_response(res)
+        return _parse_json_response(res)
+
     # USERS ###################################################################
 
     def create_user(self, username):
