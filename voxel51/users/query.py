@@ -115,6 +115,20 @@ class BaseQuery(object):
         '''
         return self.add_search(field, "|".join(search_strs))
 
+    def add_generic_search(self, search_str):
+        '''Adds generic search, e.g. search across all searchable fields.
+
+        Overwritten if used in conjunction with other search functions.
+
+        Args:
+            search_str (str): the search string
+
+        Returns:
+            the updated query instance
+        '''
+        self.search.append(search_str)
+        return self
+
     def sort_by(self, field, descending=True):
         '''Adds the given search to the query.
 
