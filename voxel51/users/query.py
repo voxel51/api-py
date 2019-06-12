@@ -115,6 +115,21 @@ class BaseQuery(object):
         '''
         return self.add_search(field, "|".join(search_strs))
 
+    def add_search_over_all_fields(self, search_str):
+        '''Adds the given search string to be applied across all fields.
+
+        The resulting query will return results where any searchable
+        field matches the specified search string.
+
+        Args:
+            search_str (str): the search string
+
+        Returns:
+            the updated query instance
+        '''
+        self.search.append(search_str)
+        return self
+
     def sort_by(self, field, descending=True):
         '''Adds the given search to the query.
 
