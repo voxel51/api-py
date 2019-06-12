@@ -115,10 +115,11 @@ class BaseQuery(object):
         '''
         return self.add_search(field, "|".join(search_strs))
 
-    def add_generic_search(self, search_str):
-        '''Adds generic search, e.g. search across all searchable fields.
+    def add_search_over_all_fields(self, search_str):
+        '''Adds the given search string to be applied across all fields.
 
-        Overwritten if used in conjunction with other search functions.
+        The resulting query will return results where any searchable
+        field matches the specified search string.
 
         Args:
             search_str (str): the search string
