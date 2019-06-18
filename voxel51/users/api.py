@@ -17,12 +17,15 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
+from concurrent.futures import Future
+from contextlib import contextmanager
 from datetime import datetime
 import os
 import time
 
 import mimetypes
 import requests
+from requests_futures.sessions import FuturesSession
 
 import voxel51.users.auth as voxa
 import voxel51.users.jobs as voxj
@@ -74,6 +77,16 @@ class API(object):
         '''
         if self.keep_alive:
             self._requests.close()
+
+    @contextmanager
+    def threads(self, num_threads):
+        old_requests = self._requests
+        try:
+            self._requests = FuturesSession(max_workers=num_threads)
+            with self._requests:
+                yield
+        finally:
+            self._requests = old_requests
 
     @classmethod
     def from_json(cls, token_path):
@@ -815,10 +828,41 @@ def _get_mime_type(path):
     return mimetypes.guess_type(path)[0] or "application/octet-stream"
 
 
+class _FutureResponse(Future):
+    def __init__(self, f):
+        super(_FutureResponse, self).__init__()
+        self.f = f
+
+    def result(self):
+        res = self.f.result()
+        _validate_response(res)
+        return voxu.load_json(res.content)
+
+    def __getitem__(self, key):
+        return _FutureItem(self, key)
+
+
+class _FutureItem(Future):
+    def __init__(self, f, key):
+        super(_FutureItem, self).__init__()
+        self.f = f
+        self.key = key
+
+    def result(self):
+        return self.f.result()[self.key]
+
+    def __getitem__(self, key):
+        return _FutureItem(self, key)
+
+
 def _validate_response(res):
+    if isinstance(res, Future):
+        return
     if not res.ok:
         raise APIError.from_response(res)
 
 
 def _parse_json_response(res):
+    if isinstance(res, Future):
+        return _FutureResponse(res)
     return voxu.load_json(res.content)
