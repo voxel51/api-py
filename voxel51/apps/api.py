@@ -26,6 +26,11 @@ import voxel51.apps.auth as voxa
 import voxel51.users.utils as voxu
 
 
+class ApplicationAPIError(APIError):
+    '''Exception raised when an :class:`ApplicationAPI` request fails.'''
+    pass
+
+
 class ApplicationAPI(API):
     '''Main class for managing an application session with the Voxel51 Platform
     API.
@@ -120,8 +125,8 @@ class ApplicationAPI(API):
         endpoint = self.base_url + "/apps/analytics/list"
         data = {"all_versions": all_versions}
         res = self._requests.get(endpoint, headers=self._header, json=data)
-        _validate_response(res)
-        return _parse_json_response(res)["analytics"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["analytics"]
 
     def query_analytics(self, analytics_query):
         '''Performs a customized analytics query.
@@ -141,8 +146,8 @@ class ApplicationAPI(API):
         endpoint = self.base_url + "/apps/analytics"
         res = self._requests.get(
             endpoint, headers=self._header, params=analytics_query.to_dict())
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     def get_analytic_doc(self, analytic_id):
         '''Gets documentation about the analytic with the given ID.
@@ -158,8 +163,8 @@ class ApplicationAPI(API):
         '''
         endpoint = self.base_url + "/apps/analytics/" + analytic_id
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     def upload_analytic(self, doc_json_path):
         '''Uploads the analytic documentation JSON file that describes a new
@@ -184,8 +189,8 @@ class ApplicationAPI(API):
             files = {"file": (filename, df, mime_type)}
             res = self._requests.post(
                 endpoint, headers=self._header, files=files)
-        _validate_response(res)
-        return _parse_json_response(res)["analytic"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["analytic"]
 
     def upload_analytic_image(self, analytic_id, image_tar_path, image_type):
         '''Uploads the Docker image for an analytic.
@@ -212,7 +217,7 @@ class ApplicationAPI(API):
             res = voxu.upload_files(
                 self._requests, endpoint, files, headers=self._header,
                 params=params)
-        _validate_response(res)
+        self._validate_response(res)
 
     def delete_analytic(self, analytic_id):
         '''Deletes the analytic with the given ID. Only analytics that your
@@ -226,7 +231,7 @@ class ApplicationAPI(API):
         '''
         endpoint = self.base_url + "/apps/analytics/" + analytic_id
         res = self._requests.delete(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     # DATA ####################################################################
 
@@ -250,8 +255,8 @@ class ApplicationAPI(API):
         endpoint = self.base_url + "/apps/data"
         res = self._requests.get(
             endpoint, headers=self._header, params=data_query.to_dict())
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     # JOBS ####################################################################
 
@@ -275,8 +280,8 @@ class ApplicationAPI(API):
         endpoint = self.base_url + "/apps/jobs"
         res = self._requests.get(
             endpoint, headers=self._header, params=jobs_query.to_dict())
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     # USERS ###################################################################
 
@@ -292,7 +297,7 @@ class ApplicationAPI(API):
         endpoint = self.base_url + "/apps/users"
         data = {"username": username}
         res = self._requests.post(endpoint, headers=self._header, json=data)
-        _validate_response(res)
+        self._validate_response(res)
 
     def list_users(self):
         '''Returns a list of all application users.
@@ -305,8 +310,8 @@ class ApplicationAPI(API):
         '''
         endpoint = self.base_url + "/apps/users/list"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["users"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["users"]
 
     # STATUS ##################################################################
 
@@ -321,19 +326,7 @@ class ApplicationAPI(API):
         '''
         endpoint = self.base_url + "/apps/status/all"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["statuses"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["statuses"]
 
-
-class ApplicationAPIError(APIError):
-    '''Exception raised when an :class:`ApplicationAPI` request fails.'''
-    pass
-
-
-def _validate_response(res):
-    if not res.ok:
-        raise ApplicationAPIError.from_response(res)
-
-
-def _parse_json_response(res):
-    return voxu.load_json(res.content)
+    _error_type = ApplicationAPIError

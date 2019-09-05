@@ -36,6 +36,42 @@ _BASE_API_URL = "https://api.voxel51.com/v1"
 _CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
+class APIError(Exception):
+    '''Exception raised when an :class:`API` request fails.'''
+
+    def __init__(self, message, code):
+        '''Creates a new APIError object.
+
+        Args:
+            message (str): the error message
+            code (int): the error code
+        '''
+        super(APIError, self).__init__("%d: %s" % (code, message))
+
+    @classmethod
+    def from_response(cls, res):
+        '''Constructs an APIError from a requests reponse.
+
+        Args:
+            res (requests.Response): a requests response
+
+        Returns:
+            an APIError instance
+
+        Raises:
+            ValueError if the given response is not an error response
+        '''
+        if res.ok:
+            raise ValueError("Response is not an error")
+
+        try:
+            message = voxu.load_json(res)["error"]["message"]
+        except:
+            message = '%s for URL: %s' % (res.reason, res.url)
+
+        return cls(message, res.status_code)
+
+
 class API(object):
     '''Main class for managing a session with the Voxel51 Platform API.
 
@@ -121,8 +157,8 @@ class API(object):
         endpoint = self.base_url + "/analytics/list"
         data = {"all_versions": all_versions}
         res = self._requests.get(endpoint, headers=self._header, json=data)
-        _validate_response(res)
-        return _parse_json_response(res)["analytics"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["analytics"]
 
     def query_analytics(self, analytics_query):
         '''Performs a customized analytics query.
@@ -142,8 +178,8 @@ class API(object):
         endpoint = self.base_url + "/analytics"
         res = self._requests.get(
             endpoint, headers=self._header, params=analytics_query.to_dict())
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     def get_analytic_doc(self, analytic_id):
         '''Gets documentation about the analytic with the given ID.
@@ -159,8 +195,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/analytics/" + analytic_id
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     def upload_analytic(self, doc_json_path):
         '''Uploads the analytic documentation JSON file that describes a new
@@ -185,8 +221,8 @@ class API(object):
             files = {"file": (filename, df, mime_type)}
             res = self._requests.post(
                 endpoint, headers=self._header, files=files)
-        _validate_response(res)
-        return _parse_json_response(res)["analytic"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["analytic"]
 
     def upload_analytic_image(self, analytic_id, image_tar_path, image_type):
         '''Uploads the Docker image for an analytic.
@@ -214,7 +250,7 @@ class API(object):
             res = voxu.upload_files(
                 self._requests, endpoint, files, headers=self._header,
                 params=params)
-        _validate_response(res)
+        self._validate_response(res)
 
     def delete_analytic(self, analytic_id):
         '''Deletes the analytic with the given ID. Only analytics that you
@@ -228,7 +264,7 @@ class API(object):
         '''
         endpoint = self.base_url + "/analytics/" + analytic_id
         res = self._requests.delete(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     # DATA ####################################################################
 
@@ -243,8 +279,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/data/list"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["data"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["data"]
 
     def query_data(self, data_query):
         '''Performs a customized data query.
@@ -263,8 +299,8 @@ class API(object):
         endpoint = self.base_url + "/data"
         res = self._requests.get(
             endpoint, headers=self._header, params=data_query.to_dict())
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     def upload_data(self, path, ttl=None):
         '''Uploads the given data.
@@ -293,8 +329,8 @@ class API(object):
             res = voxu.upload_files(
                 self._requests, endpoint, files, headers=self._header)
 
-        _validate_response(res)
-        return _parse_json_response(res)["data"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["data"]
 
     def post_data_as_url(
             self, url, filename, mime_type, size, encoding=None, ttl=None):
@@ -337,8 +373,8 @@ class API(object):
             data["data_ttl"] = ttl
 
         res = self._requests.post(endpoint, json=data, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["data"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["data"]
 
     def get_data_details(self, data_id):
         '''Gets details about the data with the given ID.
@@ -354,8 +390,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/data/" + data_id
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["data"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["data"]
 
     def download_data(self, data_id, output_path=None):
         '''Downloads the data with the given ID.
@@ -389,8 +425,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/data/" + data_id + "/download-url"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["url"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["url"]
 
     def update_data_ttl(self, data_id, days):
         '''Updates the expiration date of the data by the specified number of
@@ -411,7 +447,7 @@ class API(object):
         endpoint = self.base_url + "/data/" + data_id + "/ttl"
         data = {"days": str(days)}
         res = self._requests.put(endpoint, headers=self._header, data=data)
-        _validate_response(res)
+        self._validate_response(res)
 
     def delete_data(self, data_id):
         '''Deletes the data with the given ID.
@@ -424,7 +460,7 @@ class API(object):
         '''
         endpoint = self.base_url + "/data/" + data_id
         res = self._requests.delete(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     # JOBS ####################################################################
 
@@ -439,8 +475,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/list"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["jobs"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["jobs"]
 
     def query_jobs(self, jobs_query):
         '''Performs a customized jobs query.
@@ -459,8 +495,8 @@ class API(object):
         endpoint = self.base_url + "/jobs"
         res = self._requests.get(
             endpoint, headers=self._header, params=jobs_query.to_dict())
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     def upload_job_request(
             self, job_request, job_name, auto_start=False, ttl=None):
@@ -493,8 +529,8 @@ class API(object):
                 ttl = ttl.isoformat()
             files["job_ttl"] = (None, str(ttl))
         res = self._requests.post(endpoint, files=files, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["job"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["job"]
 
     def get_job_details(self, job_id):
         '''Gets details about the job with the given ID.
@@ -510,8 +546,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["job"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["job"]
 
     def get_job_request(self, job_id):
         '''Gets the job request for the job with the given ID.
@@ -528,8 +564,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/request"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return voxj.JobRequest.from_dict(_parse_json_response(res))
+        self._validate_response(res)
+        return voxj.JobRequest.from_dict(self._parse_json_response(res))
 
     def start_job(self, job_id):
         '''Starts the job with the given ID.
@@ -542,7 +578,7 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/start"
         res = self._requests.put(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     def update_job_ttl(self, job_id, days):
         '''Updates the expiration date of the job by the specified number of
@@ -563,7 +599,7 @@ class API(object):
         endpoint = self.base_url + "/jobs/" + job_id + "/ttl"
         data = {"days": str(days)}
         res = self._requests.put(endpoint, headers=self._header, data=data)
-        _validate_response(res)
+        self._validate_response(res)
 
     def archive_job(self, job_id):
         '''Archives the job with the given ID.
@@ -576,7 +612,7 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/archive"
         res = self._requests.put(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     def unarchive_job(self, job_id):
         '''Unarchives the job with the given ID.
@@ -589,7 +625,7 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/unarchive"
         res = self._requests.put(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     def get_job_state(self, job_id):
         '''Gets the state of the job with the given ID.
@@ -659,8 +695,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/status"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)
+        self._validate_response(res)
+        return self._parse_json_response(res)
 
     def download_job_output(self, job_id, output_path):
         '''Downloads the output of the job with the given ID.
@@ -690,8 +726,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/output-url"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["url"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["url"]
 
     def download_job_logfile(self, job_id, output_path):
         '''Downloads the logfile for the job with the given ID.
@@ -728,8 +764,8 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/log-url"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["url"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["url"]
 
     def delete_job(self, job_id):
         '''Deletes the job with the given ID.
@@ -744,7 +780,7 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id
         res = self._requests.delete(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     def kill_job(self, job_id):
         '''Force kills the job with the given ID.
@@ -759,7 +795,7 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/kill"
         res = self._requests.put(endpoint, headers=self._header)
-        _validate_response(res)
+        self._validate_response(res)
 
     # STATUS ##################################################################
 
@@ -774,10 +810,12 @@ class API(object):
         '''
         endpoint = self.base_url + "/status/all"
         res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
-        return _parse_json_response(res)["statuses"]
+        self._validate_response(res)
+        return self._parse_json_response(res)["statuses"]
 
     # PRIVATE METHODS #########################################################
+
+    _error_type = APIError
 
     def _stream_download(self, url, output_path):
         voxu.ensure_basedir(output_path)
@@ -785,43 +823,21 @@ class API(object):
             with open(output_path, "wb") as f:
                 for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
                     f.write(chunk)
-            _validate_response(res)
-
-
-class APIError(Exception):
-    '''Exception raised when an :class:`API` request fails.'''
-
-    def __init__(self, message, code):
-        '''Creates a new APIError object.
-
-        Args:
-            message (str): the error message
-            code (int): the error code
-        '''
-        super(APIError, self).__init__("%d: %s" % (code, message))
+            self._validate_response(res)
 
     @classmethod
-    def from_response(cls, res):
-        '''Constructs an APIError from a requests reponse.
+    def _validate_response(cls, res):
+        if isinstance(res, Future):
+            # _FutureResponse will validate this response later, as needed
+            return
+        if not res.ok:
+            raise cls._error_type.from_response(res)
 
-        Args:
-            res (requests.Response): a requests response
-
-        Returns:
-            an APIError instance
-
-        Raises:
-            ValueError if the given response is not an error response
-        '''
-        if res.ok:
-            raise ValueError("Response is not an error")
-
-        try:
-            message = _parse_json_response(res)["error"]["message"]
-        except:
-            message = '%s for URL: %s' % (res.reason, res.url)
-
-        return cls(message, res.status_code)
+    @classmethod
+    def _parse_json_response(cls, res):
+        if isinstance(res, Future):
+            return _FutureResponse(res, validator=cls._validate_response)
+        return voxu.load_json(res.content)
 
 
 def _get_mime_type(path):
@@ -829,13 +845,14 @@ def _get_mime_type(path):
 
 
 class _FutureResponse(Future):
-    def __init__(self, f):
+    def __init__(self, future, validator):
         super(_FutureResponse, self).__init__()
-        self.f = f
+        self.future = future
+        self.validator = validator
 
     def result(self):
-        res = self.f.result()
-        _validate_response(res)
+        res = self.future.result()
+        self.validator(res)
         return voxu.load_json(res.content)
 
     def __getitem__(self, key):
@@ -843,26 +860,13 @@ class _FutureResponse(Future):
 
 
 class _FutureItem(Future):
-    def __init__(self, f, key):
+    def __init__(self, future, key):
         super(_FutureItem, self).__init__()
-        self.f = f
+        self.future = future
         self.key = key
 
     def result(self):
-        return self.f.result()[self.key]
+        return self.future.result()[self.key]
 
     def __getitem__(self, key):
         return _FutureItem(self, key)
-
-
-def _validate_response(res):
-    if isinstance(res, Future):
-        return
-    if not res.ok:
-        raise APIError.from_response(res)
-
-
-def _parse_json_response(res):
-    if isinstance(res, Future):
-        return _FutureResponse(res)
-    return voxu.load_json(res.content)
