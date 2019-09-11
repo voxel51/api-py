@@ -28,20 +28,8 @@ import voxel51.users.auth as voxa
 import voxel51.users.jobs as voxj
 import voxel51.users.utils as voxu
 
-
 _BASE_API_URL = "https://api.voxel51.com/v1"
 _CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
-
-
-class AnalyticType(object):
-    '''Enum describing the possible Analytic Types that can be uploaded.'''
-
-    VIDEO = "video"
-    IMAGE_TO_VIDEO = "imagetovideo"
-
-    @classmethod
-    def is_valid(cls, value):
-        return value in (cls.VIDEO, cls.IMAGE_TO_VIDEO)
 
 
 class API(object):
@@ -824,6 +812,17 @@ class APIError(Exception):
             message = '%s for URL: %s' % (res.reason, res.url)
 
         return cls(message, res.status_code)
+
+
+class AnalyticType(object):
+    '''Enum describing the possible Analytic Types that can be uploaded.'''
+
+    VIDEO = "video"
+    IMAGE_TO_VIDEO = "imagetovideo"
+
+    @classmethod
+    def is_valid(cls, value):
+        return value in (cls.VIDEO, cls.IMAGE_TO_VIDEO)
 
 
 def _get_mime_type(path):
