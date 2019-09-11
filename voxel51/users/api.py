@@ -33,6 +33,17 @@ _BASE_API_URL = "https://api.voxel51.com/v1"
 _CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
+class AnalyticType(object):
+    '''Enum describing the possible Analytic Types that can be uploaded.'''
+
+    VIDEO = "video"
+    IMAGE_TO_VIDEO = "imagetovideo"
+
+    @classmethod
+    def is_valid(cls, value):
+        return value in (cls.VIDEO, cls.IMAGE_TO_VIDEO)
+
+
 class API(object):
     '''Main class for managing a session with the Voxel51 Platform API.
 
@@ -149,7 +160,7 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def upload_analytic(self, doc_json_path):
+    def upload_analytic(self, doc_json_path, analytic_type=None):
         '''Uploads the analytic documentation JSON file that describes a new
         analytic to deploy.
 
@@ -158,6 +169,7 @@ class API(object):
 
         Args:
             doc_json_path (str): the path to the analytic JSON
+            analytic_type (AnalyticType): the type of analytic being uploaded
 
         Returns:
             a dictionary containing metadata about the posted analytic
@@ -166,12 +178,15 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = self.base_url + "/analytics"
+        if not AnalyticType.is_valid(analytic_type):
+            analytic_type = AnalyticType.VIDEO
+        params = "type=" + analytic_type
         filename = os.path.basename(doc_json_path)
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
-            res = self._requests.post(
-                endpoint, headers=self._header, files=files)
+            res = self._requests.post(endpoint, headers=self._header,
+                                      files=files, params=params)
         _validate_response(res)
         return _parse_json_response(res)["analytic"]
 

@@ -20,8 +20,9 @@ from builtins import *
 import json
 
 import requests
+import os
 
-from voxel51.users.api import API, APIError
+from voxel51.users.api import API, APIError, AnalyticType, _get_mime_type
 import voxel51.apps.auth as voxa
 import voxel51.users.utils as voxu
 
@@ -161,7 +162,7 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def upload_analytic(self, doc_json_path):
+    def upload_analytic(self, doc_json_path, analytic_type=None):
         '''Uploads the analytic documentation JSON file that describes a new
         analytic to deploy.
 
@@ -170,6 +171,7 @@ class ApplicationAPI(API):
 
         Args:
             doc_json_path (str): the path to the analytic JSON
+            analytic_type (AnalyticType): the type of analytic being uploaded
 
         Returns:
             a dictionary containing metadata about the posted analytic
@@ -180,10 +182,13 @@ class ApplicationAPI(API):
         endpoint = self.base_url + "/apps/analytics"
         filename = os.path.basename(doc_json_path)
         mime_type = _get_mime_type(doc_json_path)
+        if not AnalyticType.is_valid(analytic_type):
+            analytic_type = AnalyticType.VIDEO
+        params = "type=" + analytic_type
         with open(doc_json_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
             res = self._requests.post(
-                endpoint, headers=self._header, files=files)
+                endpoint, headers=self._header, files=files, params=params)
         _validate_response(res)
         return _parse_json_response(res)["analytic"]
 
