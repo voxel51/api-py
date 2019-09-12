@@ -847,13 +847,16 @@ def _get_mime_type(path):
 class _FutureResponse(Future):
     def __init__(self, future, validator):
         super(_FutureResponse, self).__init__()
-        self.future = future
-        self.validator = validator
+        self._validator = validator
+        future.add_done_callback(self._process_result)
 
-    def result(self):
-        res = self.future.result()
-        self.validator(res)
-        return voxu.load_json(res.content)
+    def _process_result(self, future):
+        try:
+            res = future.result()
+            self._validator(res)
+            self.set_result(voxu.load_json(res.content))
+        except Exception as e:
+            self.set_exception(e)
 
     def __getitem__(self, key):
         return _FutureItem(self, key)
@@ -862,11 +865,14 @@ class _FutureResponse(Future):
 class _FutureItem(Future):
     def __init__(self, future, key):
         super(_FutureItem, self).__init__()
-        self.future = future
-        self.key = key
+        self._key = key
+        future.add_done_callback(self._process_result)
 
-    def result(self):
-        return self.future.result()[self.key]
+    def _process_result(self, future):
+        try:
+            self.set_result(future.result()[self._key])
+        except Exception as e:
+            self.set_exception(e)
 
     def __getitem__(self, key):
         return _FutureItem(self, key)
