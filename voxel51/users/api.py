@@ -65,7 +65,7 @@ class APIError(Exception):
             raise ValueError("Response is not an error")
 
         try:
-            message = voxu.load_json(res)["error"]["message"]
+            message = voxu.load_json(res.content)["error"]["message"]
         except:
             message = '%s for URL: %s' % (res.reason, res.url)
 
