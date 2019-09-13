@@ -17,9 +17,8 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
-import json
-
-import requests
+import mimetypes
+import os
 
 from voxel51.users.api import API, APIError
 import voxel51.apps.auth as voxa
@@ -186,7 +185,7 @@ class ApplicationAPI(API):
         with open(doc_json_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
             if is_image_to_video:
-                files["is_image_to_video"] = (None, str(is_image_to_video)
+                files["is_image_to_video"] = (None, str(is_image_to_video))
             res = self._requests.post(
                 endpoint, headers=self._header, files=files)
         _validate_response(res)
@@ -333,6 +332,10 @@ class ApplicationAPI(API):
 class ApplicationAPIError(APIError):
     '''Exception raised when an :class:`ApplicationAPI` request fails.'''
     pass
+
+
+def _get_mime_type(path):
+    return mimetypes.guess_type(path)[0] or "application/octet-stream"
 
 
 def _validate_response(res):

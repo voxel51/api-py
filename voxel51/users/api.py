@@ -174,7 +174,7 @@ class API(object):
         with open(doc_json_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
             if is_image_to_video:
-                files["is_image_to_video"] = (None, str(is_image_to_video)
+                files["is_image_to_video"] = (None, str(is_image_to_video))
             res = self._requests.post(
                 endpoint, headers=self._header, files=files)
         _validate_response(res)
