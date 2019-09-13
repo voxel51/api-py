@@ -159,7 +159,7 @@ class API(object):
         Args:
             doc_json_path (str): the path to the analytic JSON
             is_image_to_video (bool, optional): whether the analytic that you
-                are uploading is a image-based model for use with the
+                are uploading is an image-based model for use with the
                 Image-To-Video tool
 
         Returns:
