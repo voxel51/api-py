@@ -17,9 +17,8 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
-import json
-
-import requests
+import mimetypes
+import os
 
 from voxel51.users.api import API, APIError
 import voxel51.apps.auth as voxa
@@ -161,7 +160,7 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def upload_analytic(self, doc_json_path):
+    def upload_analytic(self, doc_json_path, analytic_type=None):
         '''Uploads the analytic documentation JSON file that describes a new
         analytic to deploy.
 
@@ -170,6 +169,9 @@ class ApplicationAPI(API):
 
         Args:
             doc_json_path (str): the path to the analytic JSON
+            analytic_type (AnalyticType, optional): the type of analytic that
+                you are uploading. If not specified, it is assumed that you
+                are uploading a standard platform analytic
 
         Returns:
             a dictionary containing metadata about the posted analytic
@@ -182,6 +184,8 @@ class ApplicationAPI(API):
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
+            if analytic_type:
+                files["analytic_type"] = (None, str(analytic_type))
             res = self._requests.post(
                 endpoint, headers=self._header, files=files)
         _validate_response(res)
@@ -328,6 +332,10 @@ class ApplicationAPI(API):
 class ApplicationAPIError(APIError):
     '''Exception raised when an :class:`ApplicationAPI` request fails.'''
     pass
+
+
+def _get_mime_type(path):
+    return mimetypes.guess_type(path)[0] or "application/octet-stream"
 
 
 def _validate_response(res):
