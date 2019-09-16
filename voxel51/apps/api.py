@@ -160,7 +160,7 @@ class ApplicationAPI(API):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def upload_analytic(self, doc_json_path, is_image_to_video=False):
+    def upload_analytic(self, doc_json_path, analytic_type=None):
         '''Uploads the analytic documentation JSON file that describes a new
         analytic to deploy.
 
@@ -169,9 +169,9 @@ class ApplicationAPI(API):
 
         Args:
             doc_json_path (str): the path to the analytic JSON
-            is_image_to_video (bool, optional): whether the analytic that you
-                are uploading is an image-based model for use with the
-                Image-To-Video tool
+            analytic_type (AnalyticType, optional): the type of analytic that
+                you are uploading. If not specified, it is assumed that you
+                are uploading a standard platform analytic
 
         Returns:
             a dictionary containing metadata about the posted analytic
@@ -184,8 +184,8 @@ class ApplicationAPI(API):
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
-            if is_image_to_video:
-                files["is_image_to_video"] = (None, str(is_image_to_video))
+            if analytic_type:
+                files["analytic_type"] = (None, str(analytic_type))
             res = self._requests.post(
                 endpoint, headers=self._header, files=files)
         _validate_response(res)
