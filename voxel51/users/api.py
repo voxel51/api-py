@@ -17,6 +17,7 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import os
 import time
@@ -95,6 +96,9 @@ class API(object):
         '''
         token = voxa.load_token(token_path=token_path)
         return cls(token=token)
+
+    def thread_pool(self, max_workers=5):
+        return ThreadPoolExecutor(max_workers)
 
     # ANALYTICS ###############################################################
 
