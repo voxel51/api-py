@@ -781,10 +781,10 @@ class API(object):
     def _stream_download(self, url, output_path):
         voxu.ensure_basedir(output_path)
         with self._requests.get(url, headers=self._header, stream=True) as res:
+            _validate_response(res)
             with open(output_path, "wb") as f:
                 for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
                     f.write(chunk)
-            _validate_response(res)
 
 
 class APIError(Exception):
