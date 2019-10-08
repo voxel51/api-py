@@ -97,8 +97,21 @@ class API(object):
         token = voxa.load_token(token_path=token_path)
         return cls(token=token)
 
-    def thread_pool(self, max_workers=5):
-        return ThreadPoolExecutor(max_workers)
+    def thread_map(self, callback, items, max_workers=5):
+        '''Makes parallel calls to a callback with arguments taken from a list.
+
+        Args:
+            callback (function): the function to call on each list item
+            items (list): a list of arguments to pass to the callback (each
+                item in this list corresponds to a separate call)
+            max_workers (int, optional): the number of calls to run in parallel
+
+        Returns:
+            a generator of values returned by `callback`, in the same order as
+            `items` (to obtain a list of return values, or to wait for all
+            calls to complete, wrap the returned generator with `list()`)
+        '''
+        return ThreadPoolExecutor(max_workers).map(callback, items)
 
     # ANALYTICS ###############################################################
 
