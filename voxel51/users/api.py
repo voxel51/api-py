@@ -369,7 +369,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         if not output_path:
-            output_path = self.get_data_details(data_id)["filename"]
+            output_path = self.get_data_details(data_id)["name"]
 
         endpoint = self.base_url + "/data/" + data_id + "/download"
         self._stream_download(endpoint, output_path)
