@@ -97,7 +97,8 @@ class API(object):
         token = voxa.load_token(token_path=token_path)
         return cls(token=token)
 
-    def thread_map(self, callback, items, max_workers=5, generator=False):
+    @staticmethod
+    def thread_map(callback, items, max_workers=5, generator=False):
         '''Makes parallel calls to a callback with arguments taken from a list.
 
         Args:
