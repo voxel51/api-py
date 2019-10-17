@@ -105,7 +105,9 @@ class API(object):
             callback (function): the function to call on each list item
             items (list): a list of arguments to pass to the callback (each
                 item in this list corresponds to a separate call)
-            max_workers (int, optional): the number of calls to run in parallel
+            max_workers (int, optional): the number of calls to run in
+                parallel. Passing `None` will compute this based on the number
+                of available CPUs.
             generator (bool): if true, return a generator instead of a list
 
         Returns:
