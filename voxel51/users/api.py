@@ -98,27 +98,25 @@ class API(object):
         return cls(token=token)
 
     @staticmethod
-    def thread_map(callback, items, max_workers=5, generator=False):
-        '''Makes parallel calls to a callback with arguments taken from a list.
+    def thread_map(callback, iterable, max_workers=None):
+        '''Applies the callback function to each item in the iterable using a
+        pool of parallel worker threads.
 
         Args:
             callback (function): the function to call on each list item
-            items (list): a list of arguments to pass to the callback (each
-                item in this list corresponds to a separate call)
-            max_workers (int, optional): the number of calls to run in
-                parallel. Passing `None` will compute this based on the number
-                of available CPUs.
-            generator (bool): if true, return a generator instead of a list
+            iterable (iterable): an iterable of arguments to pass to the
+                callback
+            max_workers (int, optional): the number of worker threads to use.
+                The default is `None`, which uses a handful of threads for each
+                CPU on your machine. See the documentation for the
+                `concurrent.futures.ThreadPoolExecutor` method for more details
 
         Returns:
-            a generator of values returned by `callback`, in the same order as
-            `items` (to obtain a list of return values, or to wait for all
-            calls to complete, wrap the returned generator with `list()`)
+            a list of values returned by `callback`, in the same order as the
+            input `iterable`
         '''
-        gen = ThreadPoolExecutor(max_workers).map(callback, items)
-        if generator:
-            return gen
-        return list(gen)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            return list(executor.map(callback, iterable))
 
     # ANALYTICS ###############################################################
 
