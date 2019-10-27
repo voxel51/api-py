@@ -1,6 +1,7 @@
 certifi==2018.1.18
 chardet==3.0.4
 future==0.16.0
+futures==3.3.0; python_version == "2.7"
 idna==2.6
 m2r==0.2.1
 pycodestyle==2.3.1

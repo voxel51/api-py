@@ -265,6 +265,39 @@ api.upload_job_request(job_request, "<job-name>", auto_start=True)
 ```
 
 
+## Improving Request Efficiency
+
+A common pattern when interacting with the platform is to perform an operation
+to a list of data or jobs. In such cases, you can dramatically increase the
+efficiency of your code by using multiple threads. This library exposes a
+thread pool that provides an easy way to distribute work among multiple
+threads.
+
+For example, the following code will start all unstarted jobs on the platform
+using 16 threads to execute the requests:
+
+```py
+from voxel51.users.api import API
+from voxel51.users.jobs import JobState
+from voxel51.users.query import JobsQuery
+
+api = API()
+
+# Get all unarchived jobs
+jobs_query = JobsQuery().add_all_fields().add_search("archived", False)
+jobs = api.query_jobs(jobs_query)["jobs"]
+
+def start_job_if_necessary(job):
+    if job["state"] == JobState.READY:
+        api.start_job(job["id"])
+
+# Start all unstarted jobs
+api.thread_map(start_job_if_necessary, jobs, max_workers=16)
+```
+
+See :func:`voxel51.users.api.API.thread_map` for details.
+
+
 ## Generating Documentation
 
 This project uses

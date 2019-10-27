@@ -17,6 +17,7 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import os
 import time
@@ -95,6 +96,27 @@ class API(object):
         '''
         token = voxa.load_token(token_path=token_path)
         return cls(token=token)
+
+    @staticmethod
+    def thread_map(callback, iterable, max_workers=None):
+        '''Applies the callback function to each item in the iterable using a
+        pool of parallel worker threads.
+
+        Args:
+            callback (function): the function to call on each list item
+            iterable (iterable): an iterable of arguments to pass to the
+                callback
+            max_workers (int, optional): the number of worker threads to use.
+                The default is `None`, which uses a handful of threads for each
+                CPU on your machine. See the documentation for the
+                `concurrent.futures.ThreadPoolExecutor` method for more details
+
+        Returns:
+            a list of values returned by `callback`, in the same order as the
+            input `iterable`
+        '''
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            return list(executor.map(callback, iterable))
 
     # ANALYTICS ###############################################################
 
