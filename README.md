@@ -274,7 +274,7 @@ thread pool that provides an easy way to distribute work among multiple
 threads.
 
 For example, the following code will start all unstarted jobs on the platform
-and wait for all requests to complete:
+using 16 threads to execute the requests:
 
 ```py
 from voxel51.users.api import API
@@ -282,15 +282,21 @@ from voxel51.users.jobs import JobState
 from voxel51.users.query import JobsQuery
 
 api = API()
-jobs_query = JobsQuery().add_fields(["id", "state"])
+
+# Get all unarchived jobs
+jobs_query = JobsQuery().add_all_fields().add_search("archived", False)
 jobs = api.query_jobs(jobs_query)["jobs"]
 
-api.thread_map(api.start_job,
-    [job["id"] for job in jobs if job["state"] == JobState.READY])
+def start_job_if_necessary(job):
+    if job["state"] == JobState.READY:
+        api.start_job(job["id"])
 
+# Start all unstarted jobs
+api.thread_map(start_job_if_necessary, jobs, max_workers=16)
 ```
 
 See :func:`voxel51.users.api.API.thread_map` for details.
+
 
 ## Generating Documentation
 
