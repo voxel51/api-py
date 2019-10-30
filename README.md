@@ -273,8 +273,29 @@ efficiency of your code by using multiple threads. This library exposes a
 thread pool that provides an easy way to distribute work among multiple
 threads.
 
-For example, the following code will start all unstarted jobs on the platform
-using 16 threads to execute the requests:
+For example, the following code will run VehicleSense on a list of videos
+using 8 threads to parallelize the upload of each video + job:
+
+```py
+from voxel51.users.api import API
+from voxel51.users.jobs import JobRequest
+
+api = API()
+
+def run_vehicle_sense(path):
+    data = api.upload_data(path)
+    job_request = JobRequest("voxel51/vehicle-sense")
+    job_request.set_input("video", data_id=data["id"])
+    job_name = "vehicle-sense-%s" % data["name"]
+    return api.upload_job_request(job_request, job_name, auto_start=True)
+
+# Run VehicleSense on all videos using 16 threads
+paths = ["1.mp4", "2.mp4", "3.mp4", ...]
+jobs = api.thread_map(run_vehicle_sense, paths, max_workers=8)
+```
+
+Or, the following code will start all unstarted jobs on the platform using 16
+threads to execute the requests:
 
 ```py
 from voxel51.users.api import API
