@@ -316,7 +316,7 @@ def start_job_if_necessary(job):
 api.thread_map(start_job_if_necessary, jobs, max_workers=16)
 ```
 
-See :func:`voxel51.users.api.API.thread_map` for details.
+See `voxel51.users.api.API.thread_map()` for details.
 
 
 ## Generating Documentation
