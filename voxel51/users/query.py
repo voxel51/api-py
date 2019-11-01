@@ -281,4 +281,4 @@ class JobsQuery(BaseQuery):
         super(JobsQuery, self).__init__([
             "id", "name", "state", "archived", "upload_date", "analytic_id",
             "auto_start", "compute_mode", "start_date", "completion_date",
-            "fail_date", "failure_type"])
+            "fail_date", "failure_type", "expiration_date"])
