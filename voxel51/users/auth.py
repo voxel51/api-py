@@ -106,7 +106,12 @@ def load_token(token_path=None):
 
 
 class Token(object):
-    '''A class encapsulating an API authentication token.'''
+    '''A class encapsulating an API authentication token.
+
+    Attributes:
+        creation_date (str): the creation date of the token
+        id (str): the ID of the token
+    '''
 
     def __init__(self, token_dict):
         '''Creates a token object with the given contents
