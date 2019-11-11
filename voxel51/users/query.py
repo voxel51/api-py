@@ -118,8 +118,8 @@ class BaseQuery(object):
     def add_search_over_all_fields(self, search_str):
         '''Adds the given search string to be applied across all fields.
 
-        The resulting query will return results where any searchable
-        field matches the specified search string.
+        The resulting query will return results where any searchable field
+        matches the specified search string.
 
         Args:
             search_str (str): the search string
