@@ -29,8 +29,6 @@ logger = logging.getLogger(__name__)
 TOKEN_ENVIRON_VAR = "VOXEL51_API_TOKEN"
 TOKEN_PATH = os.path.join(
     os.path.expanduser("~"), ".voxel51", "api-token.json")
-ACCESS_TOKEN_FIELD = "access_token"
-PRIVATE_KEY_FIELD = "private_key"
 
 
 def activate_token(path):
@@ -90,8 +88,10 @@ class Token(object):
         Args:
             token_dict (dict): a JSON dictionary defining an API token
         '''
+        self.creation_date = token_dict["access_token"]["created_at"]
+        self.id = token_dict["access_token"]["token_id"]
+        self._private_key = token_dict["access_token"]["private_key"]
         self._token_dict = token_dict
-        self._private_key = token_dict[ACCESS_TOKEN_FIELD][PRIVATE_KEY_FIELD]
 
     def __str__(self):
         return voxu.json_to_str(self._token_dict)
