@@ -149,6 +149,6 @@ class Token(object):
         return cls(voxu.read_json(path))
 
 
-class TokenLoadError(Exception):
-    '''Exception raised when a :class:`Token` fails to load.'''
+class TokenError(Exception):
+    '''Exception raised when a problem with a :class:`Token` is encountered.'''
     pass
