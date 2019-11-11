@@ -727,16 +727,19 @@ class API(object):
 
         Args:
             job_id (str): the job ID
-            output_path (str, optional): the path to write the logfile. By
-                default, the logfile is written to the current working
-                directory with the filename "${job_id}.log"
+            output_path (str, optional): the path to write the logfile. If
+                not provided, the logfile is returned as a string
+
+        Returns:
+            the logfile as a string, if `output_path` is None; otherwise None
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        if not output_path:
-            output_path = "%s.log" % job_id
         endpoint = self.base_url + "/jobs/" + job_id + "/log"
+        if output_path is None:
+            return self._stream_download_bytes(endpoint)
+
         self._stream_download(endpoint, output_path)
 
     def get_job_logfile_download_url(self, job_id):
@@ -816,6 +819,14 @@ class API(object):
             with open(output_path, "wb") as f:
                 for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
                     f.write(chunk)
+
+    def _stream_download_bytes(self, url):
+        response = ""
+        with self._requests.get(url, headers=self._header, stream=True) as res:
+            _validate_response(res)
+            for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
+                response += chunk
+        return response
 
 
 class APIError(Exception):
