@@ -130,6 +130,21 @@ class BaseQuery(object):
         self.search.append(search_str)
         return self
 
+    def add_search_direct(self, search_str):
+        '''Adds the given search string directly to the query.
+
+        This method is useful in situations where you have constructed a
+        pre-built search query that you want to add to the query.
+
+        Args:
+            search_str (str): the search string
+
+        Returns:
+            the updated query instance
+        '''
+        self.search.append(search_str)
+        return self
+
     def sort_by(self, field, descending=True):
         '''Adds the given search to the query.
 
