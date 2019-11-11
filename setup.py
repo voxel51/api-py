@@ -26,4 +26,5 @@ setup(
     install_requires=[
         "requests>=2.18.4",
     ],
+    scripts=["voxel51/cli/voxel51"],
 )
