@@ -387,6 +387,9 @@ class API(object):
                 default, the data is written to the current working directory
                 with the same filename as the uploaded data
 
+        Returns:
+            the path to the downloaded data
+
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
@@ -395,6 +398,8 @@ class API(object):
 
         endpoint = self.base_url + "/data/" + data_id + "/download"
         self._stream_download(endpoint, output_path)
+
+        return output_path
 
     def get_data_download_url(self, data_id):
         '''Gets a signed download URL for the data with the given ID.
