@@ -75,13 +75,13 @@ def load_application_token(token_path=None):
         an :class:`ApplicationToken` instance
 
     Raises:
-        :class:`ApplicationTokenLoadError` if no valid token was found
+        :class:`ApplicationTokenError` if no valid token was found
     '''
     path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
     try:
         return ApplicationToken.from_json(path)
     except IOError:
-        raise ApplicationTokenLoadError("No application token found")
+        raise ApplicationTokenError("No application token found")
 
 
 class ApplicationToken(Token):
@@ -104,6 +104,8 @@ class ApplicationToken(Token):
         return header
 
 
-class ApplicationTokenLoadError(Exception):
-    '''Exception raised when a :class:`ApplicationToken` fails to load.'''
+class ApplicationTokenError(Exception):
+    '''Exception raised when a problem with an :class:`ApplicationToken` is
+    encountered.
+    '''
     pass
