@@ -539,7 +539,6 @@ class AnalyticsCommand(Command):
                 query = query.set_limit(limit)
             if args.search is not None:
                 query = query.add_search_direct(args.search)
-            print(query)
             analytics = api.query_analytics(query)["analytics"]
             _print_analytics_table(analytics, show_count=args.count)
 
