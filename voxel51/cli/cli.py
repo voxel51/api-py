@@ -460,6 +460,7 @@ class AnalyticsCommand(Command):
     Examples:
         # List analytics
         voxel51 analytics --list [<num>]
+            [--all-versions]
             [--search [<field>:][<str>]]
             [--sort-by <field>] [--ascending]
             [--count]
@@ -485,6 +486,9 @@ class AnalyticsCommand(Command):
         listing.add_argument(
             "-l", "--list", nargs="?", metavar="NUM", const=-1,
             help="list number of analytics")
+        listing.add_argument(
+            "-a", "--all-versions", action="store_true",
+            help="whether to include all versions of analytics")
         listing.add_argument(
             "--search", metavar="[FIELD:]STR",
             help="search to limit results when listing analytics")
@@ -526,8 +530,10 @@ class AnalyticsCommand(Command):
             limit = int(args.list)
             sort_field = args.sort_by if args.sort_by else "upload_date"
             descending = not args.ascending
+            all_versions = args.all_versions
             query = (AnalyticsQuery()
                 .add_all_fields()
+                .set_all_versions(all_versions)
                 .sort_by(sort_field, descending=descending))
             if limit >= 0:
                 query = query.set_limit(limit)
