@@ -105,6 +105,7 @@ class DataCommand(Command):
         voxel51 data --list [<num>]
             [--search [<field>:][<str>]]
             [--sort-by <field>] [--ascending]
+            [--count]
 
         # Get info about data
         voxel51 data --info <id> [...]
@@ -137,6 +138,9 @@ class DataCommand(Command):
         listing.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        listing.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of data in the list")
 
         download = parser.add_argument_group("download arguments")
         download.add_argument(
@@ -172,7 +176,7 @@ class DataCommand(Command):
             if args.search is not None:
                 query = query.add_search_direct(args.search)
             data = api.query_data(query)["data"]
-            _print_data_table(data)
+            _print_data_table(data, show_count=args.count)
 
         # Print data details
         if args.info:
@@ -329,7 +333,7 @@ class JobsCommand(Command):
             if args.search is None or not args.search.startswith("archived:"):
                 query = query.add_search("archived", False)
             jobs = api.query_jobs(query)["jobs"]
-            _print_jobs_table(jobs)
+            _print_jobs_table(jobs, show_count=args.count)
 
         # Print job details
         if args.info:
@@ -413,6 +417,7 @@ class AnalyticsCommand(Command):
         voxel51 analytics --list [<num>]
             [--search [<field>:][<str>]]
             [--sort-by <field>] [--ascending]
+            [--count]
 
         # Get analytic documentation
         voxel51 analytics --docs <id>
@@ -444,6 +449,9 @@ class AnalyticsCommand(Command):
         listing.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        listing.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of jobs in the list")
 
         upload = parser.add_argument_group("upload arguments")
         upload.add_argument(
@@ -482,7 +490,7 @@ class AnalyticsCommand(Command):
                 query = query.add_search_direct(args.search)
             print(query)
             analytics = api.query_analytics(query)["analytics"]
-            _print_analytics_table(analytics)
+            _print_analytics_table(analytics, show_count=args.count)
 
         # Upload analytic documentation
         if args.upload_docs:
@@ -527,7 +535,7 @@ def _print_active_token_info():
     print(table_str)
 
 
-def _print_data_table(data):
+def _print_data_table(data, show_count=False):
     records = [
         (
             d["id"], _parse_name(d["name"]), d["size"], d["type"],
@@ -542,9 +550,11 @@ def _print_data_table(data):
         tablefmt=TABLE_FORMAT)
 
     print(table_str)
+    if show_count:
+        print("\nFound %d data\n" % len(records))
 
 
-def _print_jobs_table(jobs):
+def _print_jobs_table(jobs, show_count=False):
     records = [
         (
             j["id"], _parse_name(j["name"]), j["state"], j["archived"],
@@ -559,9 +569,11 @@ def _print_jobs_table(jobs):
         tablefmt=TABLE_FORMAT)
 
     print(table_str)
+    if show_count:
+        print("\nFound %d jobs\n" % len(records))
 
 
-def _print_analytics_table(analytics):
+def _print_analytics_table(analytics, show_count=False):
     records = [
         (
             a["id"], a["name"], a["version"], a["scope"],
@@ -577,6 +589,8 @@ def _print_analytics_table(analytics):
         tablefmt=TABLE_FORMAT)
 
     print(table_str)
+    if show_count:
+        print("\nFound %d analytics\n" % len(records))
 
 
 def _print_table(records):
