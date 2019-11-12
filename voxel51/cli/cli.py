@@ -634,7 +634,7 @@ def _print_analytics_table(analytics, show_count=False):
     table_str = tabulate(
         records,
         headers=[
-            "id", "name", "version", "type", "supports cpu", "supports gpu",
+            "id", "name", "version", "scope", "supports cpu", "supports gpu",
             "pending", "upload date"],
         tablefmt=TABLE_FORMAT)
 
