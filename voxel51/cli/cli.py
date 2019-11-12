@@ -220,6 +220,15 @@ class JobsCommand(Command):
         voxel51 jobs --list [<num>]
             [--search [<field>:][<str>]]
             [--sort-by <field>] [--ascending]
+            [--count]
+
+        # Shorthand for listing jobs in a particular state
+        voxel51 jobs --ready
+        voxel51 jobs --queued
+        voxel51 jobs --scheduled
+        voxel51 jobs --running
+        voxel51 jobs --complete
+        voxel51 jobs --failed
 
         # Get info about jobs
         voxel51 jobs --info <id> [...]
@@ -274,6 +283,23 @@ class JobsCommand(Command):
         listing.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        listing.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of jobs in the list")
+
+        states = parser.add_argument_group("state arguments")
+        states.add_argument(
+            "--ready", action="store_true", help="jobs in READY state")
+        states.add_argument(
+            "--queued", action="store_true", help="jobs in QUEUED state")
+        states.add_argument(
+            "--scheduled", action="store_true", help="jobs in SCHEDULED state")
+        states.add_argument(
+            "--running", action="store_true", help="jobs in RUNNING state")
+        states.add_argument(
+            "--complete", action="store_true", help="jobs in COMPLETE state")
+        states.add_argument(
+            "--failed", action="store_true", help="jobs in FAILED state")
 
         upload = parser.add_argument_group("upload arguments")
         upload.add_argument(
@@ -318,6 +344,23 @@ class JobsCommand(Command):
     def run(args):
         api = API()
 
+        # Handle explicit state arguments
+        states = []
+        if args.ready:
+            states.append("READY")
+        elif args.queued:
+            states.append("QUEUED")
+        elif args.scheduled:
+            states.append("SCHEDULED")
+        elif args.running:
+            states.append("RUNNING")
+        elif args.complete:
+            states.append("COMPLETE")
+        elif args.failed:
+            states.append("FAILED")
+        if states and args.list is None:
+            args.list = -1
+
         # List jobs
         if args.list:
             limit = int(args.list)
@@ -328,6 +371,8 @@ class JobsCommand(Command):
                 .sort_by(sort_field, descending=descending))
             if limit >= 0:
                 query = query.set_limit(limit)
+            if states:
+                query = query.add_search_or("state", states)
             if args.search is not None:
                 query = query.add_search_direct(args.search)
             if args.search is None or not args.search.startswith("archived:"):
