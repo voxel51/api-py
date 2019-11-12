@@ -738,7 +738,9 @@ class API(object):
         '''
         endpoint = self.base_url + "/jobs/" + job_id + "/log"
         if output_path is None:
-            return self._stream_download_bytes(endpoint)
+            res = self._requests.get(endpoint, headers=self._header)
+            _validate_response(res)
+            return res.content
 
         self._stream_download(endpoint, output_path)
 
@@ -819,14 +821,6 @@ class API(object):
             with open(output_path, "wb") as f:
                 for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
                     f.write(chunk)
-
-    def _stream_download_bytes(self, url):
-        response = ""
-        with self._requests.get(url, headers=self._header, stream=True) as res:
-            _validate_response(res)
-            for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
-                response += chunk
-        return response
 
 
 class APIError(Exception):
