@@ -102,7 +102,7 @@ class DataCommand(Command):
 
     Examples:
         # List data
-        voxel51 data --list [<num>]
+        voxel51 data --list [<limit>]
             [--search [<field>:][<str>]]
             [--sort-by <field>] [--ascending]
             [--count]
@@ -127,8 +127,8 @@ class DataCommand(Command):
     def setup(parser):
         listing = parser.add_argument_group("listing arguments")
         listing.add_argument(
-            "-l", "--list", nargs="?", metavar="NUM", const=-1,
-            help="list number of data")
+            "-l", "--list", nargs="?", metavar="LIMIT", const=-1,
+            help="list data, up to optional record limit")
         listing.add_argument(
             "--search", metavar="[FIELD:]STR",
             help="search to limit results when listing data")
@@ -217,7 +217,7 @@ class JobsCommand(Command):
 
     Examples:
         # List jobs
-        voxel51 jobs --list [<num>]
+        voxel51 jobs --list [<limit>]
             [--search [<field>:][<str>]]
             [--sort-by <field>] [--ascending]
             [--count]
@@ -272,8 +272,8 @@ class JobsCommand(Command):
     def setup(parser):
         listing = parser.add_argument_group("listing arguments")
         listing.add_argument(
-            "-l", "--list", nargs="?", metavar="NUM", const=-1,
-            help="list number of jobs")
+            "-l", "--list", nargs="?", metavar="LIMIT", const=-1,
+            help="list jobs, up to optional record limit")
         listing.add_argument(
             "--search", metavar="[FIELD:]STR",
             help="search to limit results when listing jobs")
@@ -459,7 +459,7 @@ class AnalyticsCommand(Command):
 
     Examples:
         # List analytics
-        voxel51 analytics --list [<num>]
+        voxel51 analytics --list [<limit>]
             [--all-versions]
             [--search [<field>:][<str>]]
             [--sort-by <field>] [--ascending]
@@ -484,8 +484,8 @@ class AnalyticsCommand(Command):
     def setup(parser):
         listing = parser.add_argument_group("listing arguments")
         listing.add_argument(
-            "-l", "--list", nargs="?", metavar="NUM", const=-1,
-            help="list number of analytics")
+            "-l", "--list", nargs="?", metavar="LIMIT", const=-1,
+            help="list analytics, up to optional record limit")
         listing.add_argument(
             "-a", "--all-versions", action="store_true",
             help="whether to include all versions of analytics")
