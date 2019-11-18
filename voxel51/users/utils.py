@@ -14,6 +14,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
 from future.utils import iteritems
+import six
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
@@ -27,6 +28,35 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 
 logger = logging.getLogger(__name__)
+
+
+def upload_files(requests, url, files, headers, **kwargs):
+    '''Upload one or more files of any size using a streaming upload.
+
+    This is intended as an alternative to using ``requests`` directly for files
+    larger than 2GB.
+
+    Args:
+        requests (requests|requests.Session): an existing session to use, or
+            the ``requests`` module
+        url (str): the request endpoint
+        files (dict): files to upload, in the same format as the ``files``
+            argument to ``requests``
+        headers (dict): headers to include
+        kwargs: any other arguments to pass to ``requests``
+
+    Returns:
+        a ``requests.Response``
+    '''
+    #
+    # NOTE: this is limited to 8K chunk size. If this becomes an issue,
+    # monkey-patching data.read to ignore the given chunk size is an option
+    #
+    data = MultipartEncoder(files)
+
+    headers = headers.copy()
+    headers["Content-Type"] = data.content_type
+    return requests.post(url, headers=headers, data=data, **kwargs)
 
 
 def read_json(path):
@@ -78,8 +108,8 @@ def write_json(obj, path):
         path (str): the output path
     '''
     ensure_basedir(path)
-    with open(path, "wt") as f:
-        f.write(json_to_str(obj))
+    with open(path, "wb") as f:
+        f.write(_to_bytes(json_to_str(obj)))
 
 
 def copy_file(inpath, outpath):
@@ -204,28 +234,10 @@ def _recurse(v):
     return v
 
 
-def upload_files(requests, url, files, headers, **kwargs):
-    '''Upload one or more files of any size using a streaming upload.
+def _to_bytes(val, encoding="utf-8"):
+    bytes_str = (
+        val.encode(encoding) if isinstance(val, six.text_type) else val)
+    if not isinstance(bytes_str, six.binary_type):
+        raise TypeError("Failed to convert %r to bytes" % bytes_str)
 
-    This is intended as an alternative to using ``requests`` directly for files
-    larger than 2GB.
-
-    Args:
-        requests (requests|requests.Session): an existing session to use, or
-            the ``requests`` module
-        url (str): the request endpoint
-        files (dict): files to upload, in the same format as the ``files``
-            argument to ``requests``
-        headers (dict): headers to include
-        kwargs: any other arguments to pass to ``requests``
-
-    Returns:
-        a ``requests.Response``
-    '''
-    # note: this is limited to 8K chunk size. If this becomes an issue,
-    # monkey-patching data.read to ignore the given chunk size is an option.
-    data = MultipartEncoder(files)
-    # add the necessary content-type without modifying the original headers
-    headers = headers.copy()
-    headers["Content-Type"] = data.content_type
-    return requests.post(url, headers=headers, data=data, **kwargs)
+    return bytes_str
