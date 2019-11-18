@@ -26,8 +26,9 @@ from tabulate import tabulate
 
 from voxel51.users.api import API
 import voxel51.users.auth as voxa
-from voxel51.users.jobs import JobRequest
+from voxel51.users.jobs import JobRequest, JobState
 from voxel51.users.query import AnalyticsQuery, DataQuery, JobsQuery
+import voxel51.users.utils as voxu
 
 
 MAX_NAME_COLUMN_WIDTH = 51
@@ -35,14 +36,19 @@ TABLE_FORMAT = "simple"
 
 
 class Command(object):
-    '''Interface for defining commands for the `voxel51` CLI.'''
+    '''Interface for defining commands.
+
+    Command instances must implement the `setup()` method, and they should
+    implement the `run()` method if they perform any functionality beyond
+    defining subparsers.
+    '''
 
     @staticmethod
     def setup(parser):
         '''Setup the command-line arguments for the command.
 
         Args:
-            parser: an argparse.ArgumentParser instance
+            parser: an `argparse.ArgumentParser` instance
         '''
         raise NotImplementedError("subclass must implement setup()")
 
@@ -51,241 +57,335 @@ class Command(object):
         '''Execute the command on the given args.
 
         args:
-            args: an argparse.Namespace instance containing the arguments
+            args: an `argparse.Namespace` instance containing the arguments
                 for the command
         '''
-        raise NotImplementedError("subclass must implement run()")
+        pass
 
 
-class AuthenticationCommand(Command):
-    '''Command-line tool for authentication.
+class Voxel51Command(Command):
+    '''Voxel51 Platform API command-line interface.'''
+
+    @staticmethod
+    def setup(parser):
+        subparsers = parser.add_subparsers(title="available commands")
+        _register_command(subparsers, "auth", AuthCommand)
+        _register_command(subparsers, "data", DataCommand)
+        _register_command(subparsers, "jobs", JobsCommand)
+        _register_command(subparsers, "analytics", AnalyticsCommand)
+
+
+class AuthCommand(Command):
+    '''Command-line tool for authentication.'''
+
+    @staticmethod
+    def setup(parser):
+        subparsers = parser.add_subparsers(title="available commands")
+        _register_command(subparsers, "show", ShowAuthCommand)
+        _register_command(subparsers, "activate", ActivateAuthCommand)
+        _register_command(subparsers, "clean", CleanAuthCommand)
+
+
+class ShowAuthCommand(Command):
+    '''Show info about the active API token.
 
     Examples:
-        # Show info about the active API token
-        voxel51 auth --show
-
-        # Activate API token
-        voxel51 auth --activate '/path/to/token.json'
-
-        # Deactivate active API token, if any
-        voxel51 auth --clean
+        # Print info about active token
+        voxel51 auth show
     '''
 
     @staticmethod
     def setup(parser):
-        parser.add_argument(
-            "-s", "--show", action="store_true",
-            help="show info about the active API token")
-        parser.add_argument(
-            "-a", "--activate", help="activate the API token")
-        parser.add_argument(
-            "-c", "--clean", action="store_true",
-            help="Deactivate active API token, if any")
+        pass
 
     @staticmethod
     def run(args):
-        # Show active token
-        if args.show:
-            _print_active_token_info()
-
-        # Activate token
-        if args.activate:
-            voxa.activate_token(args.activate)
-
-        # Deactivate all tokens
-        if args.clean:
-            voxa.deactivate_token()
+        _print_active_token_info()
 
 
-class DataCommand(Command):
-    '''Command-line tool for working with data.
+class ActivateAuthCommand(Command):
+    '''Activate an API token.
 
     Examples:
-        # List data
-        voxel51 data --list [<limit>]
-            [--search [<field>:][<str>]]
-            [--sort-by <field>] [--ascending]
-            [--count]
-
-        # Get info about data
-        voxel51 data --info <id> [...]
-
-        # Upload data
-        voxel51 data --upload '/path/to/video.mp4' [...]
-
-        # Download data
-        voxel51 data --download <id> [--path '/path/for/video.mp4']
-
-        # Generate signed URL to download data
-        voxel51 data --download-url <id>
-
-        # Delete data
-        voxel51 data --delete <id> [...]
+        # Activate API token
+        voxel51 auth activate '/path/to/token.json'
     '''
 
     @staticmethod
     def setup(parser):
-        listing = parser.add_argument_group("listing arguments")
-        listing.add_argument(
-            "-l", "--list", nargs="?", metavar="LIMIT", const=-1,
-            help="list data, up to optional record limit")
-        listing.add_argument(
-            "--search", metavar="[FIELD:]STR",
+        parser.add_argument(
+            "activate", help="path to API token to activate")
+
+    @staticmethod
+    def run(args):
+        voxa.activate_token(args.activate)
+
+
+class CleanAuthCommand(Command):
+    '''Deletes the active API token, if any.'''
+
+    @staticmethod
+    def setup(parser):
+        pass
+
+    @staticmethod
+    def run(args):
+        voxa.deactivate_token()
+
+
+class DataCommand(Command):
+    '''Command-line tool for working with data.'''
+
+    @staticmethod
+    def setup(parser):
+        subparsers = parser.add_subparsers(title="available commands")
+        _register_command(subparsers, "list", ListDataCommand)
+        _register_command(subparsers, "info", InfoDataCommand)
+        _register_command(subparsers, "upload", UploadDataCommand)
+        _register_command(subparsers, "download", DownloadDataCommand)
+        _register_command(subparsers, "delete", DeleteDataCommand)
+
+
+class ListDataCommand(Command):
+    '''Command-line tool for listing data.
+
+    Examples:
+        # List data according to the given query
+        voxel51 data list
+            [--limit <limit>]
+            [--search [<field>:]<str>]
+            [--sort-by <field>]
+            [--ascending]
+            [--count]
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "-l", "--limit", metavar="LIMIT", type=int, default=-1,
+            help="limit the number of data listed")
+        parser.add_argument(
+            "-s", "--search", metavar="[FIELD:]STR",
             help="search to limit results when listing data")
-        listing.add_argument(
-            "--sort-by", metavar="FIELD",
-            help="field to sort by when listing data")
-        listing.add_argument(
-            "--ascending", action="store_true",
-            help="whether to sort in ascending order")
-        listing.add_argument(
+        parser.add_argument(
             "-c", "--count", action="store_true",
             help="whether to show the number of data in the list")
-
-        download = parser.add_argument_group("download arguments")
-        download.add_argument(
-            "-d", "--download", metavar="ID", help="data to download")
-        download.add_argument(
-            "-p", "--path", metavar="PATH", help="path to download data")
-
         parser.add_argument(
-            "-i", "--info", nargs="+", metavar="ID",
-            help="get info about data")
+            "--sort-by", metavar="FIELD",
+            help="field to sort by when listing data")
         parser.add_argument(
-            "-u", "--upload", nargs="+", metavar="PATH", help="upload data")
-        parser.add_argument(
-            "--download-url", metavar="ID",
-            help="generate signed URL to download data")
-        parser.add_argument(
-            "--delete", nargs="+", metavar="ID", help="delete data")
+            "--ascending", action="store_true",
+            help="whether to sort in ascending order")
 
     @staticmethod
     def run(args):
         api = API()
 
-        # List data
-        if args.list:
-            limit = int(args.list)
-            sort_field = args.sort_by if args.sort_by else "upload_date"
-            descending = not args.ascending
-            query = (DataQuery()
-                .add_all_fields()
-                .sort_by(sort_field, descending=descending))
-            if limit >= 0:
-                query = query.set_limit(limit)
-            if args.search is not None:
-                query = query.add_search_direct(args.search)
-            data = api.query_data(query)["data"]
-            _print_data_table(data, show_count=args.count)
+        query = DataQuery().add_all_fields()
 
-        # Print data details
-        if args.info:
-            data = [api.get_data_details(data_id) for data_id in args.info]
-            _print_data_table(data)
+        if args.limit >= 0:
+            query = query.set_limit(args.limit)
 
+        sort_field = args.sort_by if args.sort_by else "upload_date"
+        descending = not args.ascending
+        query = query.sort_by(sort_field, descending=descending)
+
+        if args.search is not None:
+            query = query.add_search_direct(args.search)
+
+        data = api.query_data(query)["data"]
+        _print_data_table(data, show_count=args.count)
+
+
+class InfoDataCommand(Command):
+    '''Command-line tool for getting information about data.
+
+    Examples:
+        # Get data info
+        voxel51 data info <id> [...]
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="+", metavar="ID", help="the data ID(s) of interest")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        data = [api.get_data_details(data_id) for data_id in args.ids]
+        _print_data_table(data)
+
+
+class UploadDataCommand(Command):
+    '''Command-line tool for uploading data.
+
+    Examples:
         # Upload data
-        if args.upload:
-            uploads = []
-            for path in args.upload:
-                print("Uploading data '%s'" % path)
-                data_id = api.upload_data(path)
-                uploads.append({"id": data_id, "path": path})
-            _print_table(uploads)
+        voxel51 data upload '/path/to/video.mp4' [...]
+    '''
 
-        # Download data
-        if args.download:
-            data_id = args.download
-            output_path = args.path if args.path else None
-            output_path = api.download_data(data_id, output_path=output_path)
-            print("Downloaded '%s' to '%s'" % (data_id, output_path))
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="+", metavar="ID", help="the data ID(s) to upload")
 
-        # Generate data download URL
-        if args.download_url:
-            data_id = args.download_url
+    @staticmethod
+    def run(args):
+        api = API()
+
+        uploads = []
+        for path in args.ids:
+            print("Uploading data '%s'" % path)
+            data_id = api.upload_data(path)
+            uploads.append({"id": data_id, "path": path})
+
+        _print_table(uploads)
+
+
+class DownloadDataCommand(Command):
+    '''Command-line tool for downloading data.
+
+    Examples:
+        # Download data to default location
+        voxel51 data download <id>
+
+        # Download data to specific location
+        voxel51 data download <id> --path '/path/for/video.mp4'
+
+        # Generate signed URL to download data
+        voxel51 data download <id> --url
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument("id", metavar="ID", help="data to download")
+        parser.add_argument(
+            "-p", "--path", metavar="PATH", help="path to download data")
+        parser.add_argument(
+            "-u", "--url", metavar="ID",
+            help="generate signed URL to download data")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        data_id = args.id
+
+        if args.url:
             url = api.get_data_download_url(data_id)
             print(url)
+            return
 
+        output_path = api.download_data(data_id, output_path=args.path)
+        print("Downloaded '%s' to '%s'" % (data_id, output_path))
+
+
+class DeleteDataCommand(Command):
+    '''Command-line tool for deleting data.
+
+    Examples:
         # Delete data
-        if args.delete:
-            for data_id in args.delete:
+        voxel51 data delete <ID> [...]
+
+        # Delete all data
+        voxel51 data delete --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the data ID(s) to delete")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to delete all data")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print data IDs that would be deleted rather than"
+            "actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if args.all:
+            data_ids = [data["id"] for data in api.list_data()]
+        else:
+            data_ids = args.ids or []
+
+        if args.dry_run:
+            for data_id in data_ids:
+                print(data_id)
+        else:
+            print("Found %d data to delete" % len(data_ids))
+            for data_id in data_ids:
                 api.delete_data(data_id)
                 print("Data '%s' deleted" % data_id)
 
 
 class JobsCommand(Command):
-    '''Command-line tool for working with jobs.
+    '''Command-line tool for working with jobs.'''
+
+    @staticmethod
+    def setup(parser):
+        subparsers = parser.add_subparsers(title="available commands")
+        _register_command(subparsers, "list", ListJobsCommand)
+        _register_command(subparsers, "info", InfoJobsCommand)
+        _register_command(subparsers, "upload", UploadJobsCommand)
+        _register_command(subparsers, "start", StartJobsCommand)
+        _register_command(subparsers, "archive", ArchiveJobsCommand)
+        _register_command(subparsers, "unarchive", UnarchiveJobsCommand)
+        _register_command(subparsers, "request", RequestJobsCommand)
+        _register_command(subparsers, "status", StatusJobsCommand)
+        _register_command(subparsers, "log", LogJobsCommand)
+        _register_command(subparsers, "download", DownloadJobsCommand)
+        _register_command(subparsers, "kill", KillJobsCommand)
+        _register_command(subparsers, "delete", DeleteJobsCommand)
+
+
+class ListJobsCommand(Command):
+    '''Command-line tool for listing jobs.
 
     Examples:
-        # List jobs
-        voxel51 jobs --list [<limit>]
-            [--search [<field>:][<str>]]
-            [--sort-by <field>] [--ascending]
+        # List jobs according to the given query
+        voxel51 jobs list
+            [--limit <limit>]
+            [--search [<field>:]<str>]
+            [--sort-by <field>]
+            [--archived]
+            [--ascending]
             [--count]
 
-        # Shorthand for listing jobs in a particular state
-        voxel51 jobs --ready
-        voxel51 jobs --queued
-        voxel51 jobs --scheduled
-        voxel51 jobs --running
-        voxel51 jobs --complete
-        voxel51 jobs --failed
-
-        # Get info about jobs
-        voxel51 jobs --info <id> [...]
-
-        # Upload job
-        voxel51 jobs --upload '/path/to/video.mp4'
-            --name <job-name> [--auto-start]
-
-        # Start jobs
-        voxel51 jobs --start <id> [...]
-
-        # Archive jobs
-        voxel51 jobs --archive <id> [...]
-
-        # Unarchive jobs
-        voxel51 jobs --unarchive <id> [...]
-
-        # Get job request
-        voxel51 jobs --request <id>
-
-        # Get job status
-        voxel51 jobs --status <id>
-
-        # Get job logfile
-        voxel51 jobs --log <id>
-
-        # Download job output
-        voxel51 jobs --download <id> [--path '/path/for/output.json']
-
-        # Generate signed URL to download job output
-        voxel51 jobs --download-url <id>
-
-        # Kill jobs
-        voxel51 jobs --kill <id> [...]
-
-        # Delete jobs
-        voxel51 jobs --delete <id> [...]
+        # Flags for jobs in a particular state
+        voxel51 jobs list --ready
+        voxel51 jobs list --queued
+        voxel51 jobs list --scheduled
+        voxel51 jobs list --running
+        voxel51 jobs list --complete
+        voxel51 jobs list --failed
     '''
 
     @staticmethod
     def setup(parser):
-        listing = parser.add_argument_group("listing arguments")
-        listing.add_argument(
-            "-l", "--list", nargs="?", metavar="LIMIT", const=-1,
-            help="list jobs, up to optional record limit")
-        listing.add_argument(
-            "--search", metavar="[FIELD:]STR",
+        parser.add_argument(
+            "-l", "--limit", metavar="LIMIT", type=int, default=-1,
+            help="limit the number of jobs listed")
+        parser.add_argument(
+            "-s", "--search", metavar="[FIELD:]STR",
             help="search to limit results when listing jobs")
-        listing.add_argument(
-            "--sort-by", metavar="FIELD",
-            help="field to sort by when listing jobs")
-        listing.add_argument(
-            "--ascending", action="store_true",
-            help="whether to sort in ascending order")
-        listing.add_argument(
+        parser.add_argument(
             "-c", "--count", action="store_true",
             help="whether to show the number of jobs in the list")
+        parser.add_argument(
+            "--sort-by", metavar="FIELD",
+            help="field to sort by when listing jobs")
+        parser.add_argument(
+            "--ascending", action="store_true",
+            help="whether to sort in ascending order")
+        parser.add_argument(
+            "--archived", action="store_true",
+            help="whether to list archived jobs")
 
         states = parser.add_argument_group("state arguments")
         states.add_argument(
@@ -301,276 +401,616 @@ class JobsCommand(Command):
         states.add_argument(
             "--failed", action="store_true", help="jobs in FAILED state")
 
-        upload = parser.add_argument_group("upload arguments")
-        upload.add_argument(
-            "-u", "--upload", metavar="PATH", help="upload job")
-        upload.add_argument(
-            "-n", "--name", metavar="NAME", help="job name")
-        upload.add_argument(
-            "--auto-start", action="store_true",
-            help="whether to automatically start job")
-
-        download = parser.add_argument_group("download arguments")
-        download.add_argument(
-            "-d", "--download", metavar="ID", help="job to download")
-        download.add_argument(
-            "-p", "--path", metavar="PATH", help="path to download job output")
-
-        parser.add_argument(
-            "-i", "--info", nargs="+", metavar="ID",
-            help="get info about jobs")
-        parser.add_argument(
-            "--start", nargs="+", metavar="ID", help="start jobs")
-        parser.add_argument(
-            "--archive", nargs="+", metavar="ID", help="archive jobs")
-        parser.add_argument(
-            "--unarchive", nargs="+", metavar="ID",
-            help="unarchive jobs")
-        parser.add_argument(
-            "--request", metavar="ID", help="get request for job")
-        parser.add_argument(
-            "--status", metavar="ID", help="get status for job")
-        parser.add_argument(
-            "--log", metavar="ID", help="get logfile for job")
-        parser.add_argument(
-            "--download-url", metavar="ID",
-            help="generate signed URL to download job output")
-        parser.add_argument(
-            "--delete", nargs="+", metavar="ID", help="delete jobs")
-        parser.add_argument(
-            "--kill", nargs="+", metavar="ID", help="kill jobs")
-
     @staticmethod
     def run(args):
         api = API()
 
-        # Handle explicit state arguments
+        query = JobsQuery().add_all_fields()
+
+        if args.limit >= 0:
+            query = query.set_limit(args.limit)
+
+        sort_field = args.sort_by if args.sort_by else "upload_date"
+        descending = not args.ascending
+        query = query.sort_by(sort_field, descending=descending)
+
         states = []
         if args.ready:
-            states.append("READY")
-        elif args.queued:
-            states.append("QUEUED")
-        elif args.scheduled:
-            states.append("SCHEDULED")
-        elif args.running:
-            states.append("RUNNING")
-        elif args.complete:
-            states.append("COMPLETE")
-        elif args.failed:
-            states.append("FAILED")
-        if states and args.list is None:
-            args.list = -1
+            states.append(JobState.READY)
+        if args.queued:
+            states.append(JobState.QUEUED)
+        if args.scheduled:
+            states.append(JobState.SCHEDULED)
+        if args.running:
+            states.append(JobState.RUNNING)
+        if args.complete:
+            states.append(JobState.COMPLETE)
+        if args.failed:
+            states.append(JobState.FAILED)
+        if states:
+            query = query.add_search_or("state", states)
 
-        # List jobs
-        if args.list:
-            limit = int(args.list)
-            sort_field = args.sort_by if args.sort_by else "upload_date"
-            descending = not args.ascending
-            query = (JobsQuery()
-                .add_all_fields()
-                .sort_by(sort_field, descending=descending))
-            if limit >= 0:
-                query = query.set_limit(limit)
-            if states:
-                query = query.add_search_or("state", states)
-            if args.search is not None:
-                query = query.add_search_direct(args.search)
-            if args.search is None or not args.search.startswith("archived:"):
-                query = query.add_search("archived", False)
-            jobs = api.query_jobs(query)["jobs"]
-            _print_jobs_table(jobs, show_count=args.count)
+        if args.search is not None:
+            query = query.add_search_direct(args.search)
 
-        # Print job details
-        if args.info:
-            jobs = [api.get_job_details(job_id) for job_id in args.info]
-            _print_jobs_table(jobs)
+        if (args.archived or args.search is None or
+                not "archived:" in args.search):
+            query = query.add_search("archived", args.archived)
 
-        # Upload job
-        if args.upload:
-            request = JobRequest.from_json(args.upload)
-            job_id = api.upload_job_request(
-                request, args.name, auto_start=args.auto_start)
-            print("Created job '%s'" % job_id)
-
-        # Download job output
-        if args.download:
-            job_id = args.download
-            output_path = args.path
-            api.download_job_output(job_id, output_path)
-            print("Downloaded '%s' to '%s'" % (job_id, output_path))
-
-        # Start jobs
-        if args.start:
-            for job_id in args.start:
-                api.start_job(job_id)
-                print("Job '%s' started" % job_id)
-
-        # Archive jobs
-        if args.archive:
-            for job_id in args.archive:
-                api.archive_job(job_id)
-                print("Job '%s' archived" % job_id)
-
-        # Unarchive jobs
-        if args.unarchive:
-            for job_id in args.unarchive:
-                api.unarchive_job(job_id)
-                print("Job '%s' unarchived" % job_id)
-
-        # Get job request
-        if args.request:
-            job_id = args.request
-            request = api.get_job_request(job_id)
-            print(request)
-
-        # Get job status
-        if args.status:
-            job_id = args.status
-            status = api.get_job_status(job_id)
-            _print_dict_as_json(status)
-
-        # Get job logfile
-        if args.log:
-            job_id = args.log
-            logfile = api.download_job_logfile(job_id)
-            print(logfile)
-
-        # Generate job output download URL
-        if args.download_url:
-            job_id = args.download_url
-            url = api.get_job_output_download_url(job_id)
-            print(url)
-
-        # Delete jobs
-        if args.delete:
-            for job_id in args.delete:
-                api.delete_job(job_id)
-                print("Job '%s' deleted" % job_id)
-
-        # Kill jobs
-        if args.kill:
-            for job_id in args.kill:
-                api.kill_job(job_id)
-                print("Job '%s' killed" % job_id)
+        jobs = api.query_jobs(query)["jobs"]
+        _print_jobs_table(jobs, show_count=args.count)
 
 
-class AnalyticsCommand(Command):
-    '''Command-line tool for working with analytics.
+class InfoJobsCommand(Command):
+    '''Command-line tool for getting information about jobs.
 
     Examples:
-        # List analytics
-        voxel51 analytics --list [<limit>]
-            [--all-versions]
-            [--search [<field>:][<str>]]
-            [--sort-by <field>] [--ascending]
-            [--count]
-
-        # Get analytic documentation
-        voxel51 analytics --docs <id>
-
-        # Upload documentation for analytic
-        voxel51 analytics --upload-docs '/path/to/docs.json'
-            [--analytic-type TYPE]
-
-        # Upload analytic image
-        voxel51 analytics --upload-image <id>
-            --image-path '/path/to/image.tar.gz' --image-type cpu|gpu
-
-        # Delete analytics
-        voxel51 analytics --delete <id> [...]
+        # Get job(s) info
+        voxel51 jobs info <id> [...]
     '''
 
     @staticmethod
     def setup(parser):
-        listing = parser.add_argument_group("listing arguments")
-        listing.add_argument(
-            "-l", "--list", nargs="?", metavar="LIMIT", const=-1,
-            help="list analytics, up to optional record limit")
-        listing.add_argument(
-            "-a", "--all-versions", action="store_true",
-            help="whether to include all versions of analytics")
-        listing.add_argument(
-            "--search", metavar="[FIELD:]STR",
-            help="search to limit results when listing analytics")
-        listing.add_argument(
-            "--sort-by", metavar="FIELD",
-            help="field to sort by when listing analytics")
-        listing.add_argument(
-            "--ascending", action="store_true",
-            help="whether to sort in ascending order")
-        listing.add_argument(
-            "-c", "--count", action="store_true",
-            help="whether to show the number of jobs in the list")
-
-        upload = parser.add_argument_group("upload arguments")
-        upload.add_argument(
-            "--upload-docs", metavar="PATH", help="analytic docs to upload")
-        upload.add_argument(
-            "--analytic-type", help="type of analytic")
-        upload.add_argument(
-            "--upload-image", metavar="ID",
-            help="analytic ID to upload image for")
-        upload.add_argument(
-            "--image-path", metavar="PATH", help="analytic image to upload")
-        upload.add_argument(
-            "--image-type", help="type of image being uploaded")
-
         parser.add_argument(
-            "-d", "--docs", metavar="ID",
-            help="get documentation for analytic")
-        parser.add_argument(
-            "--delete", nargs="+", metavar="ID", help="delete analytics")
+            "ids", nargs="+", metavar="ID", help="the job ID(s) of interest")
 
     @staticmethod
     def run(args):
         api = API()
 
-        # List analytics
-        if args.list:
-            limit = int(args.list)
-            sort_field = args.sort_by if args.sort_by else "upload_date"
-            descending = not args.ascending
-            all_versions = args.all_versions
-            query = (AnalyticsQuery()
+        jobs = [api.get_job_details(job_id) for job_id in args.ids]
+        _print_jobs_table(jobs)
+
+
+class UploadJobsCommand(Command):
+    '''Command-line tool for uploading job requests.
+
+    Examples:
+        # Upload job request
+        voxel51 jobs upload '/path/to/request.json'
+            --name <job-name> [--auto-start]
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "path", metavar="PATH", help="job request to upload")
+        parser.add_argument(
+            "-n", "--name", metavar="NAME", help="job name")
+        parser.add_argument(
+            "--auto-start", action="store_true",
+            help="whether to automatically start job")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        request = JobRequest.from_json(args.path)
+        job_id = api.upload_job_request(
+            request, args.name, auto_start=args.auto_start)
+        print("Created job '%s'" % job_id)
+
+
+class StartJobsCommand(Command):
+    '''Command-line tool for starting jobs.
+
+    Examples:
+        # Start specific jobs
+        voxel51 jobs start <id> [...]
+
+        # Start all eligible (= READY) jobs
+        voxel51 jobs start --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the job ID(s) to start")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to start all eligible jobs")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print job IDs that would be started rather than"
+            "actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if args.all:
+            query = (JobsQuery()
                 .add_all_fields()
-                .set_all_versions(all_versions)
-                .sort_by(sort_field, descending=descending))
-            if limit >= 0:
-                query = query.set_limit(limit)
-            if args.search is not None:
-                query = query.add_search_direct(args.search)
-            analytics = api.query_analytics(query)["analytics"]
-            _print_analytics_table(analytics, show_count=args.count)
+                .add_search("state", JobState.READY)
+                .add_search("archived", False)
+                .sort_by("upload_date", descending=False))
+            jobs = api.query_jobs(query)["jobs"]
+            job_ids = [job["id"] for job in jobs]
+        else:
+            job_ids = args.ids
+
+        if args.dry_run:
+            for job_id in job_ids:
+                print(job_id)
+        else:
+            print("Found %d jobs to start" % len(job_ids))
+            for job_id in job_ids:
+                api.start_job(job_id)
+                print("Job '%s' started" % job_id)
+
+
+class ArchiveJobsCommand(Command):
+    '''Command-line tool for archiving jobs.
+
+    Examples:
+        # Archive specific jobs
+        voxel51 jobs archive <id> [...]
+
+        # Archive all jobs
+        voxel51 jobs archive --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the job ID(s) to archive")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to archive all jobs")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print job IDs that would be archived rather than"
+            "actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if args.all:
+            query = (JobsQuery()
+                .add_all_fields()
+                .add_search("archived", False)
+                .sort_by("upload_date", descending=False))
+            jobs = api.query_jobs(query)["jobs"]
+            job_ids = [job["id"] for job in jobs]
+        else:
+            job_ids = args.ids
+
+        if args.dry_run:
+            for job_id in job_ids:
+                print(job_id)
+        else:
+            print("Found %d jobs to archive" % len(job_ids))
+            for job_id in job_ids:
+                api.archive_job(job_id)
+                print("Job '%s' archived" % job_id)
+
+
+class UnarchiveJobsCommand(Command):
+    '''Command-line tool for unarchiving jobs.
+
+    Examples:
+        # Unarchive specific jobs
+        voxel51 jobs unarchive <id> [...]
+
+        # Unarchive all eligible (= unexpired) jobs
+        voxel51 jobs unarchive --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the job ID(s) to unarchive")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to unarchive all eligible jobs")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print job IDs that would be unarchived rather "
+            "than actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if args.all:
+            query = (JobsQuery()
+                .add_all_fields()
+                .add_search("archived", True)
+                .sort_by("upload_date", descending=False))
+            jobs = api.query_jobs(query)["jobs"]
+
+            # Exclude expired jobs
+            job_ids = [
+                job["id"] for job in jobs if not api.is_job_expired(job=job)]
+        else:
+            job_ids = args.ids
+
+        if args.dry_run:
+            for job_id in job_ids:
+                print(job_id)
+        else:
+            print("Found %d jobs to unarchive" % len(job_ids))
+            for job_id in job_ids:
+                api.unarchive_job(job_id)
+                print("Job '%s' unarchived" % job_id)
+
+
+class RequestJobsCommand(Command):
+    '''Command-line tool for downloading job requests.
+
+    Example:
+        # Print job request
+        voxel51 jobs request <id>
+
+        # Download job request to disk
+        voxel51 jobs request <id> --path '/path/for/request.json'
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument("id", metavar="ID", help="the job ID of interest")
+        parser.add_argument(
+            "-p", "--path", metavar="PATH", help="path to write request JSON")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        request = api.get_job_request(args.id)
+
+        if args.path:
+            request.to_json(args.path)
+            print(
+                "Request for job '%s' written to '%s'" % (args.id, args.path))
+        else:
+            print(request)
+
+
+class StatusJobsCommand(Command):
+    '''Command-line tool for downloading job statuses.
+
+    Example:
+        # Print job status
+        voxel51 jobs status <id>
+
+        # Download job status to disk
+        voxel51 jobs status <id> --path '/path/for/status.json'
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument("id", metavar="ID", help="the job ID of interest")
+        parser.add_argument(
+            "-p", "--path", metavar="PATH", help="path to write status JSON")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        status = api.get_job_status(args.id)
+
+        if args.path:
+            voxu.write_json(status, args.path)
+            print("Status for job '%s' written to '%s'" % (args.id, args.path))
+        else:
+            _print_dict_as_json(status)
+
+
+class LogJobsCommand(Command):
+    '''Command-line tool for downloading job logfiles.
+
+    Example:
+        # Print job logfile
+        voxel51 jobs log <id>
+
+        # Download job logfile to disk
+        voxel51 jobs log <id> --path '/path/for/job.log'
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument("id", metavar="ID", help="the job ID of interest")
+        parser.add_argument(
+            "-p", "--path", metavar="PATH", help="path to write logfile")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if args.path:
+            api.download_job_logfile(args.id, output_path=args.path)
+            print(
+                "Logfile for job '%s' written to '%s'" % (args.id, args.path))
+        else:
+            logfile = api.download_job_logfile(args.id, output_path=args.path)
+            print(logfile)
+
+
+class DownloadJobsCommand(Command):
+    '''Command-line tool for downloading job outputs.
+
+    Examples:
+        # Download job to specific location
+        voxel51 jobs download <id> --path '/path/for/video.mp4'
+
+        # Generate signed URL to download job
+        voxel51 jobs download <id> --url
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument("download", metavar="ID", help="job to download")
+        parser.add_argument(
+            "-p", "--path", metavar="PATH", help="path to write output")
+        parser.add_argument(
+            "-u", "--url", metavar="ID",
+            help="generate signed URL to download job")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        job_id = args.download
+
+        if args.url:
+            url = api.get_job_output_download_url(job_id)
+            print(url)
+            return
+
+        api.download_job_output(job_id, args.path)
+        print("Downloaded '%s' to '%s'" % (job_id, args.path))
+
+
+class KillJobsCommand(Command):
+    '''Command-line tool for killing jobs.
+
+    Examples:
+        # Kill specific jobs
+        voxel51 jobs kill <ID> [...]
+
+        # Kill all eligible jobs
+        voxel51 jobs kill --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="job ID(s) to kill")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to kill all eligible jobs")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if args.all:
+            query = (JobsQuery()
+                .add_all_fields()
+                .add_search("archived", False)
+                .add_search_or("state", [JobState.QUEUED, JobState.SCHEDULED])
+                .sort_by("upload_date", descending=False))
+            jobs = api.query_jobs(query)["jobs"]
+            job_ids = [job["id"] for job in jobs]
+            print("Found %d jobs to kill" % len(job_ids))
+        else:
+            job_ids = args.ids
+
+        for job_id in job_ids:
+            api.kill_job(job_id)
+            print("Job '%s' killed" % job_id)
+
+
+class DeleteJobsCommand(Command):
+    '''Command-line tool for deleting jobs.
+
+    Examples:
+        # Delete specific jobs
+        voxel51 jobs delete <ID> [...]
+
+        # Delete all eligible jobs
+        voxel51 jobs delete --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="job ID(s) to delete")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to delete all eligible jobs")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if args.all:
+            query = (JobsQuery()
+                .add_all_fields()
+                .add_search("archived", False)
+                .add_search("state", JobState.READY)
+                .sort_by("upload_date", descending=False))
+            jobs = api.query_jobs(query)["jobs"]
+            job_ids = [job["id"] for job in jobs]
+            print("Found %d jobs to kill" % len(job_ids))
+        else:
+            job_ids = args.ids
+
+        for job_id in job_ids:
+            api.delete_job(job_id)
+            print("Job '%s' deleted" % job_id)
+
+
+class AnalyticsCommand(Command):
+    '''Command-line tool for working with analytics.'''
+
+    @staticmethod
+    def setup(parser):
+        subparsers = parser.add_subparsers(title="available commands")
+        _register_command(subparsers, "list", ListAnalyticsCommand)
+        _register_command(subparsers, "docs", DocsAnalyticsCommand)
+        _register_command(subparsers, "upload", UploadAnalyticsCommand)
+        _register_command(subparsers, "delete", DeleteAnalyticsCommand)
+
+
+class ListAnalyticsCommand(Command):
+    '''Command-line tool for listing analytics.
+
+    Examples:
+        # List analytics according to the given query
+        voxel51 analytics list
+            [--limit <limit>]
+            [--search [<field>:]<str>]
+            [--sort-by <field>]
+            [--all-versions]
+            [--ascending]
+            [--count]
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "-l", "--limit", metavar="LIMIT", type=int, default=-1,
+            help="limit the number of analytics listed")
+        parser.add_argument(
+            "-s", "--search", metavar="[FIELD:]STR",
+            help="search to limit results when listing analytics")
+        parser.add_argument(
+            "--sort-by", metavar="FIELD",
+            help="field to sort by when listing analytics")
+        parser.add_argument(
+            "-a", "--all-versions", action="store_true",
+            help="whether to include all versions of analytics")
+        parser.add_argument(
+            "--ascending", action="store_true",
+            help="whether to sort in ascending order")
+        parser.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of analytics in the list")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        query = AnalyticsQuery().add_all_fields()
+
+        if args.limit >= 0:
+            query = query.set_limit(args.limit)
+
+        sort_field = args.sort_by if args.sort_by else "upload_date"
+        descending = not args.ascending
+        query = query.sort_by(sort_field, descending=descending)
+
+        query = query.set_all_versions(args.all_versions)
+
+        if args.search is not None:
+            query = query.add_search_direct(args.search)
+
+        print(query)
+        analytics = api.query_analytics(query)["analytics"]
+        _print_analytics_table(analytics, show_count=args.count)
+
+
+class DocsAnalyticsCommand(Command):
+    '''Command-line tool for getting documentation for analytics.
+
+    Examples:
+        # Print documentation for analytic
+        voxel51 analytics docs <id>
+
+        # Write documentation for analytic to disk
+        voxel51 analytics docs <id> --path '/path/for/doc.json'
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument("id", metavar="ID", help="the analytic ID")
+        parser.add_argument(
+            "-p", "--path", metavar="PATH", help="path to write doc JSON")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        docs = api.get_analytic_doc(args.id)
+
+        if args.path:
+            voxu.write_json(docs, args.path)
+            print(
+                "Documentation for analytic '%s' written to '%s'" %
+                (args.id, args.path))
+        else:
+            _print_dict_as_json(docs)
+
+
+class UploadAnalyticsCommand(Command):
+    '''Command-line tool for uploading analytics.
+
+    Examples:
+        # Upload documentation for analytic
+        voxel51 analytics upload --docs '/path/to/docs.json'
+            [--analytic-type TYPE]
+
+        # Upload analytic image
+        voxel51 analytics upload --image <id>
+            --path '/path/to/image.tar.gz' --image-type cpu|gpu
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "--docs", metavar="PATH", help="analytic docs to upload")
+        parser.add_argument(
+            "--analytic-type", help="type of analytic")
+        parser.add_argument(
+            "--image", metavar="ID",
+            help="analytic ID to upload image for")
+        parser.add_argument(
+            "--path", metavar="PATH", help="analytic image to upload")
+        parser.add_argument(
+            "--image-type", help="type of image being uploaded")
+
+    @staticmethod
+    def run(args):
+        api = API()
 
         # Upload analytic documentation
-        if args.upload_docs:
-            docs_path = args.upload_docs
-            analytic_type = args.analytic_type
+        if args.docs:
             metadata = api.upload_analytic(
-                docs_path, analytic_type=analytic_type)
+                args.docs, analytic_type=args.analytic_type)
             _print_dict_as_table(metadata)
 
         # Upload analytic image
-        if args.upload_image:
-            analytic_id = args.upload_image
-            image_tar_path = args.image_path
+        if args.image:
+            analytic_id = args.image
             image_type = args.image_type
-            api.upload_analytic_image(analytic_id, image_tar_path, image_type)
+            api.upload_analytic_image(analytic_id, args.path, image_type)
             print(
                 "%s image for analytic %s uploaded" %
                 (image_type.upper(), analytic_id))
 
-        # Get analytic documentation
-        if args.docs:
-            analytic_id = args.docs
-            docs = api.get_analytic_doc(analytic_id)
-            _print_dict_as_json(docs)
 
-        # Delete analytic
-        if args.delete:
-            for analytic_id in args.delete:
-                api.delete_analytic(analytic_id)
-                print("Analytic '%s' deleted" % analytic_id)
+class DeleteAnalyticsCommand(Command):
+    '''Command-line tool for deleting analytics.
+
+    Example:
+        # Delete analytics
+        voxel51 analytics delete <ID> [...]
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="+", metavar="ID",
+            help="the analytic ID(s) to delete")
+
+    @staticmethod
+    def run(args):
+        api = API()
+        for analytic_id in args.ids:
+            api.delete_analytic(analytic_id)
+            print("Analytic '%s' deleted" % analytic_id)
 
 
 def _print_active_token_info():
@@ -665,33 +1105,26 @@ def _parse_name(name):
     return name
 
 
-def _register_command(cmd, cls):
-    parser = subparsers.add_parser(
-        cmd, help=cls.__doc__.splitlines()[0],
-        description=cls.__doc__.rstrip(),
+def _register_main_command(command):
+    parser = argparse.ArgumentParser(description=command.__doc__.rstrip())
+    parser.set_defaults(run=command.run)
+    command.setup(parser)
+    return parser
+
+
+def _register_command(parent, name, command):
+    parser = parent.add_parser(
+        name, help=command.__doc__.splitlines()[0],
+        description=command.__doc__.rstrip(),
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.set_defaults(run=cls.run)
-    cls.setup(parser)
-
-
-# Main setup
-parser = argparse.ArgumentParser(
-    description="Voxel51 Platform API command-line interface.")
-parser.add_argument(
-    "-v", "--version", action="version", version="0.1.0",
-    help="show version info")
-subparsers = parser.add_subparsers(title="available commands")
-
-
-# Register commands
-_register_command("auth", AuthenticationCommand)
-_register_command("data", DataCommand)
-_register_command("jobs", JobsCommand)
-_register_command("analytics", AnalyticsCommand)
+    parser.set_defaults(run=command.run)
+    command.setup(parser)
+    return parser
 
 
 def main():
     '''Executes the `voxel51` tool with the given command-line args.'''
+    parser = _register_main_command(Voxel51Command)
     if len(sys.argv) == 1:
         parser.print_help()
         return
