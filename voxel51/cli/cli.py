@@ -780,6 +780,10 @@ class KillJobsCommand(Command):
         parser.add_argument(
             "-a", "--all", action="store_true",
             help="whether to kill all eligible jobs")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print job IDs that would be killed rather than"
+            "actually performing the action")
 
     @staticmethod
     def run(args):
@@ -793,13 +797,17 @@ class KillJobsCommand(Command):
                 .sort_by("upload_date", descending=False))
             jobs = api.query_jobs(query)["jobs"]
             job_ids = [job["id"] for job in jobs]
-            print("Found %d jobs to kill" % len(job_ids))
         else:
             job_ids = args.ids
 
-        for job_id in job_ids:
-            api.kill_job(job_id)
-            print("Job '%s' killed" % job_id)
+        if args.dry_run:
+            for job_id in job_ids:
+                print(job_id)
+        else:
+            print("Found %d jobs to kill" % len(job_ids))
+            for job_id in job_ids:
+                api.kill_job(job_id)
+                print("Job '%s' killed" % job_id)
 
 
 class DeleteJobsCommand(Command):
@@ -820,6 +828,10 @@ class DeleteJobsCommand(Command):
         parser.add_argument(
             "-a", "--all", action="store_true",
             help="whether to delete all eligible jobs")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print job IDs that would be deleted rather than"
+            "actually performing the action")
 
     @staticmethod
     def run(args):
@@ -833,13 +845,17 @@ class DeleteJobsCommand(Command):
                 .sort_by("upload_date", descending=False))
             jobs = api.query_jobs(query)["jobs"]
             job_ids = [job["id"] for job in jobs]
-            print("Found %d jobs to kill" % len(job_ids))
         else:
             job_ids = args.ids
 
-        for job_id in job_ids:
-            api.delete_job(job_id)
-            print("Job '%s' deleted" % job_id)
+        if args.dry_run:
+            for job_id in job_ids:
+                print(job_id)
+        else:
+            print("Found %d jobs to delete" % len(job_ids))
+            for job_id in job_ids:
+                api.delete_job(job_id)
+                print("Job '%s' deleted" % job_id)
 
 
 class AnalyticsCommand(Command):
