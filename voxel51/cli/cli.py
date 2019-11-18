@@ -882,6 +882,10 @@ class ListAnalyticsCommand(Command):
             [--all-versions]
             [--ascending]
             [--count]
+
+        # Flags for analytics with particular scopes
+        voxel51 analytics list --public
+        voxel51 analytics list --user
     '''
 
     @staticmethod
@@ -905,6 +909,12 @@ class ListAnalyticsCommand(Command):
             "-c", "--count", action="store_true",
             help="whether to show the number of analytics in the list")
 
+        scopes = parser.add_argument_group("scope arguments")
+        scopes.add_argument(
+            "--public", action="store_true", help="public analytics")
+        scopes.add_argument(
+            "--user", action="store_true", help="user analytics")
+
     @staticmethod
     def run(args):
         api = API()
@@ -920,10 +930,17 @@ class ListAnalyticsCommand(Command):
 
         query = query.set_all_versions(args.all_versions)
 
+        scopes = []
+        if args.public:
+            scopes.append("public")
+        if args.user:
+            scopes.append("user")
+        if scopes:
+            query = query.add_search_or("scope", scopes)
+
         if args.search is not None:
             query = query.add_search_direct(args.search)
 
-        print(query)
         analytics = api.query_analytics(query)["analytics"]
         _print_analytics_table(analytics, show_count=args.count)
 
