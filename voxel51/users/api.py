@@ -687,6 +687,33 @@ class API(object):
             if (time.time() - start_time) > max_wait_time:
                 raise voxj.JobExecutionError("Maximum wait time exceeded")
 
+    def is_job_expired(self, job_id=None, job=None):
+        '''Determines whether the job is expired.
+
+        Exactly one keyword argument should be provided.
+
+        Args:
+            job_id (str, optional): the job ID
+            job (dict, optional): the metadata dictionary for the job, as
+                returned by :func:`get_job_details` or :func:`query_jobs`
+
+        Returns:
+            True if the job is expired, and False otherwise
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        if job_id is not None:
+            expiration_date = self.get_job_details(job_id)["expiration_date"]
+        elif job is not None:
+            expiration_date = job["expiration_date"]
+        else:
+            raise APIError("Must provide a keyword argument")
+
+        expiration = dateutil.parser.parse(expiration_date)
+        now = datetime.utcnow()
+        return now >= expiration.replace(tzinfo=None)
+
     def get_job_status(self, job_id):
         '''Gets the status of the job with the given ID.
 
