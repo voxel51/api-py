@@ -76,7 +76,7 @@ class Voxel51Command(Command):
 
 
 class AuthCommand(Command):
-    '''Command-line tool for authentication.'''
+    '''Tools for managing authentication.'''
 
     @staticmethod
     def setup(parser):
@@ -134,7 +134,7 @@ class CleanAuthCommand(Command):
 
 
 class DataCommand(Command):
-    '''Command-line tool for working with data.'''
+    '''Tools for working with data.'''
 
     @staticmethod
     def setup(parser):
@@ -147,7 +147,7 @@ class DataCommand(Command):
 
 
 class ListDataCommand(Command):
-    '''Command-line tool for listing data.
+    '''List data uploaded to the platform.
 
     Examples:
         # List data according to the given query
@@ -198,7 +198,7 @@ class ListDataCommand(Command):
 
 
 class InfoDataCommand(Command):
-    '''Command-line tool for getting information about data.
+    '''Get information about data uploaded to the platform.
 
     Examples:
         # Get data info
@@ -219,7 +219,7 @@ class InfoDataCommand(Command):
 
 
 class UploadDataCommand(Command):
-    '''Command-line tool for uploading data.
+    '''Upload data to the platform.
 
     Examples:
         # Upload data
@@ -245,7 +245,7 @@ class UploadDataCommand(Command):
 
 
 class DownloadDataCommand(Command):
-    '''Command-line tool for downloading data.
+    '''Download data from the platform.
 
     Examples:
         # Download data to default location
@@ -283,7 +283,7 @@ class DownloadDataCommand(Command):
 
 
 class DeleteDataCommand(Command):
-    '''Command-line tool for deleting data.
+    '''Delete data from the platform.
 
     Examples:
         # Delete data
@@ -325,7 +325,7 @@ class DeleteDataCommand(Command):
 
 
 class JobsCommand(Command):
-    '''Command-line tool for working with jobs.'''
+    '''Tools for working with jobs.'''
 
     @staticmethod
     def setup(parser):
@@ -345,7 +345,7 @@ class JobsCommand(Command):
 
 
 class ListJobsCommand(Command):
-    '''Command-line tool for listing jobs.
+    '''List jobs on the platform.
 
     Examples:
         # List jobs according to the given query
@@ -442,7 +442,7 @@ class ListJobsCommand(Command):
 
 
 class InfoJobsCommand(Command):
-    '''Command-line tool for getting information about jobs.
+    '''Get information about jobs on the platform.
 
     Examples:
         # Get job(s) info
@@ -463,7 +463,7 @@ class InfoJobsCommand(Command):
 
 
 class UploadJobsCommand(Command):
-    '''Command-line tool for uploading job requests.
+    '''Upload job requests to the platform.
 
     Examples:
         # Upload job request
@@ -492,13 +492,13 @@ class UploadJobsCommand(Command):
 
 
 class StartJobsCommand(Command):
-    '''Command-line tool for starting jobs.
+    '''Start jobs on the platform.
 
     Examples:
         # Start specific jobs
         voxel51 jobs start <id> [...]
 
-        # Start all eligible (= READY) jobs
+        # Start all eligible (i.e., unstarted) jobs
         voxel51 jobs start --all
     '''
 
@@ -540,7 +540,7 @@ class StartJobsCommand(Command):
 
 
 class ArchiveJobsCommand(Command):
-    '''Command-line tool for archiving jobs.
+    '''Archive jobs on the platform.
 
     Examples:
         # Archive specific jobs
@@ -587,13 +587,13 @@ class ArchiveJobsCommand(Command):
 
 
 class UnarchiveJobsCommand(Command):
-    '''Command-line tool for unarchiving jobs.
+    '''Unarchive jobs on the platform.
 
     Examples:
         # Unarchive specific jobs
         voxel51 jobs unarchive <id> [...]
 
-        # Unarchive all eligible (= unexpired) jobs
+        # Unarchive all eligible (i.e., unexpired) jobs
         voxel51 jobs unarchive --all
     '''
 
@@ -637,7 +637,7 @@ class UnarchiveJobsCommand(Command):
 
 
 class RequestJobsCommand(Command):
-    '''Command-line tool for downloading job requests.
+    '''Download job requests.
 
     Example:
         # Print job request
@@ -668,7 +668,7 @@ class RequestJobsCommand(Command):
 
 
 class StatusJobsCommand(Command):
-    '''Command-line tool for downloading job statuses.
+    '''Download job statuses.
 
     Example:
         # Print job status
@@ -698,7 +698,7 @@ class StatusJobsCommand(Command):
 
 
 class LogJobsCommand(Command):
-    '''Command-line tool for downloading job logfiles.
+    '''Download job logfiles.
 
     Example:
         # Print job logfile
@@ -728,7 +728,7 @@ class LogJobsCommand(Command):
 
 
 class DownloadJobsCommand(Command):
-    '''Command-line tool for downloading job outputs.
+    '''Download job outputs.
 
     Examples:
         # Download job to specific location
@@ -763,13 +763,13 @@ class DownloadJobsCommand(Command):
 
 
 class KillJobsCommand(Command):
-    '''Command-line tool for killing jobs.
+    '''Kill jobs on the platform.
 
     Examples:
         # Kill specific jobs
         voxel51 jobs kill <ID> [...]
 
-        # Kill all eligible jobs
+        # Kill all eligible (i.e., queued or scheduled) jobs
         voxel51 jobs kill --all
     '''
 
@@ -803,13 +803,13 @@ class KillJobsCommand(Command):
 
 
 class DeleteJobsCommand(Command):
-    '''Command-line tool for deleting jobs.
+    '''Delete jobs on the platform.
 
     Examples:
         # Delete specific jobs
         voxel51 jobs delete <ID> [...]
 
-        # Delete all eligible jobs
+        # Delete all eligible (i.e., unstarted) jobs
         voxel51 jobs delete --all
     '''
 
@@ -843,7 +843,7 @@ class DeleteJobsCommand(Command):
 
 
 class AnalyticsCommand(Command):
-    '''Command-line tool for working with analytics.'''
+    '''Tools for working with analytics.'''
 
     @staticmethod
     def setup(parser):
@@ -855,7 +855,7 @@ class AnalyticsCommand(Command):
 
 
 class ListAnalyticsCommand(Command):
-    '''Command-line tool for listing analytics.
+    '''List analytics on the platform.
 
     Examples:
         # List analytics according to the given query
@@ -913,7 +913,7 @@ class ListAnalyticsCommand(Command):
 
 
 class DocsAnalyticsCommand(Command):
-    '''Command-line tool for getting documentation for analytics.
+    '''Get documentation about analytics.
 
     Examples:
         # Print documentation for analytic
@@ -945,7 +945,7 @@ class DocsAnalyticsCommand(Command):
 
 
 class UploadAnalyticsCommand(Command):
-    '''Command-line tool for uploading analytics.
+    '''Upload analytics to the platform.
 
     Examples:
         # Upload documentation for analytic
@@ -992,7 +992,7 @@ class UploadAnalyticsCommand(Command):
 
 
 class DeleteAnalyticsCommand(Command):
-    '''Command-line tool for deleting analytics.
+    '''Delete analytics from the platform.
 
     Example:
         # Delete analytics
