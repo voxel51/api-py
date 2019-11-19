@@ -20,6 +20,7 @@ from builtins import *
 
 import argparse
 import json
+import logging
 import sys
 
 from tabulate import tabulate
@@ -29,6 +30,9 @@ import voxel51.users.auth as voxa
 from voxel51.users.jobs import JobRequest, JobState
 from voxel51.users.query import AnalyticsQuery, DataQuery, JobsQuery
 import voxel51.users.utils as voxu
+
+
+logger = logging.getLogger(__name__)
 
 
 MAX_NAME_COLUMN_WIDTH = 51
@@ -237,7 +241,7 @@ class UploadDataCommand(Command):
 
         uploads = []
         for path in args.ids:
-            print("Uploading data '%s'" % path)
+            logger.info("Uploading data '%s'", path)
             data_id = api.upload_data(path)
             uploads.append({"id": data_id, "path": path})
 
@@ -275,11 +279,11 @@ class DownloadDataCommand(Command):
 
         if args.url:
             url = api.get_data_download_url(data_id)
-            print(url)
+            logger.info(url)
             return
 
         output_path = api.download_data(data_id, output_path=args.path)
-        print("Downloaded '%s' to '%s'" % (data_id, output_path))
+        logger.info("Downloaded '%s' to '%s'", data_id, output_path)
 
 
 class DeleteDataCommand(Command):
@@ -316,12 +320,12 @@ class DeleteDataCommand(Command):
 
         if args.dry_run:
             for data_id in data_ids:
-                print(data_id)
+                logger.info(data_id)
         else:
             print("Found %d data to delete" % len(data_ids))
             for data_id in data_ids:
                 api.delete_data(data_id)
-                print("Data '%s' deleted" % data_id)
+                logger.info("Data '%s' deleted", data_id)
 
 
 class JobsCommand(Command):
@@ -488,7 +492,7 @@ class UploadJobsCommand(Command):
         request = JobRequest.from_json(args.path)
         job_id = api.upload_job_request(
             request, args.name, auto_start=args.auto_start)
-        print("Created job '%s'" % job_id)
+        logger.info("Created job '%s'", job_id)
 
 
 class StartJobsCommand(Command):
@@ -531,12 +535,12 @@ class StartJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                print(job_id)
+                logger.info(job_id)
         else:
             print("Found %d jobs to start" % len(job_ids))
             for job_id in job_ids:
                 api.start_job(job_id)
-                print("Job '%s' started" % job_id)
+                logger.info("Job '%s' started", job_id)
 
 
 class ArchiveJobsCommand(Command):
@@ -578,12 +582,12 @@ class ArchiveJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                print(job_id)
+                logger.info(job_id)
         else:
             print("Found %d jobs to archive" % len(job_ids))
             for job_id in job_ids:
                 api.archive_job(job_id)
-                print("Job '%s' archived" % job_id)
+                logger.info("Job '%s' archived", job_id)
 
 
 class UnarchiveJobsCommand(Command):
@@ -628,12 +632,12 @@ class UnarchiveJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                print(job_id)
+                logger.info(job_id)
         else:
             print("Found %d jobs to unarchive" % len(job_ids))
             for job_id in job_ids:
                 api.unarchive_job(job_id)
-                print("Job '%s' unarchived" % job_id)
+                logger.info("Job '%s' unarchived", job_id)
 
 
 class RequestJobsCommand(Command):
@@ -661,10 +665,10 @@ class RequestJobsCommand(Command):
 
         if args.path:
             request.to_json(args.path)
-            print(
-                "Request for job '%s' written to '%s'" % (args.id, args.path))
+            logger.info(
+                "Request for job '%s' written to '%s'", args.id, args.path)
         else:
-            print(request)
+            logger.info(request)
 
 
 class StatusJobsCommand(Command):
@@ -692,7 +696,8 @@ class StatusJobsCommand(Command):
 
         if args.path:
             voxu.write_json(status, args.path)
-            print("Status for job '%s' written to '%s'" % (args.id, args.path))
+            logger.info(
+                "Status for job '%s' written to '%s'", args.id, args.path)
         else:
             _print_dict_as_json(status)
 
@@ -720,11 +725,11 @@ class LogJobsCommand(Command):
 
         if args.path:
             api.download_job_logfile(args.id, output_path=args.path)
-            print(
-                "Logfile for job '%s' written to '%s'" % (args.id, args.path))
+            logger.info(
+                "Logfile for job '%s' written to '%s'", args.id, args.path)
         else:
             logfile = api.download_job_logfile(args.id, output_path=args.path)
-            print(logfile)
+            logger.info(logfile)
 
 
 class DownloadJobsCommand(Command):
@@ -755,11 +760,11 @@ class DownloadJobsCommand(Command):
 
         if args.url:
             url = api.get_job_output_download_url(job_id)
-            print(url)
+            logger.info(url)
             return
 
         api.download_job_output(job_id, args.path)
-        print("Downloaded '%s' to '%s'" % (job_id, args.path))
+        logger.info("Downloaded '%s' to '%s'", job_id, args.path)
 
 
 class KillJobsCommand(Command):
@@ -802,12 +807,12 @@ class KillJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                print(job_id)
+                logger.info(job_id)
         else:
             print("Found %d jobs to kill" % len(job_ids))
             for job_id in job_ids:
                 api.kill_job(job_id)
-                print("Job '%s' killed" % job_id)
+                logger.info("Job '%s' killed", job_id)
 
 
 class DeleteJobsCommand(Command):
@@ -850,12 +855,12 @@ class DeleteJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                print(job_id)
+                logger.info(job_id)
         else:
             print("Found %d jobs to delete" % len(job_ids))
             for job_id in job_ids:
                 api.delete_job(job_id)
-                print("Job '%s' deleted" % job_id)
+                logger.info("Job '%s' deleted", job_id)
 
 
 class AnalyticsCommand(Command):
@@ -970,9 +975,9 @@ class DocsAnalyticsCommand(Command):
 
         if args.path:
             voxu.write_json(docs, args.path)
-            print(
-                "Documentation for analytic '%s' written to '%s'" %
-                (args.id, args.path))
+            logger.info(
+                "Documentation for analytic '%s' written to '%s'",
+                args.id, args.path)
         else:
             _print_dict_as_json(docs)
 
@@ -1019,9 +1024,9 @@ class UploadAnalyticsCommand(Command):
             analytic_id = args.image
             image_type = args.image_type
             api.upload_analytic_image(analytic_id, args.path, image_type)
-            print(
-                "%s image for analytic %s uploaded" %
-                (image_type.upper(), analytic_id))
+            logger.info(
+                "%s image for analytic %s uploaded", image_type.upper(),
+                analytic_id)
 
 
 class DeleteAnalyticsCommand(Command):
@@ -1041,9 +1046,10 @@ class DeleteAnalyticsCommand(Command):
     @staticmethod
     def run(args):
         api = API()
+
         for analytic_id in args.ids:
             api.delete_analytic(analytic_id)
-            print("Analytic '%s' deleted" % analytic_id)
+            logger.info("Analytic '%s' deleted", analytic_id)
 
 
 def _print_active_token_info():
@@ -1055,7 +1061,7 @@ def _print_active_token_info():
         ("creation date", token.creation_date),
     ]
     table_str = tabulate(contents, tablefmt="plain")
-    print(table_str)
+    logger.info(table_str)
 
 
 def _print_data_table(data, show_count=False):
@@ -1072,9 +1078,9 @@ def _print_data_table(data, show_count=False):
             "expiration date"],
         tablefmt=TABLE_FORMAT)
 
-    print(table_str)
+    logger.info(table_str)
     if show_count:
-        print("\nFound %d data\n" % len(records))
+        logger.info("\nFound %d data\n", len(records))
 
 
 def _print_jobs_table(jobs, show_count=False):
@@ -1091,9 +1097,9 @@ def _print_jobs_table(jobs, show_count=False):
             "expiration date"],
         tablefmt=TABLE_FORMAT)
 
-    print(table_str)
+    logger.info(table_str)
     if show_count:
-        print("\nFound %d jobs\n" % len(records))
+        logger.info("\nFound %d jobs\n", len(records))
 
 
 def _print_analytics_table(analytics, show_count=False):
@@ -1111,25 +1117,25 @@ def _print_analytics_table(analytics, show_count=False):
             "pending", "upload date"],
         tablefmt=TABLE_FORMAT)
 
-    print(table_str)
+    logger.info(table_str)
     if show_count:
-        print("\nFound %d analytics\n" % len(records))
+        logger.info("\nFound %d analytics\n", len(records))
 
 
 def _print_table(records):
     table_str = tabulate(records, headers="keys", tablefmt=TABLE_FORMAT)
-    print(table_str)
+    logger.info(table_str)
 
 
 def _print_dict_as_json(d):
     s = json.dumps(d, indent=4)
-    print(s)
+    logger.info(s)
 
 
 def _print_dict_as_table(d):
     contents = list(d.items())
     table_str = tabulate(contents, tablefmt="plain")
-    print(table_str)
+    logger.info(table_str)
 
 
 def _parse_name(name):
