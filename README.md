@@ -16,11 +16,10 @@ git clone https://github.com/voxel51/api-py
 cd api-py
 ```
 
-and then install the package:
+and then run the install script:
 
 ```shell
-pip install -r requirements.txt
-pip install -e .
+bash install.bash
 ```
 
 
