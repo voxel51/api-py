@@ -1084,12 +1084,22 @@ class DeleteAnalyticsCommand(Command):
         parser.add_argument(
             "ids", nargs="+", metavar="ID",
             help="the analytic ID(s) to delete")
+        parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force delete without confirmation")
 
     @staticmethod
     def run(args):
         api = API()
 
-        for analytic_id in args.ids:
+        analytic_ids = args.ids
+
+        num_analytics = len(analytic_ids)
+        logger.info("Found %d analytic(s) to delete", num_analytics)
+        if num_analytics > 0 and not args.force:
+            _abort_if_requested()
+
+        for analytic_id in analytic_ids:
             api.delete_analytic(analytic_id)
             logger.info("Analytic '%s' deleted", analytic_id)
 
