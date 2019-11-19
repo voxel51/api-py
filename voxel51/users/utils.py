@@ -31,6 +31,20 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 logger = logging.getLogger(__name__)
 
 
+def setup_logging(level=logging.INFO, format="%(message)s"):
+    '''Sets up basic logging to stdout.
+
+    Note that this method uses `logging.basicConfig`, so it does nothing if
+    the root logger already has handlers configured. This is intentional so
+    that applications using this library can configure logging as desired.
+
+    Args:
+        level (str): the logging level. The default is `logging.INFO`
+        format (str): the logging format. The default is `"%(message)s"`
+    '''
+    logging.basicConfig(level=level, format=format)
+
+
 def read_json(path):
     '''Reads JSON from file.
 
