@@ -30,6 +30,8 @@ TOKEN_ENVIRON_VAR = "VOXEL51_API_TOKEN"
 TOKEN_PATH = os.path.join(
     os.path.expanduser("~"), ".voxel51", "api-token.json")
 
+HELP_URL = "https://voxel51.com/docs/api/?python#authentication"
+
 
 def activate_token(path):
     '''Activates the token by copying it to ``~/.voxel51/api-token.json``.
@@ -41,7 +43,7 @@ def activate_token(path):
         path (str): the path to a :class:`Token` JSON file
     '''
     voxu.copy_file(path, TOKEN_PATH)
-    logger.info("Token successfully activated")
+    logger.info("API token successfully activated")
 
 
 def deactivate_token():
@@ -51,9 +53,9 @@ def deactivate_token():
     '''
     try:
         os.remove(TOKEN_PATH)
-        logger.info("Token '%s' successfully deactivated", TOKEN_PATH)
+        logger.info("API token '%s' successfully deactivated", TOKEN_PATH)
     except OSError:
-        logger.info("No token to deactivate")
+        logger.info("No API token to deactivate")
 
 
 def get_active_token_path():
@@ -72,11 +74,12 @@ def get_active_token_path():
     if token_path is not None:
         if not os.path.isfile(token_path):
             raise TokenError(
-                "No token found at '%s=%s'" % (TOKEN_ENVIRON_VAR, token_path))
+                "No API token found at '%s=%s'" %
+                (TOKEN_ENVIRON_VAR, token_path))
     elif os.path.isfile(TOKEN_PATH):
         token_path = TOKEN_PATH
     else:
-        raise TokenError("No token found")
+        raise TokenError("No API token found")
 
     return token_path
 
@@ -102,7 +105,7 @@ def load_token(token_path=None):
     try:
         return Token.from_json(token_path)
     except IOError:
-        raise TokenError("File '%s' is not a valid token" % token_path)
+        raise TokenError("File '%s' is not a valid API token" % token_path)
 
 
 class Token(object):
@@ -151,4 +154,13 @@ class Token(object):
 
 class TokenError(Exception):
     '''Exception raised when a problem with a :class:`Token` is encountered.'''
-    pass
+
+    def __init__(self, message):
+        '''Creates a TokenError instance.
+
+        Args:
+            message (str): the error message
+        '''
+        super(TokenError, self).__init__(
+            "%s. See %s for more information about activating an API token."
+            % (message, HELP_URL))
