@@ -17,7 +17,9 @@ from builtins import *
 
 from pkgutil import extend_path
 
+import voxel51.constants as voxc
 import voxel51.users.utils as voxu
+
 
 #
 # This statement allows multiple `voxel51.XXX` packages to be installed in the
@@ -27,6 +29,8 @@ import voxel51.users.utils as voxu
 #
 __path__ = extend_path(__path__, __name__)
 
+# Version string
+version = "%s v%s, %s" % (voxc.NAME, voxc.VERSION, voxc.AUTHOR)
 
 # Ensure that logging is setup
 voxu.setup_logging()
