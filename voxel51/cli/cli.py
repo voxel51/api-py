@@ -548,7 +548,7 @@ class StartJobsCommand(Command):
                 logger.info(job_id)
         else:
             num_jobs = len(job_ids)
-            logger.info("Found %d jobs to start", num_jobs)
+            logger.info("Found %d job(s) to start", num_jobs)
             if num_jobs > 0 and args.all and not args.force:
                 _abort_if_requested()
 
@@ -602,7 +602,7 @@ class ArchiveJobsCommand(Command):
                 logger.info(job_id)
         else:
             num_jobs = len(job_ids)
-            logger.info("Found %d jobs to archive", num_jobs)
+            logger.info("Found %d job(s) to archive", num_jobs)
             if num_jobs > 0 and args.all and not args.force:
                 _abort_if_requested()
 
@@ -659,7 +659,7 @@ class UnarchiveJobsCommand(Command):
                 logger.info(job_id)
         else:
             num_jobs = len(job_ids)
-            logger.info("Found %d jobs to unarchive", num_jobs)
+            logger.info("Found %d job(s) to unarchive", num_jobs)
             if num_jobs > 0 and args.all and not args.force:
                 _abort_if_requested()
 
@@ -841,7 +841,7 @@ class KillJobsCommand(Command):
                 logger.info(job_id)
         else:
             num_jobs = len(job_ids)
-            logger.info("Found %d jobs to kill", num_jobs)
+            logger.info("Found %d job(s) to kill", num_jobs)
             if num_jobs > 0 and args.all and not args.force:
                 _abort_if_requested()
 
@@ -896,7 +896,7 @@ class DeleteJobsCommand(Command):
                 logger.info(job_id)
         else:
             num_jobs = len(job_ids)
-            logger.info("Found %d jobs to delete", num_jobs)
+            logger.info("Found %d job(s) to delete", num_jobs)
             if num_jobs > 0 and args.all and not args.force:
                 _abort_if_requested()
 
@@ -1141,7 +1141,7 @@ def _print_jobs_table(jobs, show_count=False):
 
     logger.info(table_str)
     if show_count:
-        logger.info("\nFound %d jobs\n", len(records))
+        logger.info("\nFound %d job(s)\n", len(records))
 
 
 def _print_analytics_table(analytics, show_count=False):
@@ -1161,7 +1161,7 @@ def _print_analytics_table(analytics, show_count=False):
 
     logger.info(table_str)
     if show_count:
-        logger.info("\nFound %d analytics\n", len(records))
+        logger.info("\nFound %d analytic(s)\n", len(records))
 
 
 def _print_table(records):
