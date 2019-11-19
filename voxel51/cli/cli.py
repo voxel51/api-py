@@ -25,6 +25,7 @@ import sys
 
 from tabulate import tabulate
 
+import voxel51
 from voxel51.users.api import API
 import voxel51.users.auth as voxa
 from voxel51.users.jobs import JobRequest, JobState
@@ -1204,8 +1205,13 @@ def _abort_if_requested():
         sys.exit(0)
 
 
-def _register_main_command(command):
+def _register_main_command(command, version=None):
     parser = argparse.ArgumentParser(description=command.__doc__.rstrip())
+    if version:
+        parser.add_argument(
+            "-v", "--version", action="version", version=version,
+            help="show version info")
+
     parser.set_defaults(run=command.run)
     command.setup(parser)
     return parser
@@ -1223,7 +1229,8 @@ def _register_command(parent, name, command):
 
 def main():
     '''Executes the `voxel51` tool with the given command-line args.'''
-    parser = _register_main_command(Voxel51Command)
+    parser = _register_main_command(Voxel51Command, version=voxel51.version)
+
     if len(sys.argv) == 1:
         parser.print_help()
         return
