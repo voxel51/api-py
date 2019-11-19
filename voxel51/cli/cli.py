@@ -81,7 +81,7 @@ class Voxel51Command(Command):
 
 
 class AuthCommand(Command):
-    '''Tools for managing authentication.'''
+    '''Tools for configuring API tokens.'''
 
     @staticmethod
     def setup(parser):
