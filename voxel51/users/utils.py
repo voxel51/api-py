@@ -23,40 +23,12 @@ import json
 import logging
 import os
 import shutil
+import sys
 
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 
 logger = logging.getLogger(__name__)
-
-
-def upload_files(requests, url, files, headers, **kwargs):
-    '''Upload one or more files of any size using a streaming upload.
-
-    This is intended as an alternative to using ``requests`` directly for files
-    larger than 2GB.
-
-    Args:
-        requests (requests|requests.Session): an existing session to use, or
-            the ``requests`` module
-        url (str): the request endpoint
-        files (dict): files to upload, in the same format as the ``files``
-            argument to ``requests``
-        headers (dict): headers to include
-        kwargs: any other arguments to pass to ``requests``
-
-    Returns:
-        a ``requests.Response``
-    '''
-    #
-    # NOTE: this is limited to 8K chunk size. If this becomes an issue,
-    # monkey-patching data.read to ignore the given chunk size is an option
-    #
-    data = MultipartEncoder(files)
-
-    headers = headers.copy()
-    headers["Content-Type"] = data.content_type
-    return requests.post(url, headers=headers, data=data, **kwargs)
 
 
 def read_json(path):
@@ -135,6 +107,73 @@ def ensure_basedir(path):
     if dirname and not os.path.isdir(dirname):
         logger.info("Making directory '%s'", dirname)
         os.makedirs(dirname)
+
+
+def upload_files(requests, url, files, headers, **kwargs):
+    '''Upload one or more files of any size using a streaming upload.
+
+    This is intended as an alternative to using ``requests`` directly for files
+    larger than 2GB.
+
+    Args:
+        requests (requests|requests.Session): an existing session to use, or
+            the ``requests`` module
+        url (str): the request endpoint
+        files (dict): files to upload, in the same format as the ``files``
+            argument to ``requests``
+        headers (dict): headers to include
+        kwargs: any other arguments to pass to ``requests``
+
+    Returns:
+        a ``requests.Response``
+    '''
+    #
+    # NOTE: this is limited to 8K chunk size. If this becomes an issue,
+    # monkey-patching data.read to ignore the given chunk size is an option
+    #
+    data = MultipartEncoder(files)
+
+    headers = headers.copy()
+    headers["Content-Type"] = data.content_type
+    return requests.post(url, headers=headers, data=data, **kwargs)
+
+
+def query_yes_no(question, default=None):
+    '''Asks a yes/no question via the command-line and returns the answer.
+
+    This function is case insensitive and partial matches are allowed.
+
+    Args:
+        question: the question to ask
+        default: the default answer, which can be "yes", "no", or None (a
+            response is required). The default is None
+
+    Returns:
+        True/False whether the user replied "yes" or "no"
+
+    Raises:
+        ValueError: if the default value was invalid
+    '''
+    valid = {"y": True, "ye": True, "yes": True, "n": False, "no": False}
+
+    if default:
+        default = default.lower()
+        try:
+            prompt = " [Y/n] " if valid[default] else " [y/N] "
+        except KeyError:
+            raise ValueError("Invalid default value '%s'" % default)
+    else:
+        prompt = " [y/n] "
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = six.moves.input().lower()
+        if default and not choice:
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            print("Please respond with 'y[es]' or 'n[o]'")
 
 
 class Serializable(object):
