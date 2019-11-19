@@ -682,7 +682,7 @@ class API(object):
             :class:`APIError` if an underlying API request was unsuccessful
         '''
         start_time = time.time()
-        while not self.is_job_complete(job_id):
+        while not self.is_job_complete(job_id=job_id):
             time.sleep(sleep_time)
             if (time.time() - start_time) > max_wait_time:
                 raise voxj.JobExecutionError("Maximum wait time exceeded")
