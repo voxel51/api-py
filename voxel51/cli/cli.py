@@ -305,6 +305,9 @@ class DeleteDataCommand(Command):
             "-a", "--all", action="store_true",
             help="whether to delete all data")
         parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force delete all without confirmation")
+        parser.add_argument(
             "--dry-run", action="store_true",
             help="whether to print data IDs that would be deleted rather than"
             "actually performing the action")
@@ -322,7 +325,11 @@ class DeleteDataCommand(Command):
             for data_id in data_ids:
                 logger.info(data_id)
         else:
-            print("Found %d data to delete" % len(data_ids))
+            num_data = len(data_ids)
+            logger.info("Found %d data to delete", num_data)
+            if num_data > 0 and args.all and not args.force:
+                _abort_if_requested()
+
             for data_id in data_ids:
                 api.delete_data(data_id)
                 logger.info("Data '%s' deleted", data_id)
@@ -514,6 +521,9 @@ class StartJobsCommand(Command):
             "-a", "--all", action="store_true",
             help="whether to start all eligible jobs")
         parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force start all without confirmation")
+        parser.add_argument(
             "--dry-run", action="store_true",
             help="whether to print job IDs that would be started rather than"
             "actually performing the action")
@@ -537,7 +547,11 @@ class StartJobsCommand(Command):
             for job_id in job_ids:
                 logger.info(job_id)
         else:
-            print("Found %d jobs to start" % len(job_ids))
+            num_jobs = len(job_ids)
+            logger.info("Found %d jobs to start", num_jobs)
+            if num_jobs > 0 and args.all and not args.force:
+                _abort_if_requested()
+
             for job_id in job_ids:
                 api.start_job(job_id)
                 logger.info("Job '%s' started", job_id)
@@ -562,6 +576,9 @@ class ArchiveJobsCommand(Command):
             "-a", "--all", action="store_true",
             help="whether to archive all jobs")
         parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force archive all without confirmation")
+        parser.add_argument(
             "--dry-run", action="store_true",
             help="whether to print job IDs that would be archived rather than"
             "actually performing the action")
@@ -584,7 +601,11 @@ class ArchiveJobsCommand(Command):
             for job_id in job_ids:
                 logger.info(job_id)
         else:
-            print("Found %d jobs to archive" % len(job_ids))
+            num_jobs = len(job_ids)
+            logger.info("Found %d jobs to archive", num_jobs)
+            if num_jobs > 0 and args.all and not args.force:
+                _abort_if_requested()
+
             for job_id in job_ids:
                 api.archive_job(job_id)
                 logger.info("Job '%s' archived", job_id)
@@ -608,6 +629,9 @@ class UnarchiveJobsCommand(Command):
         parser.add_argument(
             "-a", "--all", action="store_true",
             help="whether to unarchive all eligible jobs")
+        parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force unarchive all without confirmation")
         parser.add_argument(
             "--dry-run", action="store_true",
             help="whether to print job IDs that would be unarchived rather "
@@ -634,7 +658,11 @@ class UnarchiveJobsCommand(Command):
             for job_id in job_ids:
                 logger.info(job_id)
         else:
-            print("Found %d jobs to unarchive" % len(job_ids))
+            num_jobs = len(job_ids)
+            logger.info("Found %d jobs to unarchive", num_jobs)
+            if num_jobs > 0 and args.all and not args.force:
+                _abort_if_requested()
+
             for job_id in job_ids:
                 api.unarchive_job(job_id)
                 logger.info("Job '%s' unarchived", job_id)
@@ -786,6 +814,9 @@ class KillJobsCommand(Command):
             "-a", "--all", action="store_true",
             help="whether to kill all eligible jobs")
         parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force kill all without confirmation")
+        parser.add_argument(
             "--dry-run", action="store_true",
             help="whether to print job IDs that would be killed rather than"
             "actually performing the action")
@@ -809,7 +840,11 @@ class KillJobsCommand(Command):
             for job_id in job_ids:
                 logger.info(job_id)
         else:
-            print("Found %d jobs to kill" % len(job_ids))
+            num_jobs = len(job_ids)
+            logger.info("Found %d jobs to kill", num_jobs)
+            if num_jobs > 0 and args.all and not args.force:
+                _abort_if_requested()
+
             for job_id in job_ids:
                 api.kill_job(job_id)
                 logger.info("Job '%s' killed", job_id)
@@ -834,6 +869,9 @@ class DeleteJobsCommand(Command):
             "-a", "--all", action="store_true",
             help="whether to delete all eligible jobs")
         parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force delete all without confirmation")
+        parser.add_argument(
             "--dry-run", action="store_true",
             help="whether to print job IDs that would be deleted rather than"
             "actually performing the action")
@@ -857,7 +895,11 @@ class DeleteJobsCommand(Command):
             for job_id in job_ids:
                 logger.info(job_id)
         else:
-            print("Found %d jobs to delete" % len(job_ids))
+            num_jobs = len(job_ids)
+            logger.info("Found %d jobs to delete", num_jobs)
+            if num_jobs > 0 and args.all and not args.force:
+                _abort_if_requested()
+
             for job_id in job_ids:
                 api.delete_job(job_id)
                 logger.info("Job '%s' deleted", job_id)
@@ -1142,6 +1184,14 @@ def _parse_name(name):
     if len(name) > MAX_NAME_COLUMN_WIDTH:
         name = name[:(MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
     return name
+
+
+def _abort_if_requested():
+    should_continue = voxu.query_yes_no(
+        "Are you sure you want to continue?", default="no")
+
+    if not should_continue:
+        sys.exit(0)
 
 
 def _register_main_command(command):
