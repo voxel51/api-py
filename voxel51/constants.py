@@ -1,8 +1,4 @@
 '''
-Package-wide constants.
-
-IMPORTANT: this module can't import other modules from this package!
-
 | Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 |
@@ -21,6 +17,10 @@ from builtins import *
 
 import json
 import os
+
+#
+# IMPORTANT: this module can't import other modules from this package!
+#
 
 
 # Paths and directories
