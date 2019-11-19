@@ -54,7 +54,7 @@ class API(object):
     '''
 
     def __init__(self, token=None, keep_alive=False):
-        '''Starts a new API session.
+        '''Creates an API instance.
 
         Args:
             token (voxel51.users.auth.Token, optional): a Token to use. If no
@@ -870,7 +870,7 @@ class APIError(Exception):
     '''Exception raised when an :class:`API` request fails.'''
 
     def __init__(self, message, code):
-        '''Creates a new APIError object.
+        '''Creates an APIError instance.
 
         Args:
             message (str): the error message
