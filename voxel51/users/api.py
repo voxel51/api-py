@@ -783,7 +783,7 @@ class API(object):
         if output_path is None:
             res = self._requests.get(endpoint, headers=self._header)
             _validate_response(res)
-            return res.content
+            return res.content.decode()
 
         self._stream_download(endpoint, output_path)
 

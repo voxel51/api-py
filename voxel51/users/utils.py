@@ -71,7 +71,7 @@ def load_json(str_or_bytes):
         return json.loads(str_or_bytes)
     except TypeError:
         # Must be a Python version for which json.loads() cannot handle bytes
-        return json.loads(str_or_bytes.decode("utf-8"))
+        return json.loads(str_or_bytes.decode())
 
 
 def json_to_str(obj):
