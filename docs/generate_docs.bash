@@ -10,7 +10,11 @@
 
 echo "**** Generating documentation"
 
-sphinx-apidoc -f -o docs/source voxel51/ voxel51/cli/
+#
+# We exclude `voxel51/cli` from the generated docs, because the CLI is
+# self-documenting from the command-line
+#
+sphinx-apidoc -f -o docs/source voxel51 voxel51/cli
 
 cd docs
 make html
