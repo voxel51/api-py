@@ -61,14 +61,14 @@ def deactivate_token():
 def get_active_token_path():
     '''Gets the path to the active API token.
 
-    If the ``VOXEL51_API_TOKEN`` environment is set, that path is used.
-    Otherwise, ``~/.voxel51/api-token.json`` is used.
+    If the ``VOXEL51_API_TOKEN`` environment variable is set, that path is
+    used. Otherwise, ``~/.voxel51/api-token.json`` is used.
 
     Returns:
         the path to the active token
 
     Raises:
-        :class:`TokenError` if no valid token was found
+        :class:`TokenError` if no token was found
     '''
     token_path = os.environ.get(TOKEN_ENVIRON_VAR, None)
     if token_path is not None:
@@ -88,8 +88,8 @@ def load_token(token_path=None):
     '''Loads the active API token.
 
     Args:
-        token_path (str, optional): the path to a valid :class:`Token` JSON
-            file. If no path is provided, the ``VOXEL51_API_TOKEN`` environment
+        token_path (str, optional): the path to a :class:`Token` JSON file.
+            If no path is provided, the ``VOXEL51_API_TOKEN`` environment
             variable is checked and, if set, the token is loaded from that
             path. Otherwise, it is loaded from ``~/.voxel51/api-token.json``
 
@@ -101,6 +101,8 @@ def load_token(token_path=None):
     '''
     if token_path is None:
         token_path = get_active_token_path()
+    elif not os.path.isfile(token_path):
+        raise TokenError("No API token found at '%s'" % token_path)
 
     try:
         return Token.from_json(token_path)
