@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generates documentation for the package.
+# Generates documentation for the voxel51-api-py package.
 #
 # Usage:
 #   bash docs/generate_docs.bash

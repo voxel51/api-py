@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs the package.
+# Installs the voxel51-api-py package.
 #
 # Copyright 2017-2019, Voxel51, Inc.
 # voxel51.com
@@ -23,7 +23,7 @@ while getopts "h" FLAG; do
 done
 [ ${SHOW_HELP} = true ] && usage && exit 0
 
-# Install library
+# Install package
 echo "Installing voxel51-api-py"
 pip install -r requirements.txt
 pip install -e .
