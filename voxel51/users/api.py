@@ -22,6 +22,7 @@ from datetime import datetime
 import os
 import time
 
+import dateutil.parser
 import mimetypes
 import requests
 
@@ -53,7 +54,7 @@ class API(object):
     '''
 
     def __init__(self, token=None, keep_alive=False):
-        '''Starts a new API session.
+        '''Creates an API instance.
 
         Args:
             token (voxel51.users.auth.Token, optional): a Token to use. If no
@@ -387,6 +388,9 @@ class API(object):
                 default, the data is written to the current working directory
                 with the same filename as the uploaded data
 
+        Returns:
+            the path to the downloaded data
+
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
@@ -395,6 +399,8 @@ class API(object):
 
         endpoint = self.base_url + "/data/" + data_id + "/download"
         self._stream_download(endpoint, output_path)
+
+        return output_path
 
     def get_data_download_url(self, data_id):
         '''Gets a signed download URL for the data with the given ID.
@@ -612,11 +618,15 @@ class API(object):
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
-    def get_job_state(self, job_id):
-        '''Gets the state of the job with the given ID.
+    def get_job_state(self, job_id=None, job=None):
+        '''Gets the state of the job.
+
+        Exactly one keyword argument should be provided.
 
         Args:
-            job_id (str): the job ID
+            job_id (str, optional): the job ID
+            job (dict, optional): the metadata dictionary for the job, as
+                returned by :func:`get_job_details` or :func:`query_jobs`
 
         Returns:
             the :class:`voxel51.users.jobs.JobState` of the job
@@ -624,26 +634,37 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        return self.get_job_details(job_id)["state"]
+        if job_id is not None:
+            state = self.get_job_details(job_id)["state"]
+        elif job is not None:
+            state = job["state"]
+        else:
+            raise APIError("Must provide a keyword argument")
 
-    def is_job_complete(self, job_id):
-        '''Determines whether the job with the given ID is complete.
+        return state
+
+    def is_job_complete(self, job_id=None, job=None):
+        '''Determines whether the job is complete.
+
+        Exactly one keyword argument should be provided.
 
         Args:
-            job_id (str): the job ID
+            job_id (str, optional): the job ID
+            job (dict, optional): the metadata dictionary for the job, as
+                returned by :func:`get_job_details` or :func:`query_jobs`
 
         Returns:
             True if the job is complete, and False otherwise
 
         Raises:
             :class:`voxel51.users.jobs.JobExecutionError` if the job failed
-            :class:`APIError` if the underlying API request was unsuccessful
+            :class:`APIError` if the request was unsuccessful
         '''
-        job_state = self.get_job_state(job_id)
-        if job_state == voxj.JobState.FAILED:
+        state = self.get_job_state(job_id=job_id, job=job)
+        if state == voxj.JobState.FAILED:
             raise voxj.JobExecutionError("Job '%s' failed" % job_id)
 
-        return job_state == voxj.JobState.COMPLETE
+        return state == voxj.JobState.COMPLETE
 
     def wait_until_job_completes(
             self, job_id, sleep_time=5, max_wait_time=600):
@@ -661,10 +682,37 @@ class API(object):
             :class:`APIError` if an underlying API request was unsuccessful
         '''
         start_time = time.time()
-        while not self.is_job_complete(job_id):
+        while not self.is_job_complete(job_id=job_id):
             time.sleep(sleep_time)
             if (time.time() - start_time) > max_wait_time:
                 raise voxj.JobExecutionError("Maximum wait time exceeded")
+
+    def is_job_expired(self, job_id=None, job=None):
+        '''Determines whether the job is expired.
+
+        Exactly one keyword argument should be provided.
+
+        Args:
+            job_id (str, optional): the job ID
+            job (dict, optional): the metadata dictionary for the job, as
+                returned by :func:`get_job_details` or :func:`query_jobs`
+
+        Returns:
+            True if the job is expired, and False otherwise
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        if job_id is not None:
+            expiration_date = self.get_job_details(job_id)["expiration_date"]
+        elif job is not None:
+            expiration_date = job["expiration_date"]
+        else:
+            raise APIError("Must provide a keyword argument")
+
+        expiration = dateutil.parser.parse(expiration_date)
+        now = datetime.utcnow()
+        return now >= expiration.replace(tzinfo=None)
 
     def get_job_status(self, job_id):
         '''Gets the status of the job with the given ID.
@@ -722,16 +770,21 @@ class API(object):
 
         Args:
             job_id (str): the job ID
-            output_path (str, optional): the path to write the logfile. By
-                default, the logfile is written to the current working
-                directory with the filename "${job_id}.log"
+            output_path (str, optional): the path to write the logfile. If
+                not provided, the logfile is returned as a string
+
+        Returns:
+            the logfile as a string, if `output_path` is None; otherwise None
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        if not output_path:
-            output_path = "%s.log" % job_id
         endpoint = self.base_url + "/jobs/" + job_id + "/log"
+        if output_path is None:
+            res = self._requests.get(endpoint, headers=self._header)
+            _validate_response(res)
+            return res.content.decode()
+
         self._stream_download(endpoint, output_path)
 
     def get_job_logfile_download_url(self, job_id):
@@ -817,7 +870,7 @@ class APIError(Exception):
     '''Exception raised when an :class:`API` request fails.'''
 
     def __init__(self, message, code):
-        '''Creates a new APIError object.
+        '''Creates an APIError instance.
 
         Args:
             message (str): the error message

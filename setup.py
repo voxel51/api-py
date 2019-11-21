@@ -1,29 +1,29 @@
 #!/usr/bin/env python
 '''
-Installs the Python client library for the Voxel51 Platform API.
+Installs the voxel51-api-py package.
 
-Copyright 2017-2019, Voxel51, Inc.
-voxel51.com
+| Copyright 2017-2019, Voxel51, Inc.
+| `voxel51.com <https://voxel51.com/>`_
+|
 '''
 from setuptools import setup, find_packages
 
+import voxel51.constants as voxc
+
 
 setup(
-    name="voxel51-api-python",
-    version="0.1.0",
-    description="Python client library for the Voxel51 Platform API",
-    author="Voxel51, Inc.",
-    author_email="support@voxel51.com",
-    url="https://github.com/voxel51/api-python",
-    license="BSD 4-clause",
+    name=voxc.NAME,
+    version=voxc.VERSION,
+    description=voxc.DESCRIPTION,
+    author=voxc.AUTHOR,
+    author_email=voxc.CONTACT,
+    url=voxc.URL,
+    license=voxc.LICENSE,
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 4 - Beta",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
-    install_requires=[
-        "requests>=2.18.4",
-    ],
+    scripts=["voxel51/cli/voxel51"],
 )

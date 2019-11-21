@@ -15,22 +15,26 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
-from pkgutil import extend_path
-
-import voxel51.constants as voxc
-import voxel51.users.utils as voxu
-
+import json
+import os
 
 #
-# This statement allows multiple `voxel51.XXX` packages to be installed in the
-# same environment and used simultaneously.
+# IMPORTANT: this module can't import other modules from this package!
 #
-# https://docs.python.org/2/library/pkgutil.html#pkgutil.extend_path
-#
-__path__ = extend_path(__path__, __name__)
 
-# Version string
-version = "%s v%s, %s" % (voxc.NAME, voxc.VERSION, voxc.AUTHOR)
 
-# Ensure that logging is setup
-voxu.setup_logging()
+# Paths and directories
+VOXEL51_DIR = os.path.abspath(os.path.dirname(__file__))
+VERSION_JSON_PATH = os.path.join(VOXEL51_DIR, "version.json")
+
+
+# Version
+with open(VERSION_JSON_PATH, "rt") as f:
+    _VER = json.load(f)
+NAME = _VER["name"]
+VERSION = _VER["version"]
+DESCRIPTION = _VER["description"]
+AUTHOR = _VER["author"]
+CONTACT = _VER["contact"]
+URL = _VER["url"]
+LICENSE = _VER["license"]

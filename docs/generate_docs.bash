@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generates Python client library documentation.
+# Generates documentation for the voxel51-api-py package.
 #
 # Usage:
 #   bash docs/generate_docs.bash
@@ -10,7 +10,11 @@
 
 echo "**** Generating documentation"
 
-sphinx-apidoc -f -o docs/source voxel51/
+#
+# We exclude `voxel51/cli` from the generated docs, because the CLI is
+# self-documenting from the command-line
+#
+sphinx-apidoc -f -o docs/source voxel51 voxel51/cli
 
 cd docs
 make html

@@ -1,0 +1,9 @@
+{
+    "name": "voxel51-api-py",
+    "version": "0.1.0",
+    "description": "Python client library for the Voxel51 Platform API",
+    "author": "Voxel51, Inc.",
+    "contact": "support@voxel51.com",
+    "url": "https://github.com/voxel51/api-py",
+    "license": "BSD 4-clause"
+}

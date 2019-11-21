@@ -20,7 +20,7 @@ from builtins import *
 import logging
 import os
 
-from voxel51.users.auth import Token
+from voxel51.users.auth import Token, TokenError
 import voxel51.users.utils as voxu
 
 
@@ -61,27 +61,59 @@ def deactivate_application_token():
         logger.info("No token to deactivate")
 
 
+def get_active_application_token_path():
+    '''Gets the path to the active application token.
+
+    If the ``VOXEL51_APP_TOKEN`` environment variable is set, that path is
+    used. Otherwise, ``~/.voxel51/app-token.json`` is used.
+
+    Returns:
+        the path to the active application token
+
+    Raises:
+        :class:`ApplicationTokenError` if no application token was found
+    '''
+    token_path = os.environ.get(TOKEN_ENVIRON_VAR, None)
+    if token_path is not None:
+        if not os.path.isfile(token_path):
+            raise ApplicationTokenError(
+                "No application token found at '%s=%s'" %
+                (TOKEN_ENVIRON_VAR, token_path))
+    elif os.path.isfile(TOKEN_PATH):
+        token_path = TOKEN_PATH
+    else:
+        raise ApplicationTokenError("No application token found")
+
+    return token_path
+
+
 def load_application_token(token_path=None):
     '''Loads the active application token.
 
     Args:
-        token_path (str, optional): a path to an :class:`ApplicationToken` JSON
-            file. If no path is provided, the ``VOXEL51_APP_TOKEN`` environment
-            variable is checked and, if set, the token is loaded from that
-            path. Otherwise, the token is loaded from
+        token_path (str, optional): the path to an :class:`ApplicationToken`
+            JSON file. If no path is provided, the ``VOXEL51_APP_TOKEN``
+            environment variable is checked and, if set, the token is loaded
+            from that path. Otherwise, it is loaded from
             ``~/.voxel51/app-token.json``
 
     Returns:
         an :class:`ApplicationToken` instance
 
     Raises:
-        :class:`ApplicationTokenLoadError` if no valid token was found
+        :class:`ApplicationTokenError` if no valid application token was found
     '''
-    path = token_path or os.environ.get(TOKEN_ENVIRON_VAR) or TOKEN_PATH
+    if token_path is None:
+        token_path = get_active_application_token_path()
+    elif not os.path.isfile(token_path):
+        raise ApplicationTokenError(
+            "No application token found at '%s'" % token_path)
+
     try:
-        return ApplicationToken.from_json(path)
+        return ApplicationToken.from_json(token_path)
     except IOError:
-        raise ApplicationTokenLoadError("No application token found")
+        raise ApplicationTokenError(
+            "File '%s' is not a valid application token" % token_path)
 
 
 class ApplicationToken(Token):
@@ -104,6 +136,8 @@ class ApplicationToken(Token):
         return header
 
 
-class ApplicationTokenLoadError(Exception):
-    '''Exception raised when a :class:`ApplicationToken` fails to load.'''
+class ApplicationTokenError(TokenError):
+    '''Exception raised when a problem with an :class:`ApplicationToken` is
+    encountered.
+    '''
     pass

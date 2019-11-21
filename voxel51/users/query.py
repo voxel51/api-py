@@ -118,8 +118,23 @@ class BaseQuery(object):
     def add_search_over_all_fields(self, search_str):
         '''Adds the given search string to be applied across all fields.
 
-        The resulting query will return results where any searchable
-        field matches the specified search string.
+        The resulting query will return results where any searchable field
+        matches the specified search string.
+
+        Args:
+            search_str (str): the search string
+
+        Returns:
+            the updated query instance
+        '''
+        self.search.append(search_str)
+        return self
+
+    def add_search_direct(self, search_str):
+        '''Adds the given search string directly to the query.
+
+        This method is useful in situations where you have constructed a
+        pre-built search query that you want to add to the query.
 
         Args:
             search_str (str): the search string
@@ -245,7 +260,7 @@ class DataQuery(BaseQuery):
     Attributes:
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `encoding`, `type`,
-            `size`, `upload_date`, and `expires`
+            `size`, `upload_date`, and `expiration_date`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
@@ -269,7 +284,8 @@ class JobsQuery(BaseQuery):
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `state`, `archived`,
             `upload_date`, `analytic_id`, `auto_start`, `compute_mode`,
-            `start_date`, `completion_date`, `fail_date`, and `failure_type`
+            `start_date`, `completion_date`, `fail_date`, `failure_type`, and
+            `expiration_date`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
