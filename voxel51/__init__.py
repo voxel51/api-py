@@ -17,8 +17,7 @@ from builtins import *
 
 from pkgutil import extend_path
 
-import voxel51.constants as voxc
-import voxel51.users.utils as voxu
+import voxel51.users.logging as voxl
 
 
 #
@@ -29,8 +28,5 @@ import voxel51.users.utils as voxu
 #
 __path__ = extend_path(__path__, __name__)
 
-# Version string
-version = "%s v%s, %s" % (voxc.NAME, voxc.VERSION, voxc.AUTHOR)
-
 # Ensure that logging is setup
-voxu.setup_logging()
+voxl.setup_logging()

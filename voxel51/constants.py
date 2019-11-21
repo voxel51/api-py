@@ -38,3 +38,4 @@ AUTHOR = _VER["author"]
 CONTACT = _VER["contact"]
 URL = _VER["url"]
 LICENSE = _VER["license"]
+VERSION_LONG = "%s v%s, %s" % (NAME, VERSION, AUTHOR)
