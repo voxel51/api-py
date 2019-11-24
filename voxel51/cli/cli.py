@@ -1110,10 +1110,11 @@ def _print_active_token_info():
     token = voxa.load_token(token_path=token_path)
     contents = [
         ("id", token.id),
-        ("path", token_path),
         ("creation date", token.creation_date),
+        ("path", token_path),
     ]
-    table_str = tabulate(contents, tablefmt="plain")
+    table_str = tabulate(
+        contents, headers=["API token", ""], tablefmt=TABLE_FORMAT)
     logger.info(table_str)
 
 
