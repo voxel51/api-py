@@ -88,7 +88,7 @@ class AuthCommand(Command):
         subparsers = parser.add_subparsers(title="available commands")
         _register_command(subparsers, "show", ShowAuthCommand)
         _register_command(subparsers, "activate", ActivateAuthCommand)
-        _register_command(subparsers, "clean", CleanAuthCommand)
+        _register_command(subparsers, "deactivate", DeactivateAuthCommand)
 
 
 class ShowAuthCommand(Command):
@@ -126,7 +126,7 @@ class ActivateAuthCommand(Command):
         voxa.activate_token(args.activate)
 
 
-class CleanAuthCommand(Command):
+class DeactivateAuthCommand(Command):
     '''Deletes the active API token, if any.'''
 
     @staticmethod
