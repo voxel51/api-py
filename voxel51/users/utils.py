@@ -437,9 +437,9 @@ class Serializable(object):
 def _recurse(v):
     if isinstance(v, list):
         return [_recurse(vi) for vi in v]
-    elif isinstance(v, dict):
+    if isinstance(v, dict):
         return {ki: _recurse(vi) for ki, vi in iteritems(v)}
-    elif isinstance(v, Serializable):
+    if isinstance(v, Serializable):
         return v.to_dict()
     return v
 
