@@ -170,10 +170,181 @@ def query_yes_no(question, default=None):
         choice = six.moves.input().lower()
         if default and not choice:
             return valid[default]
-        elif choice in valid:
+        if choice in valid:
             return valid[choice]
-        else:
-            print("Please respond with 'y[es]' or 'n[o]'")
+        print("Please respond with 'y[es]' or 'n[o]'")
+
+
+def to_human_time_str(num_seconds, decimals=1, max_unit=None):
+    '''Converts the given number of seconds to a human-readable time string.
+
+    The supported units are ["ns", "us", "ms", "second", "minute", "hour",
+    "day", "week", "month", "year"].
+
+    Examples:
+        0.001 => "1ms"
+        60 => "1 minute"
+        65 => "1.1 minutes"
+        60123123 => "1.9 years"
+
+    Args:
+        num_seconds: the number of seconds
+        decimals: the desired number of decimal points to show in the string.
+            The default is 1
+        max_unit: an optional max unit, e.g., "hour", beyond which to stop
+            converting to larger units, e.g., "day". By default, no maximum
+            unit is used
+
+    Returns:
+        a human-readable time string like "1.5 minutes" or "20.1 days"
+    '''
+    if num_seconds == 0:
+        return "0 seconds"
+
+    units = [
+        "ns", "us", "ms", " second", " minute", " hour", " day", " week",
+        " month", " year"]
+    conversions = [1000, 1000, 1000, 60, 60, 24, 7, 52 / 12, 12, float("inf")]
+    pluralizable = [
+        False, False, False, True, True, True, True, True, True, True]
+
+    if max_unit and not any(u.strip() == max_unit for u in units):
+        logger.warning("Unsupported max_unit = %s; ignoring", max_unit)
+        max_unit = None
+
+    num = 1e9 * num_seconds  # start with smallest unit
+    for unit, conv, plural in zip(units, conversions, pluralizable):
+        if abs(num) < conv:
+            break
+        if max_unit and unit.strip() == max_unit:
+            break
+        num /= conv
+
+    # Convert to string with the desired number of decimals, UNLESS those
+    # decimals are zeros, in which case they are removed
+    str_fmt = "%." + str(decimals) + "f"
+    num_only_str = (str_fmt % num).rstrip("0").rstrip(".")
+
+    # Add units
+    num_str = num_only_str + unit
+    if plural and num_only_str != "1":
+        num_str += "s"  # handle pluralization
+
+    return num_str
+
+
+def to_human_decimal_str(num, decimals=1, max_unit=None):
+    '''Returns a human-readable string represntation of the given decimal
+    (base-10) number.
+
+    Supported units are ["", "K", "M", "B", "T"].
+
+    Examples:
+        65 => "65"
+        123456 => "123.5K"
+        1e7 => "10M"
+
+    Args:
+        num: a number
+        decimals: the desired number of digits after the decimal point to show.
+            The default is 1
+        max_unit: an optional max unit, e.g., "M", beyond which to stop
+            converting to larger units, e.g., "B". By default, no maximum unit
+            is used
+
+    Returns:
+        a human-readable decimal string
+    '''
+    units = ["", "K", "M", "B", "T"]
+    if max_unit is not None and max_unit not in units:
+        logger.warning("Unsupported max_unit = %s; ignoring", max_unit)
+        max_unit = None
+
+    for unit in units:
+        if abs(num) < 1000:
+            break
+        if max_unit is not None and unit == max_unit:
+            break
+        num /= 1000
+
+    str_fmt = "%." + str(decimals) + "f"
+    return (str_fmt % num).rstrip("0").rstrip(".") + unit
+
+
+def to_human_bytes_str(num_bytes, decimals=1, max_unit=None):
+    '''Returns a human-readable string represntation of the given number of
+    bytes.
+
+    Supported units are ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"].
+
+    Examples:
+        123 => "123B"
+        123000 => "120.1KB"
+        1024 ** 4 => "1TB"
+
+    Args:
+        num_bytes: a number of bytes
+        decimals: the desired number of digits after the decimal point to show.
+            The default is 1
+        max_unit: an optional max unit, e.g., "TB", beyond which to stop
+            converting to larger units, e.g., "PB". By default, no maximum
+            unit is used
+
+    Returns:
+        a human-readable bytes string
+    '''
+    units = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    if max_unit is not None and max_unit not in units:
+        logger.warning("Unsupported max_unit = %s; ignoring", max_unit)
+        max_unit = None
+
+    for unit in units:
+        if abs(num_bytes) < 1024:
+            break
+        if max_unit is not None and unit == max_unit:
+            break
+        num_bytes /= 1024
+
+    str_fmt = "%." + str(decimals) + "f"
+    return (str_fmt % num_bytes).rstrip("0").rstrip(".") + unit
+
+
+def to_human_bits_str(num_bits, decimals=1, max_unit=None):
+    '''Returns a human-readable string represntation of the given number of
+    bits.
+
+    Supported units are ["b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb"].
+
+    Examples:
+        123 => "123b"
+        123000 => "120.1Kb"
+        1024 ** 4 => "1Tb"
+
+    Args:
+        num_bits: a number of bits
+        decimals: the desired number of digits after the decimal point to show.
+            The default is 1
+        max_unit: an optional max unit, e.g., "Tb", beyond which to stop
+            converting to larger units, e.g., "Pb". By default, no maximum
+            unit is used
+
+    Returns:
+        a human-readable bits string
+    '''
+    units = ["b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb"]
+    if max_unit is not None and max_unit not in units:
+        logger.warning("Unsupported max_unit = %s; ignoring", max_unit)
+        max_unit = None
+
+    for unit in units:
+        if abs(num_bits) < 1024:
+            break
+        if max_unit is not None and unit == max_unit:
+            break
+        num_bits /= 1024
+
+    str_fmt = "%." + str(decimals) + "f"
+    return (str_fmt % num_bits).rstrip("0").rstrip(".") + unit
 
 
 class Serializable(object):
