@@ -23,7 +23,9 @@ import json
 import logging
 import sys
 
+import dateutil.parser
 from tabulate import tabulate
+from tzlocal import get_localzone
 
 import voxel51.constants as voxc
 from voxel51.users.api import API
@@ -1114,7 +1116,7 @@ def _print_active_token_info():
     token = voxa.load_token(token_path=token_path)
     contents = [
         ("id", token.id),
-        ("creation date", token.creation_date),
+        ("creation date", _parse_date_string(token.creation_date)),
         ("path", token_path),
     ]
     table_str = tabulate(
@@ -1125,15 +1127,15 @@ def _print_active_token_info():
 def _print_data_table(data, show_count=False):
     records = [
         (
-            d["id"], _parse_name(d["name"]), d["size"], d["type"],
-            d["upload_date"], d["expiration_date"]
+            d["id"], _parse_name(d["name"]), _parse_size(d["size"]), d["type"],
+            _parse_date_string(d["upload_date"]),
+            _parse_date_string(d["expiration_date"])
         ) for d in data]
 
     table_str = tabulate(
         records,
         headers=[
-            "id", "name", "size bytes", "type", "upload date",
-            "expiration date"],
+            "id", "name", "size", "type", "upload date", "expiration date"],
         tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
@@ -1145,7 +1147,8 @@ def _print_jobs_table(jobs, show_count=False):
     records = [
         (
             j["id"], _parse_name(j["name"]), j["state"], j["archived"],
-            j["upload_date"], j["expiration_date"]
+            _parse_date_string(j["upload_date"]),
+            _parse_date_string(j["expiration_date"])
         ) for j in jobs]
 
     table_str = tabulate(
@@ -1165,7 +1168,7 @@ def _print_analytics_table(analytics, show_count=False):
         (
             a["id"], a["name"], a["version"], a["scope"],
             bool(a["supports_cpu"]), bool(a["supports_gpu"]),
-            bool(a["pending"]), a["upload_date"],
+            bool(a["pending"]), _parse_date_string(a["upload_date"]),
         ) for a in analytics]
 
     table_str = tabulate(
@@ -1200,6 +1203,17 @@ def _parse_name(name):
     if len(name) > MAX_NAME_COLUMN_WIDTH:
         name = name[:(MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
     return name
+
+
+def _parse_size(size):
+    if size is None or size < 0:
+        return ""
+    return voxu.to_human_bytes_str(size)
+
+
+def _parse_date_string(date_str):
+    dt = dateutil.parser.parse(date_str)
+    return dt.astimezone(get_localzone()).strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
 def _abort_if_requested():
