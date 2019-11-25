@@ -234,19 +234,20 @@ class UploadDataCommand(Command):
     @staticmethod
     def setup(parser):
         parser.add_argument(
-            "ids", nargs="+", metavar="ID", help="the data ID(s) to upload")
+            "paths", nargs="+", metavar="PATH", help="the file(s) to upload")
 
     @staticmethod
     def run(args):
         api = API()
 
         uploads = []
-        for path in args.ids:
+        for path in args.paths:
             logger.info("Uploading data '%s'", path)
-            data_id = api.upload_data(path)
-            uploads.append({"id": data_id, "path": path})
+            metadata = api.upload_data(path)
+            uploads.append({"id": metadata["id"], "path": path})
 
-        _print_table(uploads)
+        table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
+        logger.info("\n" + table_str + "\n")
 
 
 class DownloadDataCommand(Command):
