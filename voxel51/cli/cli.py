@@ -1183,11 +1183,6 @@ def _print_analytics_table(analytics, show_count=False):
         logger.info("\nFound %d analytic(s)\n", len(records))
 
 
-def _print_table(records):
-    table_str = tabulate(records, headers="keys", tablefmt=TABLE_FORMAT)
-    logger.info(table_str)
-
-
 def _print_dict_as_json(d):
     s = json.dumps(d, indent=4)
     logger.info(s)
