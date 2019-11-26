@@ -162,6 +162,23 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
+    def get_analytic_details(self, analytic_id):
+        '''Gets details about the analytic with the given ID.
+
+        Args:
+            analytic_id (str): the analytic ID
+
+        Returns:
+            a dictionary containing metadata about the analytic
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        endpoint = self.base_url + "/analytics/" + analytic_id + "/details"
+        res = self._requests.get(endpoint, headers=self._header)
+        _validate_response(res)
+        return _parse_json_response(res)["analytic"]
+
     def get_analytic_doc(self, analytic_id):
         '''Gets documentation about the analytic with the given ID.
 
