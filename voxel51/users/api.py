@@ -31,7 +31,6 @@ import voxel51.users.jobs as voxj
 import voxel51.users.utils as voxu
 
 
-_BASE_API_URL = "https://api.voxel51.com/v1"
 _CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
@@ -65,10 +64,13 @@ class API(object):
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''
-        self.base_url = _BASE_API_URL
-        self.token = token if token is not None else voxa.load_token()
+        if token is None:
+            token = voxa.load_token()
+
+        self.base_url = voxu.urljoin(token.base_api_url, "v1")
+        self.token = token
         self.keep_alive = keep_alive
-        self._header = self.token.get_header()
+        self._header = token.get_header()
         self._requests = requests.Session() if keep_alive else requests
 
     def __enter__(self):
