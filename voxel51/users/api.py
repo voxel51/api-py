@@ -31,7 +31,6 @@ import voxel51.users.jobs as voxj
 import voxel51.users.utils as voxu
 
 
-_BASE_API_URL = "https://api.voxel51.com/v1"
 _CHUNK_SIZE = 32 * 1024 * 1024  # in bytes
 
 
@@ -65,10 +64,13 @@ class API(object):
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''
-        self.base_url = _BASE_API_URL
-        self.token = token if token is not None else voxa.load_token()
+        if token is None:
+            token = voxa.load_token()
+
+        self.base_url = voxu.urljoin(token.base_api_url, "v1")
+        self.token = token
         self.keep_alive = keep_alive
-        self._header = self.token.get_header()
+        self._header = token.get_header()
         self._requests = requests.Session() if keep_alive else requests
 
     def __enter__(self):
@@ -85,18 +87,20 @@ class API(object):
             self._requests.close()
 
     @classmethod
-    def from_json(cls, token_path):
+    def from_json(cls, token_path, **kwargs):
         '''Creates an API instance from the given Token JSON file.
 
         Args:
-            token_path: the path to a :class:`voxel51.users.auth.Token` JSON
-                file
+            token_path (str): the path to a :class:`voxel51.users.auth.Token`
+                JSON file
+            **kwargs (dict): optional keyword arguments for
+                `API(token=token, **kwargs)`
 
         Returns:
-            an API instance
+            an :class:`API` instance
         '''
         token = voxa.load_token(token_path=token_path)
-        return cls(token=token)
+        return cls(token=token, **kwargs)
 
     @staticmethod
     def thread_map(callback, iterable, max_workers=None):
@@ -135,7 +139,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/analytics/list"
+        endpoint = voxu.urljoin(self.base_url, "analytics", "list")
         data = {"all_versions": all_versions}
         res = self._requests.get(endpoint, headers=self._header, json=data)
         _validate_response(res)
@@ -156,7 +160,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/analytics"
+        endpoint = voxu.urljoin(self.base_url, "analytics")
         res = self._requests.get(
             endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
@@ -191,7 +195,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/analytics/" + analytic_id
+        endpoint = voxu.urljoin(self.base_url, "analytics", analytic_id)
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
@@ -215,7 +219,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/analytics"
+        endpoint = voxu.urljoin(self.base_url, "analytics")
         filename = os.path.basename(doc_json_path)
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
@@ -244,7 +248,8 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/analytics/" + analytic_id + "/images"
+        endpoint = voxu.urljoin(
+            self.base_url, "analytics", analytic_id, "images")
         params = {"type": image_type.lower()}
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
@@ -265,7 +270,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/analytics/" + analytic_id
+        endpoint = voxu.urljoin(self.base_url, "analytics", analytic_id)
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -280,7 +285,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data/list"
+        endpoint = voxu.urljoin(self.base_url, "data", "list")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
@@ -299,7 +304,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data"
+        endpoint = voxu.urljoin(self.base_url, "data")
         res = self._requests.get(
             endpoint, headers=self._header, params=data_query.to_dict())
         _validate_response(res)
@@ -320,7 +325,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data"
+        endpoint = voxu.urljoin(self.base_url, "data")
         filename = os.path.basename(path)
         mime_type = _get_mime_type(path)
         with open(path, "rb") as df:
@@ -361,7 +366,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data/url"
+        endpoint = voxu.urljoin(self.base_url, "data", "url")
         data = {
             "signed_url": url,
             "filename": filename,
@@ -391,7 +396,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data/" + data_id
+        endpoint = voxu.urljoin(self.base_url, "data", data_id)
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["data"]
@@ -414,7 +419,7 @@ class API(object):
         if not output_path:
             output_path = self.get_data_details(data_id)["name"]
 
-        endpoint = self.base_url + "/data/" + data_id + "/download"
+        endpoint = voxu.urljoin(self.base_url, "data", data_id, "download")
         self._stream_download(endpoint, output_path)
 
         return output_path
@@ -431,7 +436,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data/" + data_id + "/download-url"
+        endpoint = voxu.urljoin(self.base_url, "data", data_id, "download-url")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["url"]
@@ -452,7 +457,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data/" + data_id + "/ttl"
+        endpoint = voxu.urljoin(self.base_url, "data", data_id, "ttl")
         data = {"days": str(days)}
         res = self._requests.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
@@ -466,7 +471,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/data/" + data_id
+        endpoint = voxu.urljoin(self.base_url, "data", data_id)
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -481,7 +486,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/list"
+        endpoint = voxu.urljoin(self.base_url, "jobs", "list")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["jobs"]
@@ -500,7 +505,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs"
+        endpoint = voxu.urljoin(self.base_url, "jobs")
         res = self._requests.get(
             endpoint, headers=self._header, params=jobs_query.to_dict())
         _validate_response(res)
@@ -526,7 +531,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs"
+        endpoint = voxu.urljoin(self.base_url, "jobs")
         files = {
             "file": ("job.json", str(job_request), "application/json"),
             "job_name": (None, job_name),
@@ -552,7 +557,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id)
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
@@ -570,7 +575,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/request"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "request")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return voxj.JobRequest.from_dict(_parse_json_response(res))
@@ -584,7 +589,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/start"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "start")
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -604,7 +609,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/ttl"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "ttl")
         data = {"days": str(days)}
         res = self._requests.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
@@ -618,7 +623,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/archive"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "archive")
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -631,7 +636,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/unarchive"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "unarchive")
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -743,7 +748,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/status"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "status")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
@@ -758,7 +763,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/output"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "output")
         self._stream_download(endpoint, output_path)
 
     def get_job_output_download_url(self, job_id):
@@ -774,7 +779,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/output-url"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "output-url")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["url"]
@@ -796,7 +801,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/log"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "log")
         if output_path is None:
             res = self._requests.get(endpoint, headers=self._header)
             _validate_response(res)
@@ -821,7 +826,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/log-url"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "log-url")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["url"]
@@ -837,7 +842,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id)
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -852,7 +857,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/jobs/" + job_id + "/kill"
+        endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "kill")
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -867,7 +872,7 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/status/all"
+        endpoint = voxu.urljoin(self.base_url, "status", "all")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["statuses"]
