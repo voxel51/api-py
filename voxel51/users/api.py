@@ -87,18 +87,20 @@ class API(object):
             self._requests.close()
 
     @classmethod
-    def from_json(cls, token_path):
+    def from_json(cls, token_path, **kwargs):
         '''Creates an API instance from the given Token JSON file.
 
         Args:
-            token_path: the path to a :class:`voxel51.users.auth.Token` JSON
-                file
+            token_path (str): the path to a :class:`voxel51.users.auth.Token`
+                JSON file
+            **kwargs (dict): optional keyword arguments for
+                `API(token=token, **kwargs)`
 
         Returns:
-            an API instance
+            an :class:`API` instance
         '''
         token = voxa.load_token(token_path=token_path)
-        return cls(token=token)
+        return cls(token=token, **kwargs)
 
     @staticmethod
     def thread_map(callback, iterable, max_workers=None):
