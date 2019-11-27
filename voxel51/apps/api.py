@@ -119,7 +119,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/analytics/list"
+        endpoint = voxu.urljoin(self.base_url, "apps", "analytics", "list")
         data = {"all_versions": all_versions}
         res = self._requests.get(endpoint, headers=self._header, json=data)
         _validate_response(res)
@@ -140,7 +140,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/analytics"
+        endpoint = voxu.urljoin(self.base_url, "apps", "analytics")
         res = self._requests.get(
             endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
@@ -158,7 +158,8 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/analytics/" + analytic_id
+        endpoint = voxu.urljoin(
+            self.base_url, "apps", "analytics", analytic_id)
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)
@@ -182,7 +183,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/analytics"
+        endpoint = voxu.urljoin(self.base_url, "apps", "analytics")
         filename = os.path.basename(doc_json_path)
         mime_type = _get_mime_type(doc_json_path)
         with open(doc_json_path, "rb") as df:
@@ -210,7 +211,8 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/analytics/" + analytic_id + "/images"
+        endpoint = voxu.urljoin(
+            self.base_url, "apps", "analytics", analytic_id, "images")
         params = {"type": image_type.lower()}
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
@@ -231,7 +233,8 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/analytics/" + analytic_id
+        endpoint = voxu.urljoin(
+            self.base_url, "apps", "analytics", analytic_id)
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
@@ -254,7 +257,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/data"
+        endpoint = voxu.urljoin(self.base_url, "apps", "data")
         res = self._requests.get(
             endpoint, headers=self._header, params=data_query.to_dict())
         _validate_response(res)
@@ -279,7 +282,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/jobs"
+        endpoint = voxu.urljoin(self.base_url, "apps", "jobs")
         res = self._requests.get(
             endpoint, headers=self._header, params=jobs_query.to_dict())
         _validate_response(res)
@@ -296,7 +299,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/users"
+        endpoint = voxu.urljoin(self.base_url, "apps", "users")
         data = {"username": username}
         res = self._requests.post(endpoint, headers=self._header, json=data)
         _validate_response(res)
@@ -310,7 +313,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/users/list"
+        endpoint = voxu.urljoin(self.base_url, "apps", "users", "list")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["users"]
@@ -326,7 +329,7 @@ class ApplicationAPI(API):
         Raises:
             :class:`ApplicationAPIError`: if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/apps/status/all"
+        endpoint = voxu.urljoin(self.base_url, "apps", "status", "all")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["statuses"]
