@@ -59,6 +59,7 @@ class ApplicationAPI(API):
         '''
         if token is None:
             token = voxa.load_application_token()
+
         super(ApplicationAPI, self).__init__(
             token=token, keep_alive=keep_alive)
         self.active_user = None
@@ -80,19 +81,21 @@ class ApplicationAPI(API):
         self._header = self.token.get_header()
 
     @classmethod
-    def from_json(cls, token_path):
+    def from_json(cls, token_path, **kwargs):
         '''Creates an :class:`ApplicationAPI` instance from the given
         :class:`ApplicationToken` JSON file.
 
         Args:
             token_path (str): the path to an
                 :class:`voxel51.apps.auth.ApplicationToken` JSON file
+            **kwargs (dict): optional keyword arguments for
+                `ApplicationAPI(token=token, **kwargs)`
 
         Returns:
             an :class:`ApplicationAPI` instance
         '''
         token = voxa.load_application_token(token_path=token_path)
-        return cls(token=token)
+        return cls(token=token, **kwargs)
 
     #
     # ANALYTICS ###############################################################
