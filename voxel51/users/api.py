@@ -178,7 +178,8 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        endpoint = self.base_url + "/analytics/" + analytic_id + "/details"
+        endpoint = voxu.urljoin(
+            self.base_url, "analytics", analytic_id, "details")
         res = self._requests.get(endpoint, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["analytic"]
