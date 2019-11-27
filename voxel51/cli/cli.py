@@ -1139,7 +1139,8 @@ def _print_data_table(data, show_count=False):
 
     logger.info(table_str)
     if show_count:
-        logger.info("\nFound %d data\n", len(records))
+        total_size = _render_bytes(sum(d["size"] for d in data))
+        logger.info("\nShowing %d data, %s\n", len(records), total_size)
 
 
 def _print_jobs_table(jobs, show_count=False):
