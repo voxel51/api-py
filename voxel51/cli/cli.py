@@ -1127,14 +1127,13 @@ def _print_active_token_info():
 def _print_data_table(data, show_count=False):
     records = [
         (
-            d["id"], _render_name(d["name"]), _render_size(d["size"]),
+            d["id"], _render_name(d["name"]), _render_bytes(d["size"]),
             d["type"], _render_datetime(d["upload_date"]),
             _render_datetime(d["expiration_date"])
         ) for d in data]
 
     table_str = tabulate(
-        records,
-        headers=[
+        records, headers=[
             "id", "name", "size", "type", "upload date", "expiration date"],
         tablefmt=TABLE_FORMAT)
 
@@ -1152,15 +1151,14 @@ def _print_jobs_table(jobs, show_count=False):
         ) for j in jobs]
 
     table_str = tabulate(
-        records,
-        headers=[
+        records, headers=[
             "id", "name", "state", "archived", "upload date",
             "expiration date"],
         tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
     if show_count:
-        logger.info("\nFound %d job(s)\n", len(records))
+        logger.info("\nShowing %d job(s)\n", len(records))
 
 
 def _print_analytics_table(analytics, show_count=False):
@@ -1172,8 +1170,7 @@ def _print_analytics_table(analytics, show_count=False):
         ) for a in analytics]
 
     table_str = tabulate(
-        records,
-        headers=[
+        records, headers=[
             "id", "name", "version", "scope", "supports cpu", "supports gpu",
             "pending", "upload date"],
         tablefmt=TABLE_FORMAT)
@@ -1200,7 +1197,7 @@ def _render_name(name):
     return name
 
 
-def _render_size(size):
+def _render_bytes(size):
     if size is None or size < 0:
         return ""
     return voxu.to_human_bytes_str(size)
