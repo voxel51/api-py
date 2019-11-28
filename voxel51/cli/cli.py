@@ -160,10 +160,39 @@ class ListDataCommand(Command):
         # List data according to the given query
         voxel51 data list
             [--limit <limit>]
-            [--search [<field>:]<str>]
+            [--search [<field>:]<str>[,...]]
             [--sort-by <field>]
             [--ascending]
             [--count]
+
+        # List the last 10 data uploaded to the platform
+        voxel51 data list --limit 10 --sort-by upload_date
+
+        # List data whose filenames contain "test", in ascending order of size
+        voxel51 data list --search name:test --sort-by size --ascending
+
+    Search syntax:
+        The generic search syntax is:
+
+            --search [<field>:]<str>[,...]
+
+        where:
+            <field>    an optional field name on which to search
+            <str>      the search string
+
+        The supported fields for data searches are `id`, `name`, and `type`.
+
+        If `<field>:` is omitted, the search will match any records for which
+        any field contains the given search string.
+
+        Multiple searches can be specified as a comma-separated list. Records
+        must match all searches in order to appear in the search results.
+
+        You can include special characters `,` and `:` in search strings by
+        escaping them with `\\`.
+
+        Fields are case insensitive, and underscores can be used in-place of
+        spaces.
     '''
 
     @staticmethod
@@ -172,7 +201,7 @@ class ListDataCommand(Command):
             "-l", "--limit", metavar="LIMIT", type=int, default=-1,
             help="limit the number of data listed")
         parser.add_argument(
-            "-s", "--search", metavar="[FIELD:]STR",
+            "-s", "--search", metavar="SEARCH",
             help="search to limit results when listing data")
         parser.add_argument(
             "-c", "--count", action="store_true",
@@ -366,7 +395,7 @@ class ListJobsCommand(Command):
         # List jobs according to the given query
         voxel51 jobs list
             [--limit <limit>]
-            [--search [<field>:]<str>]
+            [--search [<field>:]<str>[,...]]
             [--sort-by <field>]
             [--archived]
             [--ascending]
@@ -379,6 +408,36 @@ class ListJobsCommand(Command):
         voxel51 jobs list --running
         voxel51 jobs list --complete
         voxel51 jobs list --failed
+
+        # List the last 10 jobs completed on the platform
+        voxel51 jobs list --complete --limit 10 --sort-by upload_date
+
+        # List jobs whose filenames contain "test", in alphabetical order
+        voxel51 jobs list --search name:test --sort-by name --ascending
+
+    Search syntax:
+        The generic search syntax is:
+
+            --search [<field>:]<str>[,...]
+
+        where:
+            <field>    an optional field name on which to search
+            <str>      the search string
+
+        The supported fields for jobs searches are `id`, `name`, `state`, and
+        `archived`.
+
+        If `<field>:` is omitted, the search will match any records for which
+        any field contains the given search string.
+
+        Multiple searches can be specified as a comma-separated list. Records
+        must match all searches in order to appear in the search results.
+
+        You can include special characters `,` and `:` in search strings by
+        escaping them with `\\`.
+
+        Fields are case insensitive, and underscores can be used in-place of
+        spaces.
     '''
 
     @staticmethod
@@ -387,7 +446,7 @@ class ListJobsCommand(Command):
             "-l", "--limit", metavar="LIMIT", type=int, default=-1,
             help="limit the number of jobs listed")
         parser.add_argument(
-            "-s", "--search", metavar="[FIELD:]STR",
+            "-s", "--search", metavar="SEARCH",
             help="search to limit results when listing jobs")
         parser.add_argument(
             "-c", "--count", action="store_true",
@@ -931,7 +990,7 @@ class ListAnalyticsCommand(Command):
         # List analytics according to the given query
         voxel51 analytics list
             [--limit <limit>]
-            [--search [<field>:]<str>]
+            [--search [<field>:]<str>[,...]]
             [--sort-by <field>]
             [--all-versions]
             [--ascending]
@@ -940,6 +999,36 @@ class ListAnalyticsCommand(Command):
         # Flags for analytics with particular scopes
         voxel51 analytics list --public
         voxel51 analytics list --user
+
+        # List the last 10 analytics of any version uploaded to the platform
+        voxel51 analytics list --all-versions --limit 10 --sort-by upload_date
+
+        # List public analytics whose names contain "sense"
+        voxel51 analytics list --public --search name:sense
+
+    Search syntax:
+        The generic search syntax is:
+
+            --search [<field>:]<str>[,...]
+
+        where:
+            <field>    an optional field name on which to search
+            <str>      the search string
+
+        The supported fields for analytics searches are `id`, `name`, `version`
+        and `type`.
+
+        If `<field>:` is omitted, the search will match any records for which
+        any field contains the given search string.
+
+        Multiple searches can be specified as a comma-separated list. Records
+        must match all searches in order to appear in the search results.
+
+        You can include special characters `,` and `:` in search strings by
+        escaping them with `\\`.
+
+        Fields are case insensitive, and underscores can be used in-place of
+        spaces.
     '''
 
     @staticmethod
@@ -948,7 +1037,7 @@ class ListAnalyticsCommand(Command):
             "-l", "--limit", metavar="LIMIT", type=int, default=-1,
             help="limit the number of analytics listed")
         parser.add_argument(
-            "-s", "--search", metavar="[FIELD:]STR",
+            "-s", "--search", metavar="SEARCH",
             help="search to limit results when listing analytics")
         parser.add_argument(
             "--sort-by", metavar="FIELD",
