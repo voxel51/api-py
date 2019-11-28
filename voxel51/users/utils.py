@@ -31,6 +31,18 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 logger = logging.getLogger(__name__)
 
 
+def urljoin(*args):
+    '''Combines the URL parts into a single URL.
+
+    Args:
+        *args: a list of URL parts
+
+    Returns:
+        the full URL
+    '''
+    return "/".join([a.strip("/") for a in args])
+
+
 def read_json(path):
     '''Reads JSON from file.
 

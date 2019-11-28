@@ -114,6 +114,7 @@ class Token(object):
     '''A class encapsulating an API authentication token.
 
     Attributes:
+        base_api_url (str): the base URL of the API for the token
         creation_date (str): the creation date of the token
         id (str): the ID of the token
     '''
@@ -124,9 +125,11 @@ class Token(object):
         Args:
             token_dict (dict): a JSON dictionary defining an API token
         '''
-        self.creation_date = token_dict["access_token"]["created_at"]
-        self.id = token_dict["access_token"]["token_id"]
-        self._private_key = token_dict["access_token"]["private_key"]
+        access_token = token_dict["access_token"]
+        self.base_api_url = self._parse_base_api_url(access_token)
+        self.creation_date = access_token["created_at"]
+        self.id = access_token["token_id"]
+        self._private_key = access_token["private_key"]
         self._token_dict = token_dict
 
     def __str__(self):
@@ -152,6 +155,18 @@ class Token(object):
             a Token instance
         '''
         return cls(voxu.read_json(path))
+
+    @staticmethod
+    def _parse_base_api_url(access_token):
+        base_api_url = access_token.get("base_api_url", None)
+        if base_api_url is None:
+            base_api_url = "https://api.voxel51.com"
+            logger.warning(
+                "No base API URL found in token; defaulting to '%s'. To "
+                "resolve this message, download a new API token from the "
+                "Platform", base_api_url)
+
+        return base_api_url
 
 
 class TokenError(Exception):

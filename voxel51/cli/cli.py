@@ -1117,6 +1117,7 @@ def _print_active_token_info():
     contents = [
         ("id", token.id),
         ("creation date", _render_datetime(token.creation_date)),
+        ("base API URL", token.base_api_url),
         ("path", token_path),
     ]
     table_str = tabulate(
