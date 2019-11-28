@@ -919,6 +919,7 @@ class AnalyticsCommand(Command):
     def setup(parser):
         subparsers = parser.add_subparsers(title="available commands")
         _register_command(subparsers, "list", ListAnalyticsCommand)
+        _register_command(subparsers, "info", InfoAnalyticsCommand)
         _register_command(subparsers, "docs", DocsAnalyticsCommand)
         _register_command(subparsers, "upload", UploadAnalyticsCommand)
         _register_command(subparsers, "delete", DeleteAnalyticsCommand)
@@ -997,6 +998,29 @@ class ListAnalyticsCommand(Command):
 
         analytics = api.query_analytics(query)["analytics"]
         _print_analytics_table(analytics, show_count=args.count)
+
+
+class InfoAnalyticsCommand(Command):
+    '''Get information about analytics on the platform.
+
+    Examples:
+        # Get analytic(s) info
+        voxel51 analytics info <id> [...]
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="+", metavar="ID",
+            help="the analytic ID(s) of interest")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        analytics = [
+            api.get_analytic_details(analytic_id) for analytic_id in args.ids]
+        _print_analytics_table(analytics)
 
 
 class DocsAnalyticsCommand(Command):
