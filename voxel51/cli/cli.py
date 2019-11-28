@@ -1043,7 +1043,7 @@ class ListAnalyticsCommand(Command):
             "--sort-by", metavar="FIELD",
             help="field to sort by when listing analytics")
         parser.add_argument(
-            "-a", "--all-versions", action="store_true",
+            "--all-versions", action="store_true",
             help="whether to include all versions of analytics")
         parser.add_argument(
             "--ascending", action="store_true",
