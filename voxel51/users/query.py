@@ -196,6 +196,8 @@ class BaseQuery(object):
         for key in vars(self):
             val = getattr(self, key)
             if not key.startswith("_") and val:
+                if isinstance(val, list):
+                    val = ",".join(val)
                 obj[key] = val
         return obj
 
