@@ -672,7 +672,7 @@ class API(object):
         elif job is not None:
             state = job["state"]
         else:
-            raise APIError("Must provide a keyword argument")
+            raise APIError("Either `job_id` or `job` must be provided", 400)
 
         return state
 
@@ -741,7 +741,7 @@ class API(object):
         elif job is not None:
             expiration_date = job["expiration_date"]
         else:
-            raise APIError("Must provide a keyword argument")
+            raise APIError("Either `job_id` or `job` must be provided", 400)
 
         expiration = dateutil.parser.parse(expiration_date)
         now = datetime.utcnow()
