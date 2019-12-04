@@ -300,7 +300,9 @@ class API(object):
             path (str): the path to the data file
             ttl (datetime|str, optional): a TTL for the data. If none is
                 provided, the default TTL is used. If a string is provided, it
-                must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
+                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
+                If a non-UTC timezone is included in the datetime or string, it
+                will be respected
 
         Returns:
             a dictionary containing metadata about the uploaded data
@@ -314,9 +316,7 @@ class API(object):
         with open(path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
             if ttl is not None:
-                if isinstance(ttl, datetime):
-                    ttl = ttl.isoformat()
-                files["data_ttl"] = (None, str(ttl))
+                files["data_ttl"] = (None, _parse_datetime(ttl))
             res = voxu.upload_files(
                 self._requests, endpoint, files, headers=self._header)
 
@@ -341,7 +341,9 @@ class API(object):
             encoding (str, optional): an optional encoding of the file
             ttl (datetime|str, optional): a TTL for the data. If none is
                 provided, the default TTL is used. If a string is provided, it
-                must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
+                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
+                If a non-UTC timezone is included in the datetime or string, it
+                will be respected
 
         Returns:
             a dictionary containing metadata about the posted data
@@ -359,9 +361,7 @@ class API(object):
         if encoding:
             data["encoding"] = encoding
         if ttl is not None:
-            if isinstance(ttl, datetime):
-                ttl = ttl.isoformat()
-            data["data_ttl"] = ttl
+            data["data_ttl"] = _parse_datetime(ttl)
 
         res = self._requests.post(endpoint, json=data, headers=self._header)
         _validate_response(res)
@@ -504,9 +504,11 @@ class API(object):
             job_name (str): a name for the job
             auto_start (bool, optional): whether to automatically start the job
                 upon creation. By default, this is False
-            ttl (datetime|str, optional): a TTL for the job output. If none
-                is provided, the default TTL is used. If a string is provided,
-                it must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
+            ttl (datetime|str, optional): a TTL for the job output. If none is
+                provided, the default TTL is used. If a string is provided, it
+                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
+                If a non-UTC timezone is included in the datetime or string, it
+                will be respected
 
         Returns:
             a dictionary containing metadata about the job
@@ -521,9 +523,7 @@ class API(object):
             "auto_start": (None, str(auto_start)),
         }
         if ttl is not None:
-            if isinstance(ttl, datetime):
-                ttl = ttl.isoformat()
-            files["job_ttl"] = (None, str(ttl))
+            files["job_ttl"] = (None, _parse_datetime(ttl))
         res = self._requests.post(endpoint, files=files, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
@@ -905,6 +905,13 @@ class APIError(Exception):
             message = '%s for URL: %s' % (res.reason, res.url)
 
         return cls(message, res.status_code)
+
+
+def _parse_datetime(datetime_or_str):
+    if isinstance(datetime_or_str, datetime):
+        return datetime_or_str.isoformat()
+
+    return str(datetime_or_str)
 
 
 def _get_mime_type(path):
