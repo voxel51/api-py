@@ -424,24 +424,38 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["url"]
 
-    def update_data_ttl(self, data_id, days):
-        '''Updates the expiration date of the data by the specified number of
-        days.
+    def update_data_ttl(self, data_id, days=None, expiration_date=None):
+        '''Updates the expiration date of the data.
 
-        To decrease the lifespan of the data, provide a negative number. Note
-        that if the expiration date of the data after modification is in the
-        past, the data will be deleted.
+        Note that if the expiration date of the data after modification is in
+        the past, the data will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             data_id (str): the data ID
-            days (float): the number of days by which to extend the lifespan
-                of the data
+            days (float, optional): the number of days by which to extend the
+                lifespan of the data. To decrease the lifespan of the data,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new TTL for the data.
+                If a string is provided, it must be in ISO 8601 format, e.g.,
+                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
+                in the datetime or string, it will be respected
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "data", data_id, "ttl")
-        data = {"days": str(days)}
+
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+
         res = self._requests.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
 
@@ -576,24 +590,38 @@ class API(object):
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
-    def update_job_ttl(self, job_id, days):
-        '''Updates the expiration date of the job by the specified number of
-        days.
+    def update_job_ttl(self, job_id, days=None, expiration_date=None):
+        '''Updates the expiration date of the job.
 
-        To decrease the lifespan of the job, provide a negative number. Note
-        that if the expiration date of the job after modification is in the
-        past, the job will be deleted.
+        Note that if the expiration date of the job after modification is in
+        the past, the job output will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             job_id (str): the job ID
-            days (float): the number of days by which to extend the lifespan
-                of the job
+            days (float, optional): the number of days by which to extend the
+                lifespan of the job. To decrease the lifespan of the job,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new TTL for the job.
+                If a string is provided, it must be in ISO 8601 format, e.g.,
+                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
+                in the datetime or string, it will be respected
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "ttl")
-        data = {"days": str(days)}
+
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+
         res = self._requests.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
 
