@@ -830,21 +830,25 @@ class DownloadJobsCommand(Command):
     '''Download job outputs.
 
     Examples:
-        # Download job to specific location
+        # Download job output to default location
+        voxel51 jobs download <id>
+
+        # Download job output to specific location
         voxel51 jobs download <id> --path '/path/for/video.mp4'
 
-        # Generate signed URL to download job
+        # Generate signed URL to download job output
         voxel51 jobs download <id> --url
     '''
 
     @staticmethod
     def setup(parser):
-        parser.add_argument("download", metavar="ID", help="job to download")
+        parser.add_argument(
+            "download", metavar="ID", help="job output to download")
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write output")
         parser.add_argument(
             "-u", "--url", metavar="ID",
-            help="generate signed URL to download job")
+            help="generate signed URL to download job output")
 
     @staticmethod
     def run(args):
@@ -857,8 +861,8 @@ class DownloadJobsCommand(Command):
             logger.info(url)
             return
 
-        api.download_job_output(job_id, args.path)
-        logger.info("Downloaded '%s' to '%s'", job_id, args.path)
+        output_path = api.download_job_output(job_id, output_path=args.path)
+        logger.info("Downloaded '%s' to '%s'", job_id, output_path)
 
 
 class KillJobsCommand(Command):
