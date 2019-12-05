@@ -750,7 +750,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         if not output_path:
-            output_path = self.get_job_details(job_id)["filename"]
+            output_path = self.get_job_details(job_id)["output_filename"]
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "output")
         self._stream_download(endpoint, output_path)
 
