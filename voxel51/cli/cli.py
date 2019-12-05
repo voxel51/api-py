@@ -834,7 +834,7 @@ class DownloadJobsCommand(Command):
         voxel51 jobs download <id>
 
         # Download job output to specific location
-        voxel51 jobs download <id> --path '/path/for/video.mp4'
+        voxel51 jobs download <id> --path '/path/for/job/output.json'
 
         # Generate signed URL to download job output
         voxel51 jobs download <id> --url
