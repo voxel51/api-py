@@ -458,6 +458,30 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    def batch_update_data_ttl(self, data_ids, days):
+        '''Updates the expiration date of all specified data.
+
+        Args:
+            data_ids (list): the data IDs
+            days (float): the number of days by which to extend the lifespan
+                of the data
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("data", "ttl", data_ids, {"days": days})
+
+    def batch_delete_data(self, data_ids):
+        '''Deletes all specified data.
+
+        Args:
+            data_ids (list): the data IDs
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("data", "delete", data_ids)
+
     # JOBS ####################################################################
 
     def list_jobs(self):
@@ -844,6 +868,75 @@ class API(object):
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
+    def batch_start_jobs(self, job_ids):
+        '''Starts all jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "start", job_ids)
+
+    def batch_archive_jobs(self, job_ids):
+        '''Archives all jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "archive", job_ids)
+
+    def batch_unarchive_jobs(self, job_ids):
+        '''Unarchives all jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "unarchive", job_ids)
+
+    def batch_update_jobs_ttl(self, job_ids, days):
+        '''Updates the expiration dates of all specified jobs by the specified
+        number of days.
+
+        Args:
+            job_ids (list): the job IDs
+            days (float): the number of days by which to extend the lifespan
+                of the jobs
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "ttl", job_ids, {"days": days})
+
+    def batch_delete_jobs(self, job_ids):
+        '''Deletes all jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "delete", job_ids)
+
+    def batch_kill_jobs(self, job_ids):
+        '''Force kills all jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "kill", job_ids)
+
     # STATUS ##################################################################
 
     def get_platform_status(self):
@@ -861,6 +954,16 @@ class API(object):
         return _parse_json_response(res)["statuses"]
 
     # PRIVATE METHODS #########################################################
+
+    def _batch_request(self, type, action, ids, params=None):
+        endpoint = voxu.urljoin(self.base_url, type, "batch")
+        body = {}
+        if params is not None:
+            body.update(**params)
+        body.update(action=action, ids=list(ids))
+        res = self._requests.post(endpoint, headers=self._header, json=body)
+        _validate_response(res)
+        return _parse_json_response(res)["responses"]
 
     def _stream_download(self, url, output_path):
         voxu.ensure_basedir(output_path)
