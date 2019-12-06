@@ -471,8 +471,8 @@ class API(object):
                 of the data
 
         Returns:
-            a list of True/False indicating which data IDs were successfully
-                processed (True)
+            a dictionary mapping data IDs to True/False values indicating
+                whether the data was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -486,8 +486,8 @@ class API(object):
             data_ids (list): the data IDs
 
         Returns:
-            a list of True/False indicating which data IDs were successfully
-                processed (True)
+            a dictionary mapping data IDs to True/False values indicating
+                whether the data was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -887,8 +887,8 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a list of True/False indicating which job IDs were successfully
-                processed (True)
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -902,8 +902,8 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a list of True/False indicating which job IDs were successfully
-                processed (True)
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -917,8 +917,8 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a list of True/False indicating which job IDs were successfully
-                processed (True)
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -939,8 +939,8 @@ class API(object):
                 of the jobs
 
         Returns:
-            a list of True/False indicating which job IDs were successfully
-                processed (True)
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -956,8 +956,8 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a list of True/False indicating which job IDs were successfully
-                processed (True)
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -973,8 +973,8 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a list of True/False indicating which job IDs were successfully
-                processed (True)
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
 
         Raises:
             :class:`APIError` if the request was unsuccessful
