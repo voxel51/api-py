@@ -392,7 +392,7 @@ class DeleteDataCommand(Command):
 
     Examples:
         # Delete data
-        voxel51 data delete <ID> [...]
+        voxel51 data delete <id> [...]
 
         # Delete all data
         voxel51 data delete --all
@@ -974,7 +974,7 @@ class KillJobsCommand(Command):
 
     Examples:
         # Kill specific jobs
-        voxel51 jobs kill <ID> [...]
+        voxel51 jobs kill <id> [...]
 
         # Kill all eligible (i.e., queued or scheduled) jobs
         voxel51 jobs kill --all
@@ -1039,7 +1039,7 @@ class DeleteJobsCommand(Command):
 
     Examples:
         # Delete specific jobs
-        voxel51 jobs delete <ID> [...]
+        voxel51 jobs delete <id> [...]
 
         # Delete all eligible (i.e., unstarted) jobs
         voxel51 jobs delete --all
@@ -1300,7 +1300,7 @@ class DeleteAnalyticsCommand(Command):
 
     Example:
         # Delete analytics
-        voxel51 analytics delete <ID> [...]
+        voxel51 analytics delete <id> [...]
     '''
 
     @staticmethod
