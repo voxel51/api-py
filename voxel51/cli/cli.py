@@ -151,6 +151,7 @@ class DataCommand(Command):
         _register_command(subparsers, "info", InfoDataCommand)
         _register_command(subparsers, "upload", UploadDataCommand)
         _register_command(subparsers, "download", DownloadDataCommand)
+        _register_command(subparsers, "ttl", TTLDataCommand)
         _register_command(subparsers, "delete", DeleteDataCommand)
 
 
@@ -318,6 +319,72 @@ class DownloadDataCommand(Command):
 
         output_path = api.download_data(data_id, output_path=args.path)
         logger.info("Downloaded '%s' to '%s'", data_id, output_path)
+
+
+class TTLDataCommand(Command):
+    '''Update TTL of data on the platform.
+
+    Examples:
+        # Update TTL of data
+        voxel51 data ttl --days <days> <id> [...]
+
+        # Update TTL of all data
+        voxel51 data ttl --days <days> --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the data ID(s) to update")
+        parser.add_argument(
+            "-d", "--days", metavar="DAYS", type=int,
+            help="the number of days by which to extend the TTL of the data")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to update all data")
+        parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force update all without confirmation")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print data IDs that would be updated rather than"
+            "actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if not args.days:
+            return
+
+        if args.all:
+            data_ids = [data["id"] for data in api.list_data()]
+        else:
+            data_ids = args.ids or []
+
+        if args.dry_run:
+            for data_id in data_ids:
+                logger.info(data_id)
+            return
+
+        num_data = len(data_ids)
+
+        if args.all:
+            logger.info("Found %d data to update TTL", num_data)
+            if num_data > 0 and not args.force:
+                _abort_if_requested()
+
+        if num_data == 0:
+            return
+
+        results = api.batch_update_data_ttl(data_ids, args.days)
+        if all(results.values()):
+            logger.info("Data TTL(s) updated")
+        else:
+            for data_id, success in iteritems(results):
+                if not success:
+                    logger.warning(
+                        "Failed to update TTL of data '%s'", data_id)
 
 
 class DeleteDataCommand(Command):
