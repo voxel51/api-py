@@ -881,7 +881,7 @@ class API(object):
         _validate_response(res)
 
     def batch_start_jobs(self, job_ids):
-        '''Starts all jobs with the given IDs.
+        '''Starts the jobs with the given IDs.
 
         Args:
             job_ids (list): the job IDs
@@ -896,7 +896,7 @@ class API(object):
         return self._batch_request("jobs", "start", job_ids)
 
     def batch_archive_jobs(self, job_ids):
-        '''Archives all jobs with the given IDs.
+        '''Archives the jobs with the given IDs.
 
         Args:
             job_ids (list): the job IDs
@@ -911,7 +911,7 @@ class API(object):
         return self._batch_request("jobs", "archive", job_ids)
 
     def batch_unarchive_jobs(self, job_ids):
-        '''Unarchives all jobs with the given IDs.
+        '''Unarchives the jobs with the given IDs.
 
         Args:
             job_ids (list): the job IDs
