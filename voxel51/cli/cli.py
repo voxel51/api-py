@@ -337,7 +337,7 @@ class TTLDataCommand(Command):
         parser.add_argument(
             "ids", nargs="*", metavar="ID", help="the data ID(s) to update")
         parser.add_argument(
-            "-d", "--days", metavar="DAYS", type=int,
+            "-d", "--days", metavar="DAYS", type=float,
             help="the number of days by which to extend the TTL of the data")
         parser.add_argument(
             "-a", "--all", action="store_true",
@@ -859,7 +859,7 @@ class TTLJobsCommand(Command):
         parser.add_argument(
             "ids", nargs="*", metavar="ID", help="the job ID(s) to update")
         parser.add_argument(
-            "-d", "--days", metavar="DAYS", type=int,
+            "-d", "--days", metavar="DAYS", type=float,
             help="the number of days by which to extend the TTL of the jobs")
         parser.add_argument(
             "-a", "--all", action="store_true",
