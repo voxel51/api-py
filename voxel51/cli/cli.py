@@ -458,6 +458,7 @@ class JobsCommand(Command):
         _register_command(subparsers, "start", StartJobsCommand)
         _register_command(subparsers, "archive", ArchiveJobsCommand)
         _register_command(subparsers, "unarchive", UnarchiveJobsCommand)
+        _register_command(subparsers, "ttl", TTLJobsCommand)
         _register_command(subparsers, "request", RequestJobsCommand)
         _register_command(subparsers, "status", StatusJobsCommand)
         _register_command(subparsers, "log", LogJobsCommand)
@@ -840,6 +841,78 @@ class UnarchiveJobsCommand(Command):
             for job_id, success in iteritems(results):
                 if not success:
                     logger.warning("Failed to unarchive job '%s'", job_id)
+
+
+class TTLJobsCommand(Command):
+    '''Update TTL of jobs on the platform.
+
+    Examples:
+        # Update TTL of jobs
+        voxel51 jobs ttl --days <days> <id> [...]
+
+        # Update TTL of all eligible (i.e., unexpired) jobs
+        voxel51 jobs ttl --days <days> --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the job ID(s) to update")
+        parser.add_argument(
+            "-d", "--days", metavar="DAYS", type=int,
+            help="the number of days by which to extend the TTL of the jobs")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to update all eligible jobs")
+        parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force update all without confirmation")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print job IDs that would be updated rather than"
+            "actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if not args.days:
+            return
+
+        if args.all:
+            query = (JobsQuery()
+                .add_all_fields()
+                .sort_by("upload_date", descending=False))
+            jobs = api.query_jobs(query)["jobs"]
+
+            # Exclude expired jobs
+            job_ids = [
+                job["id"] for job in jobs if not api.is_job_expired(job=job)]
+        else:
+            job_ids = args.ids
+
+        if args.dry_run:
+            for job_id in job_ids:
+                logger.info(job_id)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
+            logger.info("Found %d jobs to update TTL", num_jobs)
+            if num_jobs > 0 and not args.force:
+                _abort_if_requested()
+
+        if num_jobs == 0:
+            return
+
+        results = api.batch_update_jobs_ttl(job_ids, args.days)
+        if all(results.values()):
+            logger.info("Job TTL(s) updated")
+        else:
+            for job_id, success in iteritems(results):
+                if not success:
+                    logger.warning("Failed to update TTL of job '%s'", job_id)
 
 
 class RequestJobsCommand(Command):
