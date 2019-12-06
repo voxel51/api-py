@@ -14,6 +14,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
+from future.utils import iteritems
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
@@ -369,11 +370,11 @@ class DeleteDataCommand(Command):
         if num_data == 0:
             return
 
-        successes = api.batch_delete_data(data_ids)
-        if all(successes):
+        results = api.batch_delete_data(data_ids)
+        if all(results.values()):
             logger.info("Data deleted")
         else:
-            for data_id, success in zip(data_ids, successes):
+            for data_id, success in iteritems(results):
                 if not success:
                     logger.warning("Failed to delete data '%s'", data_id)
 
@@ -634,11 +635,11 @@ class StartJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        successes = api.batch_start_jobs(job_ids)
-        if all(successes):
+        results = api.batch_start_jobs(job_ids)
+        if all(results.values()):
             logger.info("Job(s) started")
         else:
-            for job_id, success in zip(job_ids, successes):
+            for job_id, success in iteritems(results):
                 if not success:
                     logger.warning("Failed to start job '%s'", job_id)
 
@@ -698,11 +699,11 @@ class ArchiveJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        successes = api.batch_archive_jobs(job_ids)
-        if all(successes):
+        results = api.batch_archive_jobs(job_ids)
+        if all(results.values()):
             logger.info("Job(s) archived")
         else:
-            for job_id, success in zip(job_ids, successes):
+            for job_id, success in iteritems(results):
                 if not success:
                     logger.warning("Failed to archive job '%s'", job_id)
 
@@ -765,11 +766,11 @@ class UnarchiveJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        successes = api.batch_unarchive_jobs(job_ids)
-        if all(successes):
+        results = api.batch_unarchive_jobs(job_ids)
+        if all(results.values()):
             logger.info("Job(s) unarchived")
         else:
-            for job_id, success in zip(job_ids, successes):
+            for job_id, success in iteritems(results):
                 if not success:
                     logger.warning("Failed to unarchive job '%s'", job_id)
 
@@ -957,11 +958,11 @@ class KillJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        successes = api.batch_kill_jobs(job_ids)
-        if all(successes):
+        results = api.batch_kill_jobs(job_ids)
+        if all(results.values()):
             logger.info("Job(s) killed")
         else:
-            for job_id, success in zip(job_ids, successes):
+            for job_id, success in iteritems(results):
                 if not success:
                     logger.warning("Failed to kill job '%s'", job_id)
 
@@ -1022,11 +1023,11 @@ class DeleteJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        successes = api.batch_delete_jobs(job_ids)
-        if all(successes):
+        results = api.batch_delete_jobs(job_ids)
+        if all(results.values()):
             logger.info("Job(s) deleted")
         else:
-            for job_id, success in zip(job_ids, successes):
+            for job_id, success in iteritems(results):
                 if not success:
                     logger.warning("Failed to delete job '%s'", job_id)
 
