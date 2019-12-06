@@ -357,15 +357,25 @@ class DeleteDataCommand(Command):
         if args.dry_run:
             for data_id in data_ids:
                 logger.info(data_id)
-        else:
-            num_data = len(data_ids)
+            return
+
+        num_data = len(data_ids)
+
+        if args.all:
             logger.info("Found %d data to delete", num_data)
-            if num_data > 0 and args.all and not args.force:
+            if num_data > 0 and not args.force:
                 _abort_if_requested()
 
-            for data_id in data_ids:
-                api.delete_data(data_id)
-                logger.info("Data '%s' deleted", data_id)
+        if num_data == 0:
+            return
+
+        successes = api.batch_delete_data(data_ids)
+        if all(successes):
+            logger.info("Data deleted")
+        else:
+            for data_id, success in zip(data_ids, successes):
+                if not success:
+                    logger.warning("Failed to delete data '%s'", data_id)
 
 
 class JobsCommand(Command):
@@ -612,15 +622,25 @@ class StartJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to start", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.start_job(job_id)
-                logger.info("Job '%s' started", job_id)
+        if num_jobs == 0:
+            return
+
+        successes = api.batch_start_jobs(job_ids)
+        if all(successes):
+            logger.info("Job(s) started")
+        else:
+            for job_id, success in zip(job_ids, successes):
+                if not success:
+                    logger.warning("Failed to start job '%s'", job_id)
 
 
 class ArchiveJobsCommand(Command):
@@ -666,15 +686,25 @@ class ArchiveJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to archive", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.archive_job(job_id)
-                logger.info("Job '%s' archived", job_id)
+        if num_jobs == 0:
+            return
+
+        successes = api.batch_archive_jobs(job_ids)
+        if all(successes):
+            logger.info("Job(s) archived")
+        else:
+            for job_id, success in zip(job_ids, successes):
+                if not success:
+                    logger.warning("Failed to archive job '%s'", job_id)
 
 
 class UnarchiveJobsCommand(Command):
@@ -723,15 +753,25 @@ class UnarchiveJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to unarchive", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.unarchive_job(job_id)
-                logger.info("Job '%s' unarchived", job_id)
+        if num_jobs == 0:
+            return
+
+        successes = api.batch_unarchive_jobs(job_ids)
+        if all(successes):
+            logger.info("Job(s) unarchived")
+        else:
+            for job_id, success in zip(job_ids, successes):
+                if not success:
+                    logger.warning("Failed to unarchive job '%s'", job_id)
 
 
 class RequestJobsCommand(Command):
@@ -905,15 +945,25 @@ class KillJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to kill", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.kill_job(job_id)
-                logger.info("Job '%s' killed", job_id)
+        if num_jobs == 0:
+            return
+
+        successes = api.batch_kill_jobs(job_ids)
+        if all(successes):
+            logger.info("Job(s) killed")
+        else:
+            for job_id, success in zip(job_ids, successes):
+                if not success:
+                    logger.warning("Failed to kill job '%s'", job_id)
 
 
 class DeleteJobsCommand(Command):
@@ -960,15 +1010,25 @@ class DeleteJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to delete", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.delete_job(job_id)
-                logger.info("Job '%s' deleted", job_id)
+        if num_jobs == 0:
+            return
+
+        successes = api.batch_delete_jobs(job_ids)
+        if all(successes):
+            logger.info("Job(s) deleted")
+        else:
+            for job_id, success in zip(job_ids, successes):
+                if not success:
+                    logger.warning("Failed to delete job '%s'", job_id)
 
 
 class AnalyticsCommand(Command):
