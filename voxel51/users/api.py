@@ -404,7 +404,6 @@ class API(object):
 
         endpoint = voxu.urljoin(self.base_url, "data", data_id, "download")
         self._stream_download(endpoint, output_path)
-
         return output_path
 
     def get_data_download_url(self, data_id):
@@ -736,18 +735,27 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)
 
-    def download_job_output(self, job_id, output_path):
+    def download_job_output(self, job_id, output_path=None):
         '''Downloads the output of the job with the given ID.
 
         Args:
             job_id (str): the job ID
-            output_path (str): the output path to write to
+            output_path (str, optional): the output path to write to. By
+                default, the file is written to the current working directory
+                with the recommend output filename for the job
+
+        Returns:
+            the path to the downloaded job output
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
+        if not output_path:
+            output_path = self.get_job_details(job_id)["output_filename"]
+
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "output")
         self._stream_download(endpoint, output_path)
+        return output_path
 
     def get_job_output_download_url(self, job_id):
         '''Gets a signed download URL for the output of the job with the given
