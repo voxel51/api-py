@@ -1007,7 +1007,10 @@ class API(object):
         body.update(action=action, ids=list(ids))
         res = self._requests.post(endpoint, headers=self._header, json=body)
         _validate_response(res)
-        return _parse_json_response(res)["responses"]
+        statuses = _parse_json_response(res)["responses"]
+        for status in statuses.values():
+            status["success"] = ("error" not in status)
+        return statuses
 
     def _stream_download(self, url, output_path):
         voxu.ensure_basedir(output_path)

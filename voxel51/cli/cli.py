@@ -377,14 +377,14 @@ class TTLDataCommand(Command):
         if num_data == 0:
             return
 
-        results = api.batch_update_data_ttl(data_ids, args.days)
-        if all(results.values()):
+        failures = _get_batch_failures(
+            api.batch_update_data_ttl(data_ids, args.days))
+        if not failures:
             logger.info("Data TTL(s) updated")
         else:
-            for data_id, success in iteritems(results):
-                if not success:
-                    logger.warning(
-                        "Failed to update TTL of data '%s'", data_id)
+            for data_id, message in failures.items():
+                logger.warning(
+                    "Failed to update TTL of data '%s': %s", data_id, message)
 
 
 class DeleteDataCommand(Command):
@@ -437,13 +437,13 @@ class DeleteDataCommand(Command):
         if num_data == 0:
             return
 
-        results = api.batch_delete_data(data_ids)
-        if all(results.values()):
+        failures = _get_batch_failures(api.batch_delete_data(data_ids))
+        if not failures:
             logger.info("Data deleted")
         else:
-            for data_id, success in iteritems(results):
-                if not success:
-                    logger.warning("Failed to delete data '%s'", data_id)
+            for data_id, message in failures.items():
+                logger.warning(
+                    "Failed to delete data '%s': %s", data_id, message)
 
 
 class JobsCommand(Command):
@@ -703,13 +703,12 @@ class StartJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        results = api.batch_start_jobs(job_ids)
-        if all(results.values()):
+        failures = _get_batch_failures(api.batch_start_jobs(job_ids))
+        if not failures:
             logger.info("Job(s) started")
         else:
-            for job_id, success in iteritems(results):
-                if not success:
-                    logger.warning("Failed to start job '%s'", job_id)
+            for job_id, message in failures.items():
+                logger.warning("Failed to start job '%s': %s", job_id, message)
 
 
 class ArchiveJobsCommand(Command):
@@ -767,13 +766,13 @@ class ArchiveJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        results = api.batch_archive_jobs(job_ids)
-        if all(results.values()):
+        failures = _get_batch_failures(api.batch_archive_jobs(job_ids))
+        if not failures:
             logger.info("Job(s) archived")
         else:
-            for job_id, success in iteritems(results):
-                if not success:
-                    logger.warning("Failed to archive job '%s'", job_id)
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to archive job '%s': %s", job_id, message)
 
 
 class UnarchiveJobsCommand(Command):
@@ -834,13 +833,13 @@ class UnarchiveJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        results = api.batch_unarchive_jobs(job_ids)
-        if all(results.values()):
+        failures = _get_batch_failures(api.batch_unarchive_jobs(job_ids))
+        if not failures:
             logger.info("Job(s) unarchived")
         else:
-            for job_id, success in iteritems(results):
-                if not success:
-                    logger.warning("Failed to unarchive job '%s'", job_id)
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to unarchive job '%s': %s", job_id, message)
 
 
 class TTLJobsCommand(Command):
@@ -906,13 +905,14 @@ class TTLJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        results = api.batch_update_jobs_ttl(job_ids, args.days)
-        if all(results.values()):
+        failures = _get_batch_failures(
+            api.batch_update_jobs_ttl(job_ids, args.days))
+        if not failures:
             logger.info("Job TTL(s) updated")
         else:
-            for job_id, success in iteritems(results):
-                if not success:
-                    logger.warning("Failed to update TTL of job '%s'", job_id)
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to update TTL of job '%s': %s", job_id, message)
 
 
 class RequestJobsCommand(Command):
@@ -1098,13 +1098,12 @@ class KillJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        results = api.batch_kill_jobs(job_ids)
-        if all(results.values()):
+        failures = _get_batch_failures(api.batch_kill_jobs(job_ids))
+        if not failures:
             logger.info("Job(s) killed")
         else:
-            for job_id, success in iteritems(results):
-                if not success:
-                    logger.warning("Failed to kill job '%s'", job_id)
+            for job_id, message in failures.items():
+                logger.warning("Failed to kill job '%s': %s", job_id, message)
 
 
 class DeleteJobsCommand(Command):
@@ -1163,13 +1162,13 @@ class DeleteJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        results = api.batch_delete_jobs(job_ids)
-        if all(results.values()):
+        failures = _get_batch_failures(api.batch_delete_jobs(job_ids))
+        if not failures:
             logger.info("Job(s) deleted")
         else:
-            for job_id, success in iteritems(results):
-                if not success:
-                    logger.warning("Failed to delete job '%s'", job_id)
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to delete job '%s': %s", job_id, message)
 
 
 class AnalyticsCommand(Command):
@@ -1528,6 +1527,13 @@ def _register_command(parent, name, command):
     parser.set_defaults(run=command.run)
     command.setup(parser)
     return parser
+
+
+def _get_batch_failures(batch_result):
+    return {
+        id: status.get("message") for id, status in batch_result.items()
+            if not status["success"]
+    }
 
 
 def main():
