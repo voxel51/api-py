@@ -1154,7 +1154,7 @@ class UploadAnalyticsCommand(Command):
     Examples:
         # Upload documentation for analytic
         voxel51 analytics upload --doc '/path/to/doc.json'
-            [--analytic-type TYPE]
+            [--analytic-type TYPE] [--print-id]
 
         # Upload analytic image
         voxel51 analytics upload --image <id>
@@ -1167,6 +1167,9 @@ class UploadAnalyticsCommand(Command):
             "--doc", metavar="PATH", help="analytic documentation to upload")
         parser.add_argument(
             "--analytic-type", help="type of analytic")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID of the uploaded analytic")
         parser.add_argument(
             "--image", metavar="ID",
             help="analytic ID to upload image for")
@@ -1183,7 +1186,10 @@ class UploadAnalyticsCommand(Command):
         if args.doc:
             metadata = api.upload_analytic(
                 args.doc, analytic_type=args.analytic_type)
-            _print_dict_as_table(metadata)
+            if args.print_id:
+                logger.info(metadata["id"])
+            else:
+                _print_dict_as_table(metadata)
 
         # Upload analytic image
         if args.image:
