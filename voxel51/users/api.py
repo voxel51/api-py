@@ -997,8 +997,7 @@ class API(object):
         return self._batch_request("jobs", "unarchive", job_ids)
 
     def batch_update_jobs_ttl(self, job_ids, days=None, expiration_date=None):
-        '''Updates the expiration dates of the jobs with the given IDs by the
-        specified number of days.
+        '''Updates the expiration dates of the jobs with the given IDs.
 
         Note that if the expiration date of the job after modification is in
         the past, the job output will be deleted.
