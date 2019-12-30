@@ -473,6 +473,42 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    def batch_update_data_ttl(self, data_ids, days):
+        '''Updates the expiration date of the data with the given IDs.
+
+        To decrease the lifespan of the data, provide a negative number. Note
+        that if the expiration date of data after modification is in the past,
+        the data will be deleted.
+
+        Args:
+            data_ids (list): the data IDs
+            days (float): the number of days by which to extend the lifespan
+                of the data
+
+        Returns:
+            a dictionary mapping data IDs to True/False values indicating
+                whether the data was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("data", "ttl", data_ids, {"days": days})
+
+    def batch_delete_data(self, data_ids):
+        '''Deletes the data with the given IDs.
+
+        Args:
+            data_ids (list): the data IDs
+
+        Returns:
+            a dictionary mapping data IDs to True/False values indicating
+                whether the data was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("data", "delete", data_ids)
+
     # JOBS ####################################################################
 
     def list_jobs(self):
@@ -841,7 +877,7 @@ class API(object):
     def delete_job(self, job_id):
         '''Deletes the job with the given ID.
 
-        Only available for jobs that have not been started.
+        Note that only jobs that have not been started can be deleted.
 
         Args:
             job_id (str): the job ID
@@ -856,7 +892,7 @@ class API(object):
     def kill_job(self, job_id):
         '''Force kills the job with the given ID.
 
-        Only available for jobs that are queued or scheduled.
+        Note that only jobs that are queued or scheduled can be killed.
 
         Args:
             job_id (str): the job ID
@@ -867,6 +903,107 @@ class API(object):
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "kill")
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
+
+    def batch_start_jobs(self, job_ids):
+        '''Starts the jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Returns:
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "start", job_ids)
+
+    def batch_archive_jobs(self, job_ids):
+        '''Archives the jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Returns:
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "archive", job_ids)
+
+    def batch_unarchive_jobs(self, job_ids):
+        '''Unarchives the jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Returns:
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "unarchive", job_ids)
+
+    def batch_update_jobs_ttl(self, job_ids, days):
+        '''Updates the expiration dates of the jobs with the given IDs by the
+        specified number of days.
+
+        To decrease the lifespan of the jobs, provide a negative number. Note
+        that if the expiration date of a job after modification is in the
+        past, the job will be deleted.
+
+        Args:
+            job_ids (list): the job IDs
+            days (float): the number of days by which to extend the lifespan
+                of the jobs
+
+        Returns:
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "ttl", job_ids, {"days": days})
+
+    def batch_delete_jobs(self, job_ids):
+        '''Deletes the jobs with the given IDs.
+
+        Note that only jobs that have not been started can be deleted.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Returns:
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "delete", job_ids)
+
+    def batch_kill_jobs(self, job_ids):
+        '''Force kills the jobs with the given IDs.
+
+        Note that only jobs that are queued or scheduled can be killed.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Returns:
+            a dictionary mapping job IDs to True/False values indicating
+                whether the job was successfully processed (True)
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "kill", job_ids)
 
     # STATUS ##################################################################
 
@@ -885,6 +1022,19 @@ class API(object):
         return _parse_json_response(res)["statuses"]
 
     # PRIVATE METHODS #########################################################
+
+    def _batch_request(self, type, action, ids, params=None):
+        endpoint = voxu.urljoin(self.base_url, type, "batch")
+        body = {}
+        if params is not None:
+            body.update(**params)
+        body.update(action=action, ids=list(ids))
+        res = self._requests.post(endpoint, headers=self._header, json=body)
+        _validate_response(res)
+        statuses = _parse_json_response(res)["responses"]
+        for status in statuses.values():
+            status["success"] = ("error" not in status)
+        return statuses
 
     def _stream_download(self, url, output_path):
         voxu.ensure_basedir(output_path)

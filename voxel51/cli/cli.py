@@ -14,6 +14,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
+from future.utils import iteritems
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
@@ -150,6 +151,7 @@ class DataCommand(Command):
         _register_command(subparsers, "info", InfoDataCommand)
         _register_command(subparsers, "upload", UploadDataCommand)
         _register_command(subparsers, "download", DownloadDataCommand)
+        _register_command(subparsers, "ttl", TTLDataCommand)
         _register_command(subparsers, "delete", DeleteDataCommand)
 
 
@@ -319,12 +321,78 @@ class DownloadDataCommand(Command):
         logger.info("Downloaded '%s' to '%s'", data_id, output_path)
 
 
+class TTLDataCommand(Command):
+    '''Update TTL of data on the platform.
+
+    Examples:
+        # Update TTL of data
+        voxel51 data ttl --days <days> <id> [...]
+
+        # Update TTL of all data
+        voxel51 data ttl --days <days> --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the data ID(s) to update")
+        parser.add_argument(
+            "-d", "--days", metavar="DAYS", type=float,
+            help="the number of days by which to extend the TTL of the data")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to update all data")
+        parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force update all without confirmation")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print data IDs that would be updated rather than"
+            "actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if not args.days:
+            return
+
+        if args.all:
+            data_ids = [data["id"] for data in api.list_data()]
+        else:
+            data_ids = args.ids or []
+
+        if args.dry_run:
+            for data_id in data_ids:
+                logger.info(data_id)
+            return
+
+        num_data = len(data_ids)
+
+        if args.all:
+            logger.info("Found %d data to update TTL", num_data)
+            if num_data > 0 and not args.force:
+                _abort_if_requested()
+
+        if num_data == 0:
+            return
+
+        failures = _get_batch_failures(
+            api.batch_update_data_ttl(data_ids, args.days))
+        if not failures:
+            logger.info("Data TTL(s) updated")
+        else:
+            for data_id, message in failures.items():
+                logger.warning(
+                    "Failed to update TTL of data '%s': %s", data_id, message)
+
+
 class DeleteDataCommand(Command):
     '''Delete data from the platform.
 
     Examples:
         # Delete data
-        voxel51 data delete <ID> [...]
+        voxel51 data delete <id> [...]
 
         # Delete all data
         voxel51 data delete --all
@@ -357,15 +425,25 @@ class DeleteDataCommand(Command):
         if args.dry_run:
             for data_id in data_ids:
                 logger.info(data_id)
-        else:
-            num_data = len(data_ids)
+            return
+
+        num_data = len(data_ids)
+
+        if args.all:
             logger.info("Found %d data to delete", num_data)
-            if num_data > 0 and args.all and not args.force:
+            if num_data > 0 and not args.force:
                 _abort_if_requested()
 
-            for data_id in data_ids:
-                api.delete_data(data_id)
-                logger.info("Data '%s' deleted", data_id)
+        if num_data == 0:
+            return
+
+        failures = _get_batch_failures(api.batch_delete_data(data_ids))
+        if not failures:
+            logger.info("Data deleted")
+        else:
+            for data_id, message in failures.items():
+                logger.warning(
+                    "Failed to delete data '%s': %s", data_id, message)
 
 
 class JobsCommand(Command):
@@ -380,6 +458,7 @@ class JobsCommand(Command):
         _register_command(subparsers, "start", StartJobsCommand)
         _register_command(subparsers, "archive", ArchiveJobsCommand)
         _register_command(subparsers, "unarchive", UnarchiveJobsCommand)
+        _register_command(subparsers, "ttl", TTLJobsCommand)
         _register_command(subparsers, "request", RequestJobsCommand)
         _register_command(subparsers, "status", StatusJobsCommand)
         _register_command(subparsers, "log", LogJobsCommand)
@@ -612,15 +691,24 @@ class StartJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to start", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.start_job(job_id)
-                logger.info("Job '%s' started", job_id)
+        if num_jobs == 0:
+            return
+
+        failures = _get_batch_failures(api.batch_start_jobs(job_ids))
+        if not failures:
+            logger.info("Job(s) started")
+        else:
+            for job_id, message in failures.items():
+                logger.warning("Failed to start job '%s': %s", job_id, message)
 
 
 class ArchiveJobsCommand(Command):
@@ -666,15 +754,25 @@ class ArchiveJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to archive", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.archive_job(job_id)
-                logger.info("Job '%s' archived", job_id)
+        if num_jobs == 0:
+            return
+
+        failures = _get_batch_failures(api.batch_archive_jobs(job_ids))
+        if not failures:
+            logger.info("Job(s) archived")
+        else:
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to archive job '%s': %s", job_id, message)
 
 
 class UnarchiveJobsCommand(Command):
@@ -723,15 +821,98 @@ class UnarchiveJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to unarchive", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
+        if num_jobs == 0:
+            return
+
+        failures = _get_batch_failures(api.batch_unarchive_jobs(job_ids))
+        if not failures:
+            logger.info("Job(s) unarchived")
+        else:
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to unarchive job '%s': %s", job_id, message)
+
+
+class TTLJobsCommand(Command):
+    '''Update TTL of jobs on the platform.
+
+    Examples:
+        # Update TTL of jobs
+        voxel51 jobs ttl --days <days> <id> [...]
+
+        # Update TTL of all eligible (i.e., unexpired) jobs
+        voxel51 jobs ttl --days <days> --all
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="*", metavar="ID", help="the job ID(s) to update")
+        parser.add_argument(
+            "-d", "--days", metavar="DAYS", type=float,
+            help="the number of days by which to extend the TTL of the jobs")
+        parser.add_argument(
+            "-a", "--all", action="store_true",
+            help="whether to update all eligible jobs")
+        parser.add_argument(
+            "-f", "--force", action="store_true",
+            help="whether to force update all without confirmation")
+        parser.add_argument(
+            "--dry-run", action="store_true",
+            help="whether to print job IDs that would be updated rather than"
+            "actually performing the action")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        if not args.days:
+            return
+
+        if args.all:
+            query = (JobsQuery()
+                .add_all_fields()
+                .sort_by("upload_date", descending=False))
+            jobs = api.query_jobs(query)["jobs"]
+
+            # Exclude expired jobs
+            job_ids = [
+                job["id"] for job in jobs if not api.is_job_expired(job=job)]
+        else:
+            job_ids = args.ids
+
+        if args.dry_run:
             for job_id in job_ids:
-                api.unarchive_job(job_id)
-                logger.info("Job '%s' unarchived", job_id)
+                logger.info(job_id)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
+            logger.info("Found %d jobs to update TTL", num_jobs)
+            if num_jobs > 0 and not args.force:
+                _abort_if_requested()
+
+        if num_jobs == 0:
+            return
+
+        failures = _get_batch_failures(
+            api.batch_update_jobs_ttl(job_ids, args.days))
+        if not failures:
+            logger.info("Job TTL(s) updated")
+        else:
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to update TTL of job '%s': %s", job_id, message)
 
 
 class RequestJobsCommand(Command):
@@ -870,7 +1051,7 @@ class KillJobsCommand(Command):
 
     Examples:
         # Kill specific jobs
-        voxel51 jobs kill <ID> [...]
+        voxel51 jobs kill <id> [...]
 
         # Kill all eligible (i.e., queued or scheduled) jobs
         voxel51 jobs kill --all
@@ -909,15 +1090,24 @@ class KillJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to kill", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.kill_job(job_id)
-                logger.info("Job '%s' killed", job_id)
+        if num_jobs == 0:
+            return
+
+        failures = _get_batch_failures(api.batch_kill_jobs(job_ids))
+        if not failures:
+            logger.info("Job(s) killed")
+        else:
+            for job_id, message in failures.items():
+                logger.warning("Failed to kill job '%s': %s", job_id, message)
 
 
 class DeleteJobsCommand(Command):
@@ -925,7 +1115,7 @@ class DeleteJobsCommand(Command):
 
     Examples:
         # Delete specific jobs
-        voxel51 jobs delete <ID> [...]
+        voxel51 jobs delete <id> [...]
 
         # Delete all eligible (i.e., unstarted) jobs
         voxel51 jobs delete --all
@@ -964,15 +1154,25 @@ class DeleteJobsCommand(Command):
         if args.dry_run:
             for job_id in job_ids:
                 logger.info(job_id)
-        else:
-            num_jobs = len(job_ids)
+            return
+
+        num_jobs = len(job_ids)
+
+        if args.all:
             logger.info("Found %d job(s) to delete", num_jobs)
-            if num_jobs > 0 and args.all and not args.force:
+            if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
-            for job_id in job_ids:
-                api.delete_job(job_id)
-                logger.info("Job '%s' deleted", job_id)
+        if num_jobs == 0:
+            return
+
+        failures = _get_batch_failures(api.batch_delete_jobs(job_ids))
+        if not failures:
+            logger.info("Job(s) deleted")
+        else:
+            for job_id, message in failures.items():
+                logger.warning(
+                    "Failed to delete job '%s': %s", job_id, message)
 
 
 class AnalyticsCommand(Command):
@@ -1206,7 +1406,7 @@ class DeleteAnalyticsCommand(Command):
 
     Example:
         # Delete analytics
-        voxel51 analytics delete <ID> [...]
+        voxel51 analytics delete <id> [...]
     '''
 
     @staticmethod
@@ -1361,6 +1561,13 @@ def _register_command(parent, name, command):
     parser.set_defaults(run=command.run)
     command.setup(parser)
     return parser
+
+
+def _get_batch_failures(batch_result):
+    return {
+        id: status.get("message") for id, status in batch_result.items()
+            if not status["success"]
+    }
 
 
 def main():
