@@ -506,8 +506,9 @@ class API(object):
                 in the datetime or string, it will be respected
 
         Returns:
-            a dictionary mapping data IDs to True/False values indicating
-                whether the data was successfully processed (True)
+            a dictionary mapping data IDs to dictionaries indicating whether
+                the data was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -529,8 +530,9 @@ class API(object):
             data_ids (list): the data IDs
 
         Returns:
-            a dictionary mapping data IDs to True/False values indicating
-                whether the data was successfully processed (True)
+            a dictionary mapping data IDs to dictionaries indicating whether
+                the data was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -953,8 +955,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -968,8 +971,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -983,8 +987,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1011,8 +1016,9 @@ class API(object):
                 in the datetime or string, it will be respected
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1036,8 +1042,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1053,8 +1060,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
