@@ -849,11 +849,11 @@ class TTLJobsCommand(Command):
     '''Update TTL of jobs on the platform.
 
     Examples:
-        # Update TTL of jobs
+        # Extend TTL of jobs by given number of days
         voxel51 jobs ttl --days <days> <id> [...]
 
-        # Update TTL of all eligible (i.e., unexpired) jobs
-        voxel51 jobs ttl --days <days> --all
+        # Set expiration date of jobs to given date
+        voxel51 jobs ttl --date <date> <id> [...]
     '''
 
     @staticmethod
@@ -861,24 +861,26 @@ class TTLJobsCommand(Command):
         parser.add_argument(
             "ids", nargs="*", metavar="ID", help="the job ID(s) to update")
         parser.add_argument(
-            "-d", "--days", metavar="DAYS", type=float,
+            "--days", metavar="DAYS", type=float,
             help="the number of days by which to extend the TTL of the jobs")
         parser.add_argument(
+            "--date", metavar="DATE", help="new expiration date for the jobs")
+        parser.add_argument(
             "-a", "--all", action="store_true",
-            help="whether to update all eligible jobs")
+            help="whether to update all eligible (unexpired) jobs")
         parser.add_argument(
             "-f", "--force", action="store_true",
             help="whether to force update all without confirmation")
         parser.add_argument(
             "--dry-run", action="store_true",
-            help="whether to print job IDs that would be updated rather than"
+            help="whether to print job IDs that would be updated rather than "
             "actually performing the action")
 
     @staticmethod
     def run(args):
         api = API()
 
-        if not args.days:
+        if not args.days and not args.date:
             return
 
         if args.all:
@@ -909,7 +911,8 @@ class TTLJobsCommand(Command):
             return
 
         failures = _get_batch_failures(
-            api.batch_update_jobs_ttl(job_ids, args.days))
+            api.batch_update_jobs_ttl(
+                job_ids, days=args.days, expiration_date=args.date))
         if not failures:
             logger.info("Job TTL(s) updated")
         else:
