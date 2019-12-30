@@ -317,7 +317,9 @@ class API(object):
             path (str): the path to the data file
             ttl (datetime|str, optional): a TTL for the data. If none is
                 provided, the default TTL is used. If a string is provided, it
-                must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
+                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
+                If a non-UTC timezone is included in the datetime or string, it
+                will be respected
 
         Returns:
             a dictionary containing metadata about the uploaded data
@@ -331,9 +333,7 @@ class API(object):
         with open(path, "rb") as df:
             files = {"file": (filename, df, mime_type)}
             if ttl is not None:
-                if isinstance(ttl, datetime):
-                    ttl = ttl.isoformat()
-                files["data_ttl"] = (None, str(ttl))
+                files["data_ttl"] = (None, _parse_datetime(ttl))
             res = voxu.upload_files(
                 self._requests, endpoint, files, headers=self._header)
 
@@ -355,8 +355,11 @@ class API(object):
             filename (str): the filename of the data
             mime_type (str): the MIME type of the data
             size (int): the size of the data, in bytes
-            ttl (datetime|str): a TTL for the data. If a string is provided, it
-                must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
+            ttl (datetime|str, optional): a TTL for the data. If none is
+                provided, the default TTL is used. If a string is provided, it
+                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
+                If a non-UTC timezone is included in the datetime or string, it
+                will be respected
             encoding (str, optional): an optional encoding of the file
 
         Returns:
@@ -371,13 +374,10 @@ class API(object):
             "filename": filename,
             "mimetype": mime_type,
             "size": size,
-            "data_ttl": ttl,
+            "data_ttl": _parse_datetime(ttl),
         }
         if encoding:
             data["encoding"] = encoding
-        if isinstance(ttl, datetime):
-            ttl = ttl.isoformat()
-        data["data_ttl"] = ttl
 
         res = self._requests.post(endpoint, json=data, headers=self._header)
         _validate_response(res)
@@ -439,24 +439,38 @@ class API(object):
         _validate_response(res)
         return _parse_json_response(res)["url"]
 
-    def update_data_ttl(self, data_id, days):
-        '''Updates the expiration date of the data by the specified number of
-        days.
+    def update_data_ttl(self, data_id, days=None, expiration_date=None):
+        '''Updates the expiration date of the data.
 
-        To decrease the lifespan of the data, provide a negative number. Note
-        that if the expiration date of the data after modification is in the
-        past, the data will be deleted.
+        Note that if the expiration date of the data after modification is in
+        the past, the data will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             data_id (str): the data ID
-            days (float): the number of days by which to extend the lifespan
-                of the data
+            days (float, optional): the number of days by which to extend the
+                lifespan of the data. To decrease the lifespan of the data,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new TTL for the data.
+                If a string is provided, it must be in ISO 8601 format, e.g.,
+                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
+                in the datetime or string, it will be respected
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "data", data_id, "ttl")
-        data = {"days": str(days)}
+
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+
         res = self._requests.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
 
@@ -473,26 +487,41 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
-    def batch_update_data_ttl(self, data_ids, days):
-        '''Updates the expiration date of the data with the given IDs.
+    def batch_update_data_ttl(self, data_ids, days=None, expiration_date=None):
+        '''Updates the expiration dates of the data with the given IDs.
 
-        To decrease the lifespan of the data, provide a negative number. Note
-        that if the expiration date of data after modification is in the past,
-        the data will be deleted.
+        Note that if the expiration date of the data after modification is in
+        the past, the data will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             data_ids (list): the data IDs
-            days (float): the number of days by which to extend the lifespan
-                of the data
+            days (float, optional): the number of days by which to extend the
+                lifespan of the data. To decrease the lifespan of the data,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new expiration date for
+                the data. If a string is provided, it must be in ISO 8601
+                format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone
+                is included in the datetime or string, it will be respected
 
         Returns:
-            a dictionary mapping data IDs to True/False values indicating
-                whether the data was successfully processed (True)
+            a dictionary mapping data IDs to dictionaries indicating whether
+                the data was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        return self._batch_request("data", "ttl", data_ids, {"days": days})
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+        return self._batch_request("data", "ttl", data_ids, data)
 
     def batch_delete_data(self, data_ids):
         '''Deletes the data with the given IDs.
@@ -501,8 +530,9 @@ class API(object):
             data_ids (list): the data IDs
 
         Returns:
-            a dictionary mapping data IDs to True/False values indicating
-                whether the data was successfully processed (True)
+            a dictionary mapping data IDs to dictionaries indicating whether
+                the data was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -555,9 +585,11 @@ class API(object):
             job_name (str): a name for the job
             auto_start (bool, optional): whether to automatically start the job
                 upon creation. By default, this is False
-            ttl (datetime|str, optional): a TTL for the job output. If none
-                is provided, the default TTL is used. If a string is provided,
-                it must be in ISO 8601 format: "YYYY-MM-DDThh:mm:ss.sssZ"
+            ttl (datetime|str, optional): a TTL for the job output. If none is
+                provided, the default TTL is used. If a string is provided, it
+                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
+                If a non-UTC timezone is included in the datetime or string, it
+                will be respected
 
         Returns:
             a dictionary containing metadata about the job
@@ -572,9 +604,7 @@ class API(object):
             "auto_start": (None, str(auto_start)),
         }
         if ttl is not None:
-            if isinstance(ttl, datetime):
-                ttl = ttl.isoformat()
-            files["job_ttl"] = (None, str(ttl))
+            files["job_ttl"] = (None, _parse_datetime(ttl))
         res = self._requests.post(endpoint, files=files, headers=self._header)
         _validate_response(res)
         return _parse_json_response(res)["job"]
@@ -627,24 +657,38 @@ class API(object):
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
-    def update_job_ttl(self, job_id, days):
-        '''Updates the expiration date of the job by the specified number of
-        days.
+    def update_job_ttl(self, job_id, days=None, expiration_date=None):
+        '''Updates the expiration date of the job.
 
-        To decrease the lifespan of the job, provide a negative number. Note
-        that if the expiration date of the job after modification is in the
-        past, the job will be deleted.
+        Note that if the expiration date of the job after modification is in
+        the past, the job output will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             job_id (str): the job ID
-            days (float): the number of days by which to extend the lifespan
-                of the job
+            days (float, optional): the number of days by which to extend the
+                lifespan of the job. To decrease the lifespan of the job,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new TTL for the job.
+                If a string is provided, it must be in ISO 8601 format, e.g.,
+                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
+                in the datetime or string, it will be respected
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "ttl")
-        data = {"days": str(days)}
+
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+
         res = self._requests.put(endpoint, headers=self._header, data=data)
         _validate_response(res)
 
@@ -695,7 +739,7 @@ class API(object):
         elif job is not None:
             state = job["state"]
         else:
-            raise APIError("Must provide a keyword argument")
+            raise APIError("Either `job_id` or `job` must be provided", 400)
 
         return state
 
@@ -764,7 +808,7 @@ class API(object):
         elif job is not None:
             expiration_date = job["expiration_date"]
         else:
-            raise APIError("Must provide a keyword argument")
+            raise APIError("Either `job_id` or `job` must be provided", 400)
 
         expiration = dateutil.parser.parse(expiration_date)
         now = datetime.utcnow()
@@ -911,8 +955,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -926,8 +971,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -941,35 +987,50 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
         return self._batch_request("jobs", "unarchive", job_ids)
 
-    def batch_update_jobs_ttl(self, job_ids, days):
-        '''Updates the expiration dates of the jobs with the given IDs by the
-        specified number of days.
+    def batch_update_jobs_ttl(self, job_ids, days=None, expiration_date=None):
+        '''Updates the expiration dates of the jobs with the given IDs.
 
-        To decrease the lifespan of the jobs, provide a negative number. Note
-        that if the expiration date of a job after modification is in the
-        past, the job will be deleted.
+        Note that if the expiration date of a job after modification is in
+        the past, the job output will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             job_ids (list): the job IDs
-            days (float): the number of days by which to extend the lifespan
-                of the jobs
+            days (float, optional): the number of days by which to extend the
+                lifespan of each job. To decrease the lifespan of the jobs,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new expiration date for
+                each job. If a string is provided, it must be in ISO 8601
+                format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone
+                is included in the datetime or string, it will be respected
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        return self._batch_request("jobs", "ttl", job_ids, {"days": days})
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+        return self._batch_request("jobs", "ttl", job_ids, data)
 
     def batch_delete_jobs(self, job_ids):
         '''Deletes the jobs with the given IDs.
@@ -980,8 +1041,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -997,8 +1059,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to True/False values indicating
-                whether the job was successfully processed (True)
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully processed. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1079,6 +1142,13 @@ class APIError(Exception):
             message = '%s for URL: %s' % (res.reason, res.url)
 
         return cls(message, res.status_code)
+
+
+def _parse_datetime(datetime_or_str):
+    if isinstance(datetime_or_str, datetime):
+        return datetime_or_str.isoformat()
+
+    return str(datetime_or_str)
 
 
 def _get_mime_type(path):
