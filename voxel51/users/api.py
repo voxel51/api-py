@@ -487,17 +487,23 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
-    def batch_update_data_ttl(self, data_ids, days):
+    def batch_update_data_ttl(self, data_ids, days=None, expiration_date=None):
         '''Updates the expiration date of the data with the given IDs.
 
-        To decrease the lifespan of the data, provide a negative number. Note
-        that if the expiration date of data after modification is in the past,
-        the data will be deleted.
+        Note that if the expiration date of the data after modification is in
+        the past, the data will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             data_ids (list): the data IDs
-            days (float): the number of days by which to extend the lifespan
-                of the data
+            days (float, optional): the number of days by which to extend the
+                lifespan of the data. To decrease the lifespan of the data,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new TTL for the data.
+                If a string is provided, it must be in ISO 8601 format, e.g.,
+                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
+                in the datetime or string, it will be respected
 
         Returns:
             a dictionary mapping data IDs to True/False values indicating
@@ -506,7 +512,15 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        return self._batch_request("data", "ttl", data_ids, {"days": days})
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+        return self._batch_request("data", "ttl", data_ids, data)
 
     def batch_delete_data(self, data_ids):
         '''Deletes the data with the given IDs.
@@ -977,18 +991,24 @@ class API(object):
         '''
         return self._batch_request("jobs", "unarchive", job_ids)
 
-    def batch_update_jobs_ttl(self, job_ids, days):
+    def batch_update_jobs_ttl(self, job_ids, days=None, expiration_date=None):
         '''Updates the expiration dates of the jobs with the given IDs by the
         specified number of days.
 
-        To decrease the lifespan of the jobs, provide a negative number. Note
-        that if the expiration date of a job after modification is in the
-        past, the job will be deleted.
+        Note that if the expiration date of the job after modification is in
+        the past, the job output will be deleted.
+
+        Exactly one keyword argument must be provided.
 
         Args:
             job_ids (list): the job IDs
-            days (float): the number of days by which to extend the lifespan
-                of the jobs
+            days (float, optional): the number of days by which to extend the
+                lifespan of the job. To decrease the lifespan of the job,
+                provide a negative number
+            expiration_date (datetime|str, optional): a new TTL for the job.
+                If a string is provided, it must be in ISO 8601 format, e.g.,
+                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
+                in the datetime or string, it will be respected
 
         Returns:
             a dictionary mapping job IDs to True/False values indicating
@@ -997,7 +1017,15 @@ class API(object):
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
-        return self._batch_request("jobs", "ttl", job_ids, {"days": days})
+        data = {}
+        if days is not None:
+            data["days"] = str(days)
+        if expiration_date is not None:
+            data["expiration_date"] = _parse_datetime(expiration_date)
+        if len(data) != 1:
+            raise APIError(
+                "Either `days` or `expiration_date` must be provided", 400)
+        return self._batch_request("jobs", "ttl", job_ids, data)
 
     def batch_delete_jobs(self, job_ids):
         '''Deletes the jobs with the given IDs.
