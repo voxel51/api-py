@@ -325,11 +325,11 @@ class TTLDataCommand(Command):
     '''Update TTL of data on the platform.
 
     Examples:
-        # Update TTL of data
+        # Extend TTL of data by specified number of days
         voxel51 data ttl --days <days> <id> [...]
 
-        # Update TTL of all data
-        voxel51 data ttl --days <days> --all
+        # Set expiration date of data to given date
+        voxel51 data ttl --date <date> <id> [...]
     '''
 
     @staticmethod
@@ -337,8 +337,10 @@ class TTLDataCommand(Command):
         parser.add_argument(
             "ids", nargs="*", metavar="ID", help="the data ID(s) to update")
         parser.add_argument(
-            "-d", "--days", metavar="DAYS", type=float,
+            "--days", metavar="DAYS", type=float,
             help="the number of days by which to extend the TTL of the data")
+        parser.add_argument(
+            "--date", metavar="DATE", help="new expiration date for the data")
         parser.add_argument(
             "-a", "--all", action="store_true",
             help="whether to update all data")
@@ -347,14 +349,14 @@ class TTLDataCommand(Command):
             help="whether to force update all without confirmation")
         parser.add_argument(
             "--dry-run", action="store_true",
-            help="whether to print data IDs that would be updated rather than"
+            help="whether to print data IDs that would be updated rather than "
             "actually performing the action")
 
     @staticmethod
     def run(args):
         api = API()
 
-        if not args.days:
+        if not args.days and not args.date:
             return
 
         if args.all:
@@ -378,7 +380,8 @@ class TTLDataCommand(Command):
             return
 
         failures = _get_batch_failures(
-            api.batch_update_data_ttl(data_ids, args.days))
+            api.batch_update_data_ttl(
+                data_ids, days=args.days, expiration_date=args.date))
         if not failures:
             logger.info("Data TTL(s) updated")
         else:
