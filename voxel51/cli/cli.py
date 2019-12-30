@@ -1011,21 +1011,25 @@ class DownloadJobsCommand(Command):
     '''Download job outputs.
 
     Examples:
-        # Download job to specific location
-        voxel51 jobs download <id> --path '/path/for/video.mp4'
+        # Download job output to default location
+        voxel51 jobs download <id>
 
-        # Generate signed URL to download job
+        # Download job output to specific location
+        voxel51 jobs download <id> --path '/path/for/job/output.json'
+
+        # Generate signed URL to download job output
         voxel51 jobs download <id> --url
     '''
 
     @staticmethod
     def setup(parser):
-        parser.add_argument("download", metavar="ID", help="job to download")
+        parser.add_argument(
+            "download", metavar="ID", help="job output to download")
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write output")
         parser.add_argument(
             "-u", "--url", metavar="ID",
-            help="generate signed URL to download job")
+            help="generate signed URL to download job output")
 
     @staticmethod
     def run(args):
@@ -1038,8 +1042,8 @@ class DownloadJobsCommand(Command):
             logger.info(url)
             return
 
-        api.download_job_output(job_id, args.path)
-        logger.info("Downloaded '%s' to '%s'", job_id, args.path)
+        output_path = api.download_job_output(job_id, output_path=args.path)
+        logger.info("Downloaded '%s' to '%s'", job_id, output_path)
 
 
 class KillJobsCommand(Command):
@@ -1178,7 +1182,8 @@ class AnalyticsCommand(Command):
     def setup(parser):
         subparsers = parser.add_subparsers(title="available commands")
         _register_command(subparsers, "list", ListAnalyticsCommand)
-        _register_command(subparsers, "docs", DocsAnalyticsCommand)
+        _register_command(subparsers, "info", InfoAnalyticsCommand)
+        _register_command(subparsers, "doc", DocAnalyticsCommand)
         _register_command(subparsers, "upload", UploadAnalyticsCommand)
         _register_command(subparsers, "delete", DeleteAnalyticsCommand)
 
@@ -1288,15 +1293,38 @@ class ListAnalyticsCommand(Command):
         _print_analytics_table(analytics, show_count=args.count)
 
 
-class DocsAnalyticsCommand(Command):
+class InfoAnalyticsCommand(Command):
+    '''Get information about analytics on the platform.
+
+    Examples:
+        # Get analytic(s) info
+        voxel51 analytics info <id> [...]
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "ids", nargs="+", metavar="ID",
+            help="the analytic ID(s) of interest")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        analytics = [
+            api.get_analytic_details(analytic_id) for analytic_id in args.ids]
+        _print_analytics_table(analytics)
+
+
+class DocAnalyticsCommand(Command):
     '''Get documentation about analytics.
 
     Examples:
         # Print documentation for analytic
-        voxel51 analytics docs <id>
+        voxel51 analytics doc <id>
 
         # Write documentation for analytic to disk
-        voxel51 analytics docs <id> --path '/path/for/doc.json'
+        voxel51 analytics doc <id> --path '/path/for/doc.json'
     '''
 
     @staticmethod
@@ -1309,15 +1337,15 @@ class DocsAnalyticsCommand(Command):
     def run(args):
         api = API()
 
-        docs = api.get_analytic_doc(args.id)
+        doc = api.get_analytic_doc(args.id)
 
         if args.path:
-            voxu.write_json(docs, args.path)
+            voxu.write_json(doc, args.path)
             logger.info(
                 "Documentation for analytic '%s' written to '%s'",
                 args.id, args.path)
         else:
-            _print_dict_as_json(docs)
+            _print_dict_as_json(doc)
 
 
 class UploadAnalyticsCommand(Command):
@@ -1325,8 +1353,8 @@ class UploadAnalyticsCommand(Command):
 
     Examples:
         # Upload documentation for analytic
-        voxel51 analytics upload --docs '/path/to/docs.json'
-            [--analytic-type TYPE]
+        voxel51 analytics upload --doc '/path/to/doc.json'
+            [--analytic-type TYPE] [--print-id]
 
         # Upload analytic image
         voxel51 analytics upload --image <id>
@@ -1336,9 +1364,12 @@ class UploadAnalyticsCommand(Command):
     @staticmethod
     def setup(parser):
         parser.add_argument(
-            "--docs", metavar="PATH", help="analytic docs to upload")
+            "--doc", metavar="PATH", help="analytic documentation to upload")
         parser.add_argument(
             "--analytic-type", help="type of analytic")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID of the uploaded analytic")
         parser.add_argument(
             "--image", metavar="ID",
             help="analytic ID to upload image for")
@@ -1352,10 +1383,13 @@ class UploadAnalyticsCommand(Command):
         api = API()
 
         # Upload analytic documentation
-        if args.docs:
+        if args.doc:
             metadata = api.upload_analytic(
-                args.docs, analytic_type=args.analytic_type)
-            _print_dict_as_table(metadata)
+                args.doc, analytic_type=args.analytic_type)
+            if args.print_id:
+                logger.info(metadata["id"])
+            else:
+                _print_dict_as_table(metadata)
 
         # Upload analytic image
         if args.image:
