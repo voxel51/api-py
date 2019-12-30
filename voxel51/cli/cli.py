@@ -473,6 +473,8 @@ class JobsCommand(Command):
 class ListJobsCommand(Command):
     '''List jobs on the platform.
 
+    Unless overridden, only unarchived jobs are listed.
+
     Examples:
         # List jobs according to the given query
         voxel51 jobs list
@@ -1196,6 +1198,9 @@ class AnalyticsCommand(Command):
 
 class ListAnalyticsCommand(Command):
     '''List analytics on the platform.
+
+    Unless overridden, only the latest version of each analytic is listed, and
+    pending analytics are included.
 
     Examples:
         # List analytics according to the given query
