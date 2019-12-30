@@ -488,7 +488,7 @@ class API(object):
         _validate_response(res)
 
     def batch_update_data_ttl(self, data_ids, days=None, expiration_date=None):
-        '''Updates the expiration date of the data with the given IDs.
+        '''Updates the expiration dates of the data with the given IDs.
 
         Note that if the expiration date of the data after modification is in
         the past, the data will be deleted.
@@ -500,10 +500,10 @@ class API(object):
             days (float, optional): the number of days by which to extend the
                 lifespan of the data. To decrease the lifespan of the data,
                 provide a negative number
-            expiration_date (datetime|str, optional): a new TTL for the data.
-                If a string is provided, it must be in ISO 8601 format, e.g.,
-                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
-                in the datetime or string, it will be respected
+            expiration_date (datetime|str, optional): a new expiration date for
+                the data. If a string is provided, it must be in ISO 8601
+                format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone
+                is included in the datetime or string, it will be respected
 
         Returns:
             a dictionary mapping data IDs to dictionaries indicating whether
@@ -999,7 +999,7 @@ class API(object):
     def batch_update_jobs_ttl(self, job_ids, days=None, expiration_date=None):
         '''Updates the expiration dates of the jobs with the given IDs.
 
-        Note that if the expiration date of the job after modification is in
+        Note that if the expiration date of a job after modification is in
         the past, the job output will be deleted.
 
         Exactly one keyword argument must be provided.
@@ -1007,12 +1007,12 @@ class API(object):
         Args:
             job_ids (list): the job IDs
             days (float, optional): the number of days by which to extend the
-                lifespan of the job. To decrease the lifespan of the job,
+                lifespan of each job. To decrease the lifespan of the jobs,
                 provide a negative number
-            expiration_date (datetime|str, optional): a new TTL for the job.
-                If a string is provided, it must be in ISO 8601 format, e.g.,
-                "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone is included
-                in the datetime or string, it will be respected
+            expiration_date (datetime|str, optional): a new expiration date for
+                each job. If a string is provided, it must be in ISO 8601
+                format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone
+                is included in the datetime or string, it will be respected
 
         Returns:
             a dictionary mapping job IDs to dictionaries indicating whether
