@@ -128,6 +128,9 @@ class API(object):
     def list_analytics(self, all_versions=False):
         '''Returns a list of all available analytics.
 
+        By default, only the latest version of each analytic is returned.
+        Pending analytics are always excluded from this list.
+
         Args:
             all_versions (bool, optional): whether to return all versions of
                 each analytic or only the latest version. By default, this is
