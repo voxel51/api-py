@@ -165,6 +165,7 @@ class ListDataCommand(Command):
             [--search [<field>:]<str>[,...]]
             [--sort-by <field>]
             [--ascending]
+            [--all-fields]
             [--count]
 
         # List the last 10 data uploaded to the platform
@@ -206,14 +207,17 @@ class ListDataCommand(Command):
             "-s", "--search", metavar="SEARCH",
             help="search to limit results when listing data")
         parser.add_argument(
-            "-c", "--count", action="store_true",
-            help="whether to show the number of data in the list")
-        parser.add_argument(
             "--sort-by", metavar="FIELD",
             help="field to sort by when listing data")
         parser.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
+        parser.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of data in the list")
 
     @staticmethod
     def run(args):
@@ -232,7 +236,8 @@ class ListDataCommand(Command):
             query = query.add_search_direct(args.search)
 
         data = api.query_data(query)["data"]
-        _print_data_table(data, show_count=args.count)
+        _print_data_table(
+            data, show_count=args.count, show_all_fields=args.all_fields)
 
 
 class InfoDataCommand(Command):
@@ -241,19 +246,25 @@ class InfoDataCommand(Command):
     Examples:
         # Get data info
         voxel51 data info <id> [...]
+
+        # Get all available fields for data
+        voxel51 data info --all-fields <id> [...]
     '''
 
     @staticmethod
     def setup(parser):
         parser.add_argument(
             "ids", nargs="+", metavar="ID", help="the data ID(s) of interest")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
 
     @staticmethod
     def run(args):
         api = API()
 
         data = [api.get_data_details(data_id) for data_id in args.ids]
-        _print_data_table(data)
+        _print_data_table(data, show_all_fields=args.all_fields)
 
 
 class UploadDataCommand(Command):
@@ -483,6 +494,7 @@ class ListJobsCommand(Command):
             [--search [<field>:]<str>[,...]]
             [--sort-by <field>]
             [--ascending]
+            [--all-fields]
             [--count]
 
         # Flags for jobs in a particular state
@@ -544,14 +556,17 @@ class ListJobsCommand(Command):
             "-s", "--search", metavar="SEARCH",
             help="search to limit results when listing jobs")
         parser.add_argument(
-            "-c", "--count", action="store_true",
-            help="whether to show the number of jobs in the list")
-        parser.add_argument(
             "--sort-by", metavar="FIELD",
             help="field to sort by when listing jobs")
         parser.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
+        parser.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of jobs in the list")
 
         states = parser.add_argument_group("state arguments")
         states.add_argument(
@@ -634,7 +649,8 @@ class ListJobsCommand(Command):
         if args.exclude_expired:
             jobs = [job for job in jobs if not api.is_job_expired(job=job)]
 
-        _print_jobs_table(jobs, show_count=args.count)
+        _print_jobs_table(
+            jobs, show_count=args.count, show_all_fields=args.all_fields)
 
 
 class InfoJobsCommand(Command):
@@ -643,19 +659,25 @@ class InfoJobsCommand(Command):
     Examples:
         # Get job(s) info
         voxel51 jobs info <id> [...]
+
+        # Get all available fields for jobs
+        voxel51 jobs info --all-fields <id> [...]
     '''
 
     @staticmethod
     def setup(parser):
         parser.add_argument(
             "ids", nargs="+", metavar="ID", help="the job ID(s) of interest")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
 
     @staticmethod
     def run(args):
         api = API()
 
         jobs = [api.get_job_details(job_id) for job_id in args.ids]
-        _print_jobs_table(jobs)
+        _print_jobs_table(jobs, show_all_fields=args.all_fields)
 
 
 class UploadJobsCommand(Command):
@@ -1247,8 +1269,9 @@ class ListAnalyticsCommand(Command):
             [--limit <limit>]
             [--search [<field>:]<str>[,...]]
             [--sort-by <field>]
-            [--all-versions]
             [--ascending]
+            [--all-versions]
+            [--all-fields]
             [--count]
 
         # Flags for analytics with particular scopes
@@ -1304,11 +1327,14 @@ class ListAnalyticsCommand(Command):
             "--sort-by", metavar="FIELD",
             help="field to sort by when listing analytics")
         parser.add_argument(
-            "-a", "--all-versions", action="store_true",
-            help="whether to include all versions of analytics")
-        parser.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        parser.add_argument(
+            "--all-versions", action="store_true",
+            help="whether to include all versions of analytics")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
         parser.add_argument(
             "-c", "--count", action="store_true",
             help="whether to show the number of analytics in the list")
@@ -1364,7 +1390,8 @@ class ListAnalyticsCommand(Command):
                 query = query.add_search("pending", False)
 
         analytics = api.query_analytics(query)["analytics"]
-        _print_analytics_table(analytics, show_count=args.count)
+        _print_analytics_table(
+            analytics, show_count=args.count, show_all_fields=args.all_fields)
 
 
 class InfoAnalyticsCommand(Command):
@@ -1373,6 +1400,9 @@ class InfoAnalyticsCommand(Command):
     Examples:
         # Get analytic(s) info
         voxel51 analytics info <id> [...]
+
+        # Get all available fields for analytics
+        voxel51 analytics info --all-fields <id> [...]
     '''
 
     @staticmethod
@@ -1380,6 +1410,9 @@ class InfoAnalyticsCommand(Command):
         parser.add_argument(
             "ids", nargs="+", metavar="ID",
             help="the analytic ID(s) of interest")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
 
     @staticmethod
     def run(args):
@@ -1387,7 +1420,7 @@ class InfoAnalyticsCommand(Command):
 
         analytics = [
             api.get_analytic_details(analytic_id) for analytic_id in args.ids]
-        _print_analytics_table(analytics)
+        _print_analytics_table(analytics, show_all_fields=args.all_fields)
 
 
 class DocAnalyticsCommand(Command):
@@ -1522,18 +1555,22 @@ def _print_active_token_info():
     logger.info(table_str)
 
 
-def _print_data_table(data, show_count=False):
-    records = [
-        (
-            d["id"], _render_name(d["name"]), _render_bytes(d["size"]),
-            d["type"], _render_datetime(d["upload_date"]),
-            _render_datetime(d["expiration_date"])
-        ) for d in data]
+def _print_data_table(data, show_count=False, show_all_fields=False):
+    render_fcns = {
+        "name": _render_name,
+        "size": _render_bytes,
+        "upload_date": _render_datetime,
+        "expiration_date": _render_datetime,
+    }
+    _render_fields(data, render_fcns)
 
-    table_str = tabulate(
-        records, headers=[
-            "id", "name", "size", "type", "upload_date", "expiration_date"],
-        tablefmt=TABLE_FORMAT)
+    if show_all_fields:
+        table_str = tabulate(data, headers="keys", tablefmt=TABLE_FORMAT)
+    else:
+        fields = [
+            "id", "name", "size", "type", "upload_date", "expiration_date"]
+        records = _render_records(data, fields)
+        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
     if show_count:
@@ -1541,38 +1578,45 @@ def _print_data_table(data, show_count=False):
         logger.info("\nShowing %d data, %s\n", len(records), total_size)
 
 
-def _print_jobs_table(jobs, show_count=False):
-    records = [
-        (
-            j["id"], _render_name(j["name"]), j["state"], j["archived"],
-            _render_datetime(j["upload_date"]),
-            _render_datetime(j["expiration_date"])
-        ) for j in jobs]
+def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
+    render_fcns = {
+        "name": _render_name,
+        "upload_date": _render_datetime,
+        "expiration_date": _render_datetime,
+    }
+    _render_fields(jobs, render_fcns)
 
-    table_str = tabulate(
-        records, headers=[
+    if show_all_fields:
+        table_str = tabulate(jobs, headers="keys", tablefmt=TABLE_FORMAT)
+    else:
+        fields = [
             "id", "name", "state", "archived", "upload_date",
-            "expiration_date"],
-        tablefmt=TABLE_FORMAT)
+            "expiration_date"]
+        records = _render_records(jobs, fields)
+        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
     if show_count:
         logger.info("\nShowing %d job(s)\n", len(records))
 
 
-def _print_analytics_table(analytics, show_count=False):
-    records = [
-        (
-            a["id"], a["name"], a["version"], a["scope"],
-            bool(a["supports_cpu"]), bool(a["supports_gpu"]),
-            bool(a["pending"]), _render_datetime(a["upload_date"]),
-        ) for a in analytics]
+def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
+    render_fcns = {
+        "supports_cpu": bool,
+        "supports_gpu": bool,
+        "pending": bool,
+        "upload_date": _render_datetime,
+    }
+    _render_fields(analytics, render_fcns)
 
-    table_str = tabulate(
-        records, headers=[
+    if show_all_fields:
+        table_str = tabulate(analytics, headers="keys", tablefmt=TABLE_FORMAT)
+    else:
+        fields = [
             "id", "name", "version", "scope", "supports_cpu", "supports_gpu",
-            "pending", "upload_date"],
-        tablefmt=TABLE_FORMAT)
+            "pending", "upload_date"]
+        records = _render_records(analytics, fields)
+        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
     if show_count:
@@ -1605,6 +1649,20 @@ def _render_bytes(size):
 def _render_datetime(datetime_str):
     dt = dateutil.parser.isoparse(datetime_str)
     return dt.astimezone(get_localzone()).strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def _render_fields(d, render_fcns):
+    for di in d:
+        for ki, vi in iteritems(di):
+            if ki in render_fcns:
+                di[ki] = render_fcns[ki](vi)
+
+
+def _render_records(d, fields):
+    records = []
+    for di in d:
+        records.append(tuple(di[f] for f in fields))
+    return records
 
 
 def _get_batch_failures(batch_response):
