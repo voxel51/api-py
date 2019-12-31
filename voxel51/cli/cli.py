@@ -1570,9 +1570,9 @@ def _print_active_token_info():
     token_path = voxa.get_active_token_path()
     token = voxa.load_token(token_path=token_path)
     contents = [
-        ("id", token.id),
+        ("token id", token.id),
         ("creation date", _render_datetime(token.creation_date)),
-        ("base API URL", token.base_api_url),
+        ("base api url", token.base_api_url),
         ("path", token_path),
     ]
     table_str = tabulate(
