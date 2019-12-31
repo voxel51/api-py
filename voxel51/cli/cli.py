@@ -1532,7 +1532,7 @@ def _print_data_table(data, show_count=False):
 
     table_str = tabulate(
         records, headers=[
-            "id", "name", "size", "type", "upload date", "expiration date"],
+            "id", "name", "size", "type", "upload_date", "expiration_date"],
         tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
@@ -1551,8 +1551,8 @@ def _print_jobs_table(jobs, show_count=False):
 
     table_str = tabulate(
         records, headers=[
-            "id", "name", "state", "archived", "upload date",
-            "expiration date"],
+            "id", "name", "state", "archived", "upload_date",
+            "expiration_date"],
         tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
@@ -1570,8 +1570,8 @@ def _print_analytics_table(analytics, show_count=False):
 
     table_str = tabulate(
         records, headers=[
-            "id", "name", "version", "scope", "supports cpu", "supports gpu",
-            "pending", "upload date"],
+            "id", "name", "version", "scope", "supports_cpu", "supports_gpu",
+            "pending", "upload_date"],
         tablefmt=TABLE_FORMAT)
 
     logger.info(table_str)
