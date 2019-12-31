@@ -545,7 +545,7 @@ class API(object):
     # JOBS ####################################################################
 
     def list_jobs(self):
-        '''Returns a list of all jobs.
+        '''Returns a list of all unarchived jobs.
 
         Returns:
             a list of dictionaries describing the jobs
