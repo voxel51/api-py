@@ -81,6 +81,7 @@ class Voxel51Command(Command):
         _register_command(subparsers, "data", DataCommand)
         _register_command(subparsers, "jobs", JobsCommand)
         _register_command(subparsers, "analytics", AnalyticsCommand)
+        _register_command(subparsers, "status", StatusCommand)
 
 
 class AuthCommand(Command):
@@ -1506,6 +1507,63 @@ class DeleteAnalyticsCommand(Command):
         for analytic_id in analytic_ids:
             api.delete_analytic(analytic_id)
             logger.info("Analytic '%s' deleted", analytic_id)
+
+
+class StatusCommand(Command):
+    '''Tools for checking the status of the platform.
+
+    Examples:
+        # Check status of all platform services
+        voxel51 status
+
+        # Check whether platform is up
+        voxel51 status --platform
+
+        # Check whether jobs cluster is up
+        voxel51 status --jobs-cluster
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "-p", "--platform", action="store_true",
+            help="check if platform is up")
+        parser.add_argument(
+            "-j", "--jobs-cluster", action="store_true",
+            help="check if jobs cluster is up")
+
+    @staticmethod
+    def run(args):
+        api = API()
+
+        status = api.get_platform_status()
+
+        if args.platform:
+            logger.info(status["platform"])
+
+        if args.jobs_cluster:
+            logger.info(status["jobs"])
+
+        if not args.platform and not args.jobs_cluster:
+            _print_platform_status_info(status, api.token)
+
+
+def _print_platform_status_info(status, token):
+    records = []
+    for service, is_up in iteritems(status):
+        if is_up:
+            msg = "system operational!"
+        elif token.base_api_url == "https://api.voxel51.com":
+            msg = "system down; see https://status.voxel51.com for more info"
+        else:
+            msg = "system down; contact your sys admin for more info"
+
+        records.append((service, is_up, msg))
+
+    table_str = tabulate(
+        records, headers=["service", "operational", "message"],
+        tablefmt=TABLE_FORMAT)
+    logger.info(table_str)
 
 
 def _print_active_token_info():
