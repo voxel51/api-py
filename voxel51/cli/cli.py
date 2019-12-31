@@ -1623,7 +1623,7 @@ def _render_datetime(datetime_str):
 
 def _get_batch_failures(response):
     return {
-        id: status.get("error", {}).get("message", "-")
+        id: status.get("error", {}).get("message", "????")
         for id, status in iteritems(response) if not status["success"]
     }
 
