@@ -1237,8 +1237,9 @@ class AnalyticsCommand(Command):
 class ListAnalyticsCommand(Command):
     '''List analytics on the platform.
 
-    Unless overridden, only the latest version of each analytic is listed, and
-    pending analytics are included.
+    Notes:
+        Unless overridden, only the latest version of each analytic is listed,
+        and pending analytics are included.
 
     Examples:
         # List analytics according to the given query
@@ -1253,6 +1254,12 @@ class ListAnalyticsCommand(Command):
         # Flags for analytics with particular scopes
         voxel51 analytics list --public
         voxel51 analytics list --user
+
+        # Flags for analytics with particular pending states
+        # These flags are ignored when a search containing `pending` is found
+        voxel51 analytics list --include-pending    (default behavior)
+        voxel51 analytics list --exclude-pending
+        voxel51 analytics list --only-pending
 
         # List the last 10 analytics of any version uploaded to the platform
         voxel51 analytics list --all-versions --limit 10 --sort-by upload_date
@@ -1312,6 +1319,17 @@ class ListAnalyticsCommand(Command):
         scopes.add_argument(
             "--user", action="store_true", help="user analytics")
 
+        pending = parser.add_argument_group("pending arguments")
+        pending.add_argument(
+            "--include-pending", action="store_true",
+            help="include pending analytics (default behavior)")
+        pending.add_argument(
+            "--exclude-pending", action="store_true",
+            help="exclude pending analytics")
+        pending.add_argument(
+            "--pending-only", action="store_true",
+            help="only pending analytics")
+
     @staticmethod
     def run(args):
         api = API()
@@ -1337,6 +1355,13 @@ class ListAnalyticsCommand(Command):
 
         if args.search is not None:
             query = query.add_search_direct(args.search)
+
+        if args.search is None or "pending:" not in args.search:
+            # default: include pending
+            if args.pending_only:
+                query = query.add_search("pending", True)
+            if args.exclude_pending:
+                query = query.add_search("pending", False)
 
         analytics = api.query_analytics(query)["analytics"]
         _print_analytics_table(analytics, show_count=args.count)
