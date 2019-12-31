@@ -688,15 +688,22 @@ class UploadJobsCommand(Command):
         parser.add_argument(
             "--auto-start", action="store_true",
             help="whether to automatically start job")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID(s) of the job")
 
     @staticmethod
     def run(args):
         api = API()
 
         request = JobRequest.from_json(args.path)
-        job_id = api.upload_job_request(
+        metadata = api.upload_job_request(
             request, args.name, auto_start=args.auto_start)
-        if args.auto_start:
+        job_id = metadata["id"]
+
+        if args.print_id:
+            logger.info(job_id)
+        elif args.auto_start:
             logger.info("Created and started job '%s'", job_id)
         else:
             logger.info("Created job '%s'", job_id)
