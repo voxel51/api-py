@@ -685,8 +685,10 @@ class UploadJobsCommand(Command):
         api = API()
 
         request = JobRequest.from_json(args.path)
-        job_id = api.upload_job_request(
+        metadata = api.upload_job_request(
             request, args.name, auto_start=args.auto_start)
+        job_id = metadata["id"]
+
         if args.auto_start:
             logger.info("Created and started job '%s'", job_id)
         else:
