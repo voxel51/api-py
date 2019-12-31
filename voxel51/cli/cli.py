@@ -379,9 +379,10 @@ class TTLDataCommand(Command):
         if num_data == 0:
             return
 
-        failures = _get_batch_failures(
-            api.batch_update_data_ttl(
-                data_ids, days=args.days, expiration_date=args.date))
+        response = api.batch_update_data_ttl(
+            data_ids, days=args.days, expiration_date=args.date)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Data TTL(s) updated")
         else:
@@ -440,7 +441,9 @@ class DeleteDataCommand(Command):
         if num_data == 0:
             return
 
-        failures = _get_batch_failures(api.batch_delete_data(data_ids))
+        response = api.batch_delete_data(data_ids)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Data deleted")
         else:
@@ -746,7 +749,9 @@ class StartJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        failures = _get_batch_failures(api.batch_start_jobs(job_ids))
+        response = api.batch_start_jobs(job_ids)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Job(s) started")
         else:
@@ -809,7 +814,9 @@ class ArchiveJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        failures = _get_batch_failures(api.batch_archive_jobs(job_ids))
+        response = api.batch_archive_jobs(job_ids)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Job(s) archived")
         else:
@@ -876,7 +883,9 @@ class UnarchiveJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        failures = _get_batch_failures(api.batch_unarchive_jobs(job_ids))
+        response = api.batch_unarchive_jobs(job_ids)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Job(s) unarchived")
         else:
@@ -950,9 +959,10 @@ class TTLJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        failures = _get_batch_failures(
-            api.batch_update_jobs_ttl(
-                job_ids, days=args.days, expiration_date=args.date))
+        response = api.batch_update_jobs_ttl(
+            job_ids, days=args.days, expiration_date=args.date)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Job TTL(s) updated")
         else:
@@ -1148,7 +1158,9 @@ class KillJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        failures = _get_batch_failures(api.batch_kill_jobs(job_ids))
+        response = api.batch_kill_jobs(job_ids)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Job(s) killed")
         else:
@@ -1212,7 +1224,9 @@ class DeleteJobsCommand(Command):
         if num_jobs == 0:
             return
 
-        failures = _get_batch_failures(api.batch_delete_jobs(job_ids))
+        response = api.batch_delete_jobs(job_ids)
+
+        failures = _get_batch_failures(response)
         if not failures:
             logger.info("Job(s) deleted")
         else:
