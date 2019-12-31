@@ -473,7 +473,8 @@ class JobsCommand(Command):
 class ListJobsCommand(Command):
     '''List jobs on the platform.
 
-    Unless overridden, only unarchived jobs are listed.
+    Notes:
+        Unless overridden, only unarchived jobs are listed.
 
     Examples:
         # List jobs according to the given query
@@ -481,7 +482,6 @@ class ListJobsCommand(Command):
             [--limit <limit>]
             [--search [<field>:]<str>[,...]]
             [--sort-by <field>]
-            [--archived]
             [--ascending]
             [--count]
 
@@ -492,6 +492,17 @@ class ListJobsCommand(Command):
         voxel51 jobs list --running
         voxel51 jobs list --complete
         voxel51 jobs list --failed
+
+        # Flags for jobs with a particular archival state
+        # These flags are ignored when a search containing `archived` is found
+        voxel51 jobs list --include-archived
+        voxel51 jobs list --exclude-archived    (default behavior)
+        voxel51 jobs list --archived-only
+
+        # Flags for jobs with a particular expiration status
+        voxel51 jobs list --include-expired     (default behavior)
+        voxel51 jobs list --exclude-expired
+        voxel51 jobs list --expired-only
 
         # List the last 10 jobs completed on the platform
         voxel51 jobs list --complete --limit 10 --sort-by upload_date
@@ -541,9 +552,6 @@ class ListJobsCommand(Command):
         parser.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
-        parser.add_argument(
-            "--archived", action="store_true",
-            help="whether to list archived jobs")
 
         states = parser.add_argument_group("state arguments")
         states.add_argument(
@@ -558,6 +566,26 @@ class ListJobsCommand(Command):
             "--complete", action="store_true", help="jobs in COMPLETE state")
         states.add_argument(
             "--failed", action="store_true", help="jobs in FAILED state")
+
+        archival = parser.add_argument_group("archival arguments")
+        archival.add_argument(
+            "--include-archived", action="store_true",
+            help="include archived jobs")
+        archival.add_argument(
+            "--exclude-archived", action="store_true",
+            help="exclude archived jobs (default behavior)")
+        archival.add_argument(
+            "--archived-only", action="store_true", help="only archived jobs")
+
+        expiration = parser.add_argument_group("expiration arguments")
+        expiration.add_argument(
+            "--include-expired", action="store_true",
+            help="include expired jobs (default behavior)")
+        expiration.add_argument(
+            "--exclude-expired", action="store_true",
+            help="exclude expired jobs")
+        expiration.add_argument(
+            "--expired-only", action="store_true", help="only expired jobs")
 
     @staticmethod
     def run(args):
@@ -591,11 +619,21 @@ class ListJobsCommand(Command):
         if args.search is not None:
             query = query.add_search_direct(args.search)
 
-        if (args.archived or args.search is None or
-                not "archived:" in args.search):
-            query = query.add_search("archived", args.archived)
+        if args.search is None or "archived:" not in args.search:
+            # default: exclude archived
+            if args.archived_only:
+                query = query.add_search("archived", True)
+            elif not args.include_archived:
+                query = query.add_search("archived", False)
 
         jobs = api.query_jobs(query)["jobs"]
+
+        # default: include expired
+        if args.expired_only:
+            jobs = [job for job in jobs if api.is_job_expired(job=job)]
+        if args.exclude_expired:
+            jobs = [job for job in jobs if not api.is_job_expired(job=job)]
+
         _print_jobs_table(jobs, show_count=args.count)
 
 
