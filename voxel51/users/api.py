@@ -13,6 +13,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
+from future.utils import itervalues
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
@@ -1094,12 +1095,19 @@ class API(object):
         body = {}
         if params is not None:
             body.update(**params)
+
         body.update(action=action, ids=list(ids))
         res = self._requests.post(endpoint, headers=self._header, json=body)
         _validate_response(res)
         statuses = _parse_json_response(res)["responses"]
-        for status in statuses.values():
-            status["success"] = ("error" not in status)
+
+        # Cleanup statuses and add `success` field
+        for status in itervalues(statuses):
+            success = ("error" not in status)
+            if success:
+                status.clear()
+            status["success"] = success
+
         return statuses
 
     def _stream_download(self, url, output_path):
