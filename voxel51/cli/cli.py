@@ -268,6 +268,9 @@ class UploadDataCommand(Command):
     def setup(parser):
         parser.add_argument(
             "paths", nargs="+", metavar="PATH", help="the file(s) to upload")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID(s) of the uploaded data")
 
     @staticmethod
     def run(args):
@@ -275,12 +278,18 @@ class UploadDataCommand(Command):
 
         uploads = []
         for path in args.paths:
-            logger.info("Uploading data '%s'", path)
-            metadata = api.upload_data(path)
-            uploads.append({"id": metadata["id"], "path": path})
+            if not args.print_id:
+                logger.info("Uploading data '%s'", path)
 
-        table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
-        logger.info("\n" + table_str + "\n")
+            metadata = api.upload_data(path)
+
+            if args.print_id:
+                logger.info(metadata["id"])
+            else:
+                uploads.append({"id": metadata["id"], "path": path})
+
+        if not args.print_id:
+            _print_data_uploads(uploads)
 
 
 class DownloadDataCommand(Command):
@@ -1553,6 +1562,11 @@ def _print_data_table(data, show_count=False):
     if show_count:
         total_size = _render_bytes(sum(d["size"] for d in data))
         logger.info("\nShowing %d data, %s\n", len(records), total_size)
+
+
+def _print_data_uploads(uploads):
+    table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
+    logger.info("\n" + table_str + "\n")
 
 
 def _print_jobs_table(jobs, show_count=False):
