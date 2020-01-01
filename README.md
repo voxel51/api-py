@@ -137,26 +137,14 @@ print(job_request)
 Upload a job request:
 
 ```py
-api.upload_job_request(job_request, "<job-name>")
+metadata = api.upload_job_request(job_request, "<job-name>")
+job_id = metadata["id"]
 ```
 
 Start a job:
 
 ```py
-# ID of the job
-job_id = "XXXXXXXX"
-
 api.start_job(job_id)
-```
-
-Wait until a job is complete and then download its output:
-
-```py
-# Local path to which to download the output
-output_path = "/path/to/output.zip"
-
-api.wait_until_job_completes(job_id)
-api.download_job_output(job_id, output_path)
 ```
 
 Get the status of a job:
@@ -165,102 +153,13 @@ Get the status of a job:
 status = api.get_job_status(job_id)
 ```
 
-
-## Application Quickstart
-
-This section provides a brief guide to using the Platform API with your
-application.
-
-### Sign-up and Authentication
-
-To use the API with your application, you must first login to your application
-admin account at https://console.voxel51.com/admin and create an API token
-for your application.
-
-> Keep your application API token private; it is your access key to the API.
-
-Each API request you make must be authenticated by your application token. To
-activate your application token, set the `VOXEL51_APP_TOKEN` environment
-variable in your shell to point to your API token file:
-
-```shell
-export VOXEL51_APP_TOKEN="/path/to/your/app-token.json"
-```
-
-Alternatively, you can permanently activate an application token by executing
-the following commands:
+Download the output of a completed job:
 
 ```py
-from voxel51.apps.auth import activate_application_token
+# Local path to which to download the output
+output_path = "/path/to/labels.json"
 
-activate_application_token("/path/to/your/app-token.json")
-```
-
-In the latter case, your token is copied to `~/.voxel51/` and will be
-automatically used in all future sessions. An application token can be
-deactivated via the `voxel51.apps.auth.deactivate_application_token()` method.
-
-After you have activated an application API token, you have full access to the
-API.
-
-### Creating an Application API Session
-
-To initialize an API session for your application, issue the following
-commands:
-
-```py
-from voxel51.apps.api import ApplicationAPI
-
-api = ApplicationAPI()
-```
-
-### User Management
-
-The application API provides methods to manage the users of your application.
-
-For example, you can list the current users of your application:
-
-```py
-usernames = api.list_users()
-```
-
-and create a new user:
-
-```py
-api.create_user("<username>")
-```
-
-### Performing User Actions
-
-To perform actions for a user of your application, you must first activate the
-user:
-
-```py
-# Activate an application user
-api.with_user("<username>")
-```
-
-With a user activated, all subsequent API requests will be applied to that
-user. To deactivate the user, use the `api.exit_user()` method.
-
-For example, you can upload data for the user:
-
-```py
-# Local path to the data
-data_path = "/path/to/video.mp4"
-
-api.upload_data(data_path)
-```
-
-And run a job on the user's data:
-
-```py
-from voxel51.users.jobs import JobRequest
-
-job_request = JobRequest("<analytic>")
-job_request.set_input("<input>", data_id="<data-id>")
-job_request.set_parameter("<param>", val)
-api.upload_job_request(job_request, "<job-name>", auto_start=True)
+api.download_job_output(job_id, output_path=output_path)
 ```
 
 
