@@ -1,4 +1,4 @@
-# Voxel51 Platform API for Applications Quickstart
+# Voxel51 Platform API Applications Quickstart
 
 The Voxel51 Platform provides an interface through which you can upload and
 manage data for your application users and run jobs that process their data
@@ -26,8 +26,8 @@ on the Voxel51 Platform.
 ### Sign-up and Authentication
 
 To use the API with your application, you must first login to your application
-admin account at https://console.voxel51.com/admin and create an API token
-for your application.
+admin account at https://console.voxel51.com/apps/your-app-name and create an
+API token for your application.
 
 > Keep your application API token private; it is your access key to the API.
 
@@ -36,7 +36,7 @@ activate your application token, set the `VOXEL51_APP_TOKEN` environment
 variable in your shell to point to your API token file:
 
 ```shell
-export VOXEL51_APP_TOKEN="/path/to/your/app-token.json"
+export VOXEL51_APP_TOKEN=/path/to/your/app-token.json
 ```
 
 Alternatively, you can permanently activate an application token by executing
