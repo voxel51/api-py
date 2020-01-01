@@ -1736,7 +1736,8 @@ def _print_dict_as_json(d):
 
 def _print_dict_as_table(d):
     contents = list(d.items())
-    table_str = tabulate(contents, tablefmt="plain")
+    table_str = tabulate(
+        contents, headers=["Analytic", ""], tablefmt=TABLE_FORMAT)
     print(table_str)
 
 
