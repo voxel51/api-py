@@ -1657,6 +1657,9 @@ def _print_active_token_info():
 
 
 def _print_data_table(data, show_count=False, show_all_fields=False):
+    if show_count:
+        total_size = _render_bytes(sum(d["size"] for d in data))
+
     render_fcns = {
         "name": _render_name,
         "size": _render_bytes,
@@ -1675,8 +1678,7 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
 
     print(table_str)
     if show_count:
-        total_size = _render_bytes(sum(d["size"] for d in data))
-        print("\nShowing %d data, %s\n" % (len(records), total_size))
+        print("\nShowing %d data, %s\n" % (len(data), total_size))
 
 
 def _print_data_uploads(uploads):
@@ -1703,7 +1705,7 @@ def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
 
     print(table_str)
     if show_count:
-        print("\nShowing %d job(s)\n" % len(records))
+        print("\nShowing %d job(s)\n" % len(jobs))
 
 
 def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
@@ -1726,7 +1728,7 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
 
     print(table_str)
     if show_count:
-        print("\nFound %d analytic(s)\n" % len(records))
+        print("\nFound %d analytic(s)\n" % len(analytics))
 
 
 def _print_dict_as_json(d):
