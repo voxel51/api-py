@@ -1561,10 +1561,10 @@ class StatusCommand(Command):
         status = api.get_platform_status()
 
         if args.platform:
-            logger.info(status["platform"])
+            print(status["platform"])
 
         if args.jobs_cluster:
-            logger.info(status["jobs"])
+            print(status["jobs"])
 
         if not args.platform and not args.jobs_cluster:
             _print_platform_status_info(status, api.token)
@@ -1585,7 +1585,7 @@ def _print_platform_status_info(status, token):
     table_str = tabulate(
         records, headers=["service", "operational", "message"],
         tablefmt=TABLE_FORMAT)
-    logger.info(table_str)
+    print(table_str)
 
 
 def _print_active_token_info():
