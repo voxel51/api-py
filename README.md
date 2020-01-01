@@ -36,15 +36,14 @@ the [Analytics Documentation](https://voxel51.com/docs/analytics).
 For more information about using the `voxel51` command-line interface that is
 provided by this library see the [CLI Quickstart](CLI).
 
-For more information about using the Python Client Library to operate an
-application on the Voxel51 Platform, see the
-[Applications Quickstart](APPLICATIONS).
+For more information about using this client library to operate an application
+on the Voxel51 Platform, see the [Applications Quickstart](APPLICATIONS).
 
 
 ## Quickstart
 
-This section provides a brief guide to using the Platform API with your user
-account.
+This section provides a brief guide to using the Platform API with this client
+library.
 
 ### Sign-up and Authentication
 

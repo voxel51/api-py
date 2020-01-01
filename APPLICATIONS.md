@@ -8,8 +8,8 @@ In particular, the API exposes routes to manage your application, including
 uploading custom analytics, creating and managing users, monitoring the status
 of jobs, etc.
 
-This document provides a brief overview of using the Python Client Library
-to operate your application on the Voxel51 Platform.
+This document provides a brief overview of using this client library to
+operate your application on the Voxel51 Platform.
 
 <img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
 
