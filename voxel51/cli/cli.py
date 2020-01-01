@@ -21,7 +21,6 @@ from future.utils import iteritems
 
 import argparse
 import json
-import logging
 import sys
 
 import dateutil.parser
@@ -34,9 +33,6 @@ import voxel51.users.auth as voxa
 from voxel51.users.jobs import JobRequest, JobState
 from voxel51.users.query import AnalyticsQuery, DataQuery, JobsQuery
 import voxel51.users.utils as voxu
-
-
-logger = logging.getLogger(__name__)
 
 
 MAX_NAME_COLUMN_WIDTH = 51
@@ -268,6 +264,9 @@ class UploadDataCommand(Command):
     def setup(parser):
         parser.add_argument(
             "paths", nargs="+", metavar="PATH", help="the file(s) to upload")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID(s) of the uploaded data")
 
     @staticmethod
     def run(args):
@@ -275,12 +274,18 @@ class UploadDataCommand(Command):
 
         uploads = []
         for path in args.paths:
-            logger.info("Uploading data '%s'", path)
-            metadata = api.upload_data(path)
-            uploads.append({"id": metadata["id"], "path": path})
+            if not args.print_id:
+                print("Uploading data '%s'" % path)
 
-        table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
-        logger.info("\n" + table_str + "\n")
+            metadata = api.upload_data(path)
+
+            if args.print_id:
+                print(metadata["id"])
+            else:
+                uploads.append({"id": metadata["id"], "path": path})
+
+        if not args.print_id:
+            _print_data_uploads(uploads)
 
 
 class DownloadDataCommand(Command):
@@ -314,11 +319,11 @@ class DownloadDataCommand(Command):
 
         if args.url:
             url = api.get_data_download_url(data_id)
-            logger.info(url)
+            print(url)
             return
 
         output_path = api.download_data(data_id, output_path=args.path)
-        logger.info("Downloaded '%s' to '%s'", data_id, output_path)
+        print("Downloaded '%s' to '%s'" % (data_id, output_path))
 
 
 class TTLDataCommand(Command):
@@ -366,13 +371,13 @@ class TTLDataCommand(Command):
 
         if args.dry_run:
             for data_id in data_ids:
-                logger.info(data_id)
+                print(data_id)
             return
 
         num_data = len(data_ids)
 
         if args.all:
-            logger.info("Found %d data to update TTL", num_data)
+            print("Found %d data to update TTL" % num_data)
             if num_data > 0 and not args.force:
                 _abort_if_requested()
 
@@ -384,11 +389,12 @@ class TTLDataCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Data TTL(s) updated")
+            print("Data TTL(s) updated")
         else:
             for data_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to update TTL of data '%s': %s", data_id, message)
+                print(
+                    "Failed to update TTL of data '%s': %s" %
+                    (data_id, message))
 
 
 class DeleteDataCommand(Command):
@@ -428,13 +434,13 @@ class DeleteDataCommand(Command):
 
         if args.dry_run:
             for data_id in data_ids:
-                logger.info(data_id)
+                print(data_id)
             return
 
         num_data = len(data_ids)
 
         if args.all:
-            logger.info("Found %d data to delete", num_data)
+            print("Found %d data to delete" % num_data)
             if num_data > 0 and not args.force:
                 _abort_if_requested()
 
@@ -445,11 +451,10 @@ class DeleteDataCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Data deleted")
+            print("Data deleted")
         else:
             for data_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to delete data '%s': %s", data_id, message)
+                print("Failed to delete data '%s': %s" % (data_id, message))
 
 
 class JobsCommand(Command):
@@ -679,6 +684,9 @@ class UploadJobsCommand(Command):
         parser.add_argument(
             "--auto-start", action="store_true",
             help="whether to automatically start job")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID(s) of the job")
 
     @staticmethod
     def run(args):
@@ -689,10 +697,12 @@ class UploadJobsCommand(Command):
             request, args.name, auto_start=args.auto_start)
         job_id = metadata["id"]
 
-        if args.auto_start:
-            logger.info("Created and started job '%s'", job_id)
+        if args.print_id:
+            print(job_id)
+        elif args.auto_start:
+            print("Created and started job '%s'" % job_id)
         else:
-            logger.info("Created job '%s'", job_id)
+            print("Created job '%s'" % job_id)
 
 
 class StartJobsCommand(Command):
@@ -738,13 +748,13 @@ class StartJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to start", num_jobs)
+            print("Found %d job(s) to start" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -755,10 +765,10 @@ class StartJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) started")
+            print("Job(s) started")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning("Failed to start job '%s': %s", job_id, message)
+                print("Failed to start job '%s': %s" % (job_id, message))
 
 
 class ArchiveJobsCommand(Command):
@@ -803,13 +813,13 @@ class ArchiveJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to archive", num_jobs)
+            print("Found %d job(s) to archive" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -820,11 +830,10 @@ class ArchiveJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) archived")
+            print("Job(s) archived")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to archive job '%s': %s", job_id, message)
+                print("Failed to archive job '%s': %s" % (job_id, message))
 
 
 class UnarchiveJobsCommand(Command):
@@ -872,13 +881,13 @@ class UnarchiveJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to unarchive", num_jobs)
+            print("Found %d job(s) to unarchive" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -889,11 +898,10 @@ class UnarchiveJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) unarchived")
+            print("Job(s) unarchived")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to unarchive job '%s': %s", job_id, message)
+                print("Failed to unarchive job '%s': %s" % (job_id, message))
 
 
 class TTLJobsCommand(Command):
@@ -948,13 +956,13 @@ class TTLJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d jobs to update TTL", num_jobs)
+            print("Found %d jobs to update TTL" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -966,11 +974,11 @@ class TTLJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job TTL(s) updated")
+            print("Job TTL(s) updated")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to update TTL of job '%s': %s", job_id, message)
+                print(
+                    "Failed to update TTL of job '%s': %s" % (job_id, message))
 
 
 class RequestJobsCommand(Command):
@@ -998,10 +1006,10 @@ class RequestJobsCommand(Command):
 
         if args.path:
             request.to_json(args.path)
-            logger.info(
-                "Request for job '%s' written to '%s'", args.id, args.path)
+            print(
+                "Request for job '%s' written to '%s'" % (args.id, args.path))
         else:
-            logger.info(request)
+            print(request)
 
 
 class StatusJobsCommand(Command):
@@ -1029,8 +1037,7 @@ class StatusJobsCommand(Command):
 
         if args.path:
             voxu.write_json(status, args.path)
-            logger.info(
-                "Status for job '%s' written to '%s'", args.id, args.path)
+            print("Status for job '%s' written to '%s'" % (args.id, args.path))
         else:
             _print_dict_as_json(status)
 
@@ -1058,11 +1065,11 @@ class LogJobsCommand(Command):
 
         if args.path:
             api.download_job_logfile(args.id, output_path=args.path)
-            logger.info(
-                "Logfile for job '%s' written to '%s'", args.id, args.path)
+            print(
+                "Logfile for job '%s' written to '%s'" % (args.id, args.path))
         else:
             logfile = api.download_job_logfile(args.id, output_path=args.path)
-            logger.info(logfile)
+            print(logfile)
 
 
 class DownloadJobsCommand(Command):
@@ -1097,11 +1104,11 @@ class DownloadJobsCommand(Command):
 
         if args.url:
             url = api.get_job_output_download_url(job_id)
-            logger.info(url)
+            print(url)
             return
 
         output_path = api.download_job_output(job_id, output_path=args.path)
-        logger.info("Downloaded '%s' to '%s'", job_id, output_path)
+        print("Downloaded '%s' to '%s'" % (job_id, output_path))
 
 
 class KillJobsCommand(Command):
@@ -1147,13 +1154,13 @@ class KillJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to kill", num_jobs)
+            print("Found %d job(s) to kill" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -1164,10 +1171,10 @@ class KillJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) killed")
+            print("Job(s) killed")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning("Failed to kill job '%s': %s", job_id, message)
+                print("Failed to kill job '%s': %s" % (job_id, message))
 
 
 class DeleteJobsCommand(Command):
@@ -1213,13 +1220,13 @@ class DeleteJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to delete", num_jobs)
+            print("Found %d job(s) to delete" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -1230,11 +1237,10 @@ class DeleteJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) deleted")
+            print("Job(s) deleted")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to delete job '%s': %s", job_id, message)
+                print("Failed to delete job '%s': %s" % (job_id, message))
 
 
 class AnalyticsCommand(Command):
@@ -1431,9 +1437,9 @@ class DocAnalyticsCommand(Command):
 
         if args.path:
             voxu.write_json(doc, args.path)
-            logger.info(
-                "Documentation for analytic '%s' written to '%s'",
-                args.id, args.path)
+            print(
+                "Documentation for analytic '%s' written to '%s'" %
+                (args.id, args.path))
         else:
             _print_dict_as_json(doc)
 
@@ -1444,7 +1450,7 @@ class UploadAnalyticsCommand(Command):
     Examples:
         # Upload documentation for analytic
         voxel51 analytics upload --doc '/path/to/doc.json'
-            [--analytic-type TYPE] [--print-id]
+            [--analytic-type TYPE]
 
         # Upload analytic image
         voxel51 analytics upload --image <id>
@@ -1458,15 +1464,15 @@ class UploadAnalyticsCommand(Command):
         parser.add_argument(
             "--analytic-type", help="type of analytic")
         parser.add_argument(
-            "--print-id", action="store_true",
-            help="whether to print only the ID of the uploaded analytic")
-        parser.add_argument(
             "--image", metavar="ID",
             help="analytic ID to upload image for")
         parser.add_argument(
             "--path", metavar="PATH", help="analytic image to upload")
         parser.add_argument(
             "--image-type", help="type of image being uploaded")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID of the uploaded analytic")
 
     @staticmethod
     def run(args):
@@ -1477,7 +1483,7 @@ class UploadAnalyticsCommand(Command):
             metadata = api.upload_analytic(
                 args.doc, analytic_type=args.analytic_type)
             if args.print_id:
-                logger.info(metadata["id"])
+                print(metadata["id"])
             else:
                 _print_dict_as_table(metadata)
 
@@ -1486,9 +1492,9 @@ class UploadAnalyticsCommand(Command):
             analytic_id = args.image
             image_type = args.image_type
             api.upload_analytic_image(analytic_id, args.path, image_type)
-            logger.info(
-                "%s image for analytic %s uploaded", image_type.upper(),
-                analytic_id)
+            print(
+                "%s image for analytic %s uploaded"
+                % (image_type.upper(), analytic_id))
 
 
 class DeleteAnalyticsCommand(Command):
@@ -1515,13 +1521,13 @@ class DeleteAnalyticsCommand(Command):
         analytic_ids = args.ids
 
         num_analytics = len(analytic_ids)
-        logger.info("Found %d analytic(s) to delete", num_analytics)
+        print("Found %d analytic(s) to delete" % num_analytics)
         if num_analytics > 0 and not args.force:
             _abort_if_requested()
 
         for analytic_id in analytic_ids:
             api.delete_analytic(analytic_id)
-            logger.info("Analytic '%s' deleted", analytic_id)
+            print("Analytic '%s' deleted" % analytic_id)
 
 
 def _print_active_token_info():
@@ -1535,7 +1541,7 @@ def _print_active_token_info():
     ]
     table_str = tabulate(
         contents, headers=["API token", ""], tablefmt=TABLE_FORMAT)
-    logger.info(table_str)
+    print(table_str)
 
 
 def _print_data_table(data, show_count=False):
@@ -1551,10 +1557,15 @@ def _print_data_table(data, show_count=False):
             "id", "name", "size", "type", "upload_date", "expiration_date"],
         tablefmt=TABLE_FORMAT)
 
-    logger.info(table_str)
+    print(table_str)
     if show_count:
         total_size = _render_bytes(sum(d["size"] for d in data))
-        logger.info("\nShowing %d data, %s\n", len(records), total_size)
+        print("\nShowing %d data, %s\n" % (len(records), total_size))
+
+
+def _print_data_uploads(uploads):
+    table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
+    print("\n" + table_str + "\n")
 
 
 def _print_jobs_table(jobs, show_count=False):
@@ -1571,9 +1582,9 @@ def _print_jobs_table(jobs, show_count=False):
             "expiration_date"],
         tablefmt=TABLE_FORMAT)
 
-    logger.info(table_str)
+    print(table_str)
     if show_count:
-        logger.info("\nShowing %d job(s)\n", len(records))
+        print("\nShowing %d job(s)\n" % len(records))
 
 
 def _print_analytics_table(analytics, show_count=False):
@@ -1590,20 +1601,20 @@ def _print_analytics_table(analytics, show_count=False):
             "pending", "upload_date"],
         tablefmt=TABLE_FORMAT)
 
-    logger.info(table_str)
+    print(table_str)
     if show_count:
-        logger.info("\nFound %d analytic(s)\n", len(records))
+        print("\nFound %d analytic(s)\n" % len(records))
 
 
 def _print_dict_as_json(d):
     s = json.dumps(d, indent=4)
-    logger.info(s)
+    print(s)
 
 
 def _print_dict_as_table(d):
     contents = list(d.items())
     table_str = tabulate(contents, tablefmt="plain")
-    logger.info(table_str)
+    print(table_str)
 
 
 def _render_name(name):
