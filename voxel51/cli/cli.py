@@ -1809,7 +1809,7 @@ class _RecursiveHelpAction(argparse._HelpAction):
 
     @staticmethod
     def _recurse(parser):
-        print("\n%s\n%s" % ("*" * 80, parser.format_help()))
+        print("\n%s\n%s" % ("*" * 79, parser.format_help()))
         for subparser in _iter_subparsers(parser):
             _RecursiveHelpAction._recurse(subparser)
 
