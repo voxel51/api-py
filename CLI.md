@@ -1,4 +1,4 @@
-# Voxel51 Platform API Command-Line Interface Quickstart
+# Command-Line Interface Quickstart
 
 Installing the Python Client Library automatically installs `voxel51`, a
 command-line interface (CLI) for interacting with the Voxel51 Platform.

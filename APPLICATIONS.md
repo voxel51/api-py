@@ -1,4 +1,4 @@
-# Voxel51 Platform API Applications Quickstart
+# Applications Quickstart
 
 The Voxel51 Platform provides an interface through which you can upload and
 manage data for your application users and run jobs that process their data
