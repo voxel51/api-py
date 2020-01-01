@@ -14,7 +14,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
-from future.utils import iteritems
+from future.utils import iteritems, itervalues
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
@@ -1717,6 +1717,34 @@ def _abort_if_requested():
         sys.exit(0)
 
 
+def _has_subparsers(parser):
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return True
+
+    return False
+
+
+def _iter_subparsers(parser):
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            for subparser in itervalues(action.choices):
+                yield subparser
+
+
+class _RecursiveHelpAction(argparse._HelpAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        self._recurse(parser)
+        parser.exit()
+
+    @staticmethod
+    def _recurse(parser):
+        print("\n%s\n%s" % ("*" * 80, parser.format_help()))
+        for subparser in _iter_subparsers(parser):
+            _RecursiveHelpAction._recurse(subparser)
+
+
 def _register_main_command(command, version=None):
     parser = argparse.ArgumentParser(description=command.__doc__.rstrip())
 
@@ -1728,8 +1756,11 @@ def _register_main_command(command, version=None):
             "-v", "--version", action="version", version=version,
             help="show version info")
 
-    parser.set_defaults(run=command.run)
-    command.setup(parser)
+    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+        parser.add_argument(
+            "--all-help", action=_RecursiveHelpAction,
+            help="show help recurisvely and exit")
+
     return parser
 
 
@@ -1741,7 +1772,20 @@ def _register_command(parent, name, command):
 
     parser.set_defaults(run=lambda args: command.run(parser, args))
     command.setup(parser)
+
+    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+        parser.add_argument(
+            "--all-help", action=_RecursiveHelpAction,
+            help="show help recurisvely and exit")
+
     return parser
+
+
+#
+# Whether to add a flag to that recursively prints help for all parsers that
+# have subparsers
+#
+_ADD_RECURSIVE_HELP_FLAGS = True
 
 
 def main():
