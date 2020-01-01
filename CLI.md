@@ -55,6 +55,15 @@ A token can be deactivated via `voxel51 auth deactivate`.
 After you have activated an API token, you have full access to the API.
 
 
+## Usage
+
+The following usage information was generated via `voxel51 --all-help`:
+
+```
+
+```
+
+
 ## Copyright
 
 Copyright 2017-2019, Voxel51, Inc.<br>
