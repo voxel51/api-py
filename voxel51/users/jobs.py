@@ -144,17 +144,17 @@ class JobRequest(voxu.Serializable):
         Returns:
             a JobRequest instance
         '''
-        analytic = d["analytic"]
+        analytic = d.get("analytic", None)
         version = d.get("version", None)
         compute_mode = d.get("compute_mode", None)
         job_request = cls(analytic, version=version, compute_mode=compute_mode)
 
         # Set inputs
-        for name, val in iteritems(d["inputs"]):
+        for name, val in iteritems(d.get("inputs", {})):
             job_request.set_input(name, path=RemoteDataPath.from_dict(val))
 
         # Set parameters
-        for name, val in iteritems(d["parameters"]):
+        for name, val in iteritems(d.get("parameters", {})):
             if RemoteDataPath.is_remote_path_dict(val):
                 # Data parameter
                 job_request.set_data_parameter(
