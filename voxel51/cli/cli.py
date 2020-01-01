@@ -333,7 +333,7 @@ class DownloadDataCommand(Command):
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to download data")
         parser.add_argument(
-            "-u", "--url", metavar="ID",
+            "-u", "--url", action="store_true",
             help="generate signed URL to download data")
 
     @staticmethod
@@ -1133,7 +1133,7 @@ class DownloadJobsCommand(Command):
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write output")
         parser.add_argument(
-            "-u", "--url", metavar="ID",
+            "-u", "--url", action="store_true",
             help="generate signed URL to download job output")
 
     @staticmethod
