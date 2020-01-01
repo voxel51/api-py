@@ -55,27 +55,6 @@ A token can be deactivated via `voxel51 auth deactivate`.
 After you have activated an API token, you have full access to the API.
 
 
-## Usage
-
-```
-$ voxel51 --help
-usage: voxel51 [-h] [-v] {auth,data,jobs,analytics} ...
-
-Voxel51 Platform API command-line interface.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --version         show version info
-
-available commands:
-  {auth,data,jobs,analytics}
-    auth                Tools for configuring API tokens.
-    data                Tools for working with data.
-    jobs                Tools for working with jobs.
-    analytics           Tools for working with analytics.
-```
-
-
 ## Copyright
 
 Copyright 2017-2019, Voxel51, Inc.<br>
