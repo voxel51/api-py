@@ -1091,6 +1091,9 @@ class LogJobsCommand(Command):
 
         # Download job logfile to disk
         voxel51 jobs log <id> --path '/path/for/job.log'
+
+        # Generate signed URL to download job logfile
+        voxel51 jobs log <id> --url
     '''
 
     @staticmethod
@@ -1098,18 +1101,27 @@ class LogJobsCommand(Command):
         parser.add_argument("id", metavar="ID", help="the job ID of interest")
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write logfile")
+        parser.add_argument(
+            "-u", "--url", action="store_true",
+            help="generate signed URL to download job logfile")
 
     @staticmethod
     def run(parser, args):
         api = API()
 
+        if args.url:
+            url = api.get_job_logfile_download_url(args.id)
+            print(url)
+            return
+
         if args.path:
             api.download_job_logfile(args.id, output_path=args.path)
             print(
                 "Logfile for job '%s' written to '%s'" % (args.id, args.path))
-        else:
-            logfile = api.download_job_logfile(args.id, output_path=args.path)
-            print(logfile)
+            return
+
+        logfile = api.download_job_logfile(args.id, output_path=args.path)
+        print(logfile)
 
 
 class DownloadJobsCommand(Command):
