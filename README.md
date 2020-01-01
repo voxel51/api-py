@@ -1,8 +1,9 @@
 # Voxel51 Platform API Python Client Library
 
-A Python client library for interacting with the Voxel51 Platform.
+A Python client library for the Voxel51 Platform.
 
-Available at [https://github.com/voxel51/api-py](https://github.com/voxel51/api-py).
+Available at
+[https://github.com/voxel51/api-py](https://github.com/voxel51/api-py).
 
 <img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
 
@@ -13,12 +14,12 @@ To install the library, first clone it:
 
 ```shell
 git clone https://github.com/voxel51/api-py
-cd api-py
 ```
 
 and then run the install script:
 
 ```shell
+cd api-py
 bash install.bash
 ```
 
@@ -33,7 +34,7 @@ each of the analytics exposed on the Voxel51 Platform, see
 the [Analytics Documentation](https://voxel51.com/docs/analytics).
 
 
-## User Quickstart
+## Quickstart
 
 This section provides a brief guide to using the Platform API with your user
 account.
@@ -50,7 +51,7 @@ token, set the `VOXEL51_API_TOKEN` environment variable in your shell to point
 to your API token file:
 
 ```shell
-export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
+export VOXEL51_API_TOKEN=/path/to/your/api-token.json
 ```
 
 Alternatively, you can permanently activate a token by executing the following
@@ -97,6 +98,12 @@ doc = api.get_analytic_doc(analytic_id)
 
 ### Data
 
+List uploaded data:
+
+```py
+data = api.list_data()
+```
+
 Upload data to the cloud storage:
 
 ```py
@@ -104,12 +111,6 @@ Upload data to the cloud storage:
 data_path = "/path/to/video.mp4"
 
 api.upload_data(data_path)
-```
-
-List uploaded data:
-
-```py
-data = api.list_data()
 ```
 
 ### Jobs
@@ -122,14 +123,14 @@ jobs = api.list_jobs()
 
 Create a job request to perform an analytic on a data, where `<analytic>` is
 the name of the analytic to run, `<data-id>` is the ID of the data to process,
-and any `<param>` values are set as necessary to configre the analytic:
+and any `<parameter>` values are set as necessary to configre the analytic:
 
 ```py
 from voxel51.users.jobs import JobRequest
 
 job_request = JobRequest("<analytic>")
 job_request.set_input("<input>", data_id="<data-id>")
-job_request.set_parameter("<param>", val)
+job_request.set_parameter("<parameter>", val)
 
 print(job_request)
 ```
