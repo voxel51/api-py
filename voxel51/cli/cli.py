@@ -1791,7 +1791,5 @@ _ADD_RECURSIVE_HELP_FLAGS = True
 def main():
     '''Executes the `voxel51` tool with the given command-line args.'''
     parser = _register_main_command(Voxel51Command, version=voxc.VERSION_LONG)
-
-
     args = parser.parse_args()
     args.run(args)
