@@ -1,0 +1,2 @@
+
+.. mdinclude:: ../../CLI.md

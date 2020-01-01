@@ -34,11 +34,11 @@ each of the analytics exposed on the Voxel51 Platform, see
 the [Analytics Documentation](https://voxel51.com/docs/analytics).
 
 For more information about using the `voxel51` command-line interface that is
-provided by this library see the [CLI Quickstart](CLI.md).
+provided by this library see the [CLI Quickstart](CLI).
 
 For more information about using the Python Client Library to operate an
 application on the Voxel51 Platform, see the
-[Applications Quickstart](APPLICATIONS.md).
+[Applications Quickstart](APPLICATIONS).
 
 
 ## Quickstart
