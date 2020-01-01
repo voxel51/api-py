@@ -14,7 +14,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
-from future.utils import iteritems
+from future.utils import iteritems, itervalues
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
@@ -57,14 +57,15 @@ class Command(object):
         raise NotImplementedError("subclass must implement setup()")
 
     @staticmethod
-    def run(args):
-        '''Execute the command on the given args.
+    def run(parser, args):
+        '''Executes the command on the given args.
 
         args:
+            parser: the `argparse.ArgumentParser` instance for the command
             args: an `argparse.Namespace` instance containing the arguments
                 for the command
         '''
-        pass
+        raise NotImplementedError("subclass must implement run()")
 
 
 class Voxel51Command(Command):
@@ -79,6 +80,10 @@ class Voxel51Command(Command):
         _register_command(subparsers, "analytics", AnalyticsCommand)
         _register_command(subparsers, "status", StatusCommand)
 
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
+
 
 class AuthCommand(Command):
     '''Tools for configuring API tokens.'''
@@ -89,6 +94,10 @@ class AuthCommand(Command):
         _register_command(subparsers, "show", ShowAuthCommand)
         _register_command(subparsers, "activate", ActivateAuthCommand)
         _register_command(subparsers, "deactivate", DeactivateAuthCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class ShowAuthCommand(Command):
@@ -104,7 +113,7 @@ class ShowAuthCommand(Command):
         pass
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         _print_active_token_info()
 
 
@@ -122,7 +131,7 @@ class ActivateAuthCommand(Command):
             "activate", help="path to API token to activate")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         voxa.activate_token(args.activate)
 
 
@@ -134,7 +143,7 @@ class DeactivateAuthCommand(Command):
         pass
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         voxa.deactivate_token()
 
 
@@ -150,6 +159,10 @@ class DataCommand(Command):
         _register_command(subparsers, "download", DownloadDataCommand)
         _register_command(subparsers, "ttl", TTLDataCommand)
         _register_command(subparsers, "delete", DeleteDataCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class ListDataCommand(Command):
@@ -217,7 +230,7 @@ class ListDataCommand(Command):
             help="whether to show the number of data in the list")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         query = DataQuery().add_all_fields()
@@ -257,7 +270,7 @@ class InfoDataCommand(Command):
             help="whether to print all available fields")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         data = [api.get_data_details(data_id) for data_id in args.ids]
@@ -281,7 +294,7 @@ class UploadDataCommand(Command):
             help="whether to print only the ID(s) of the uploaded data")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         uploads = []
@@ -324,7 +337,7 @@ class DownloadDataCommand(Command):
             help="generate signed URL to download data")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         data_id = args.id
@@ -370,7 +383,7 @@ class TTLDataCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if not args.days and not args.date:
@@ -436,7 +449,7 @@ class DeleteDataCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -488,6 +501,10 @@ class JobsCommand(Command):
         _register_command(subparsers, "download", DownloadJobsCommand)
         _register_command(subparsers, "kill", KillJobsCommand)
         _register_command(subparsers, "delete", DeleteJobsCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class ListJobsCommand(Command):
@@ -612,7 +629,7 @@ class ListJobsCommand(Command):
             "--expired-only", action="store_true", help="only expired jobs")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         query = JobsQuery().add_all_fields()
@@ -682,7 +699,7 @@ class InfoJobsCommand(Command):
             help="whether to print all available fields")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         jobs = [api.get_job_details(job_id) for job_id in args.ids]
@@ -712,7 +729,7 @@ class UploadJobsCommand(Command):
             help="whether to print only the ID(s) of the job")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         request = JobRequest.from_json(args.path)
@@ -755,7 +772,7 @@ class StartJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -821,7 +838,7 @@ class ArchiveJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -886,7 +903,7 @@ class UnarchiveJobsCommand(Command):
             "than actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -959,7 +976,7 @@ class TTLJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if not args.days and not args.date:
@@ -1022,7 +1039,7 @@ class RequestJobsCommand(Command):
             "-p", "--path", metavar="PATH", help="path to write request JSON")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         request = api.get_job_request(args.id)
@@ -1053,7 +1070,7 @@ class StatusJobsCommand(Command):
             "-p", "--path", metavar="PATH", help="path to write status JSON")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         status = api.get_job_status(args.id)
@@ -1083,7 +1100,7 @@ class LogJobsCommand(Command):
             "-p", "--path", metavar="PATH", help="path to write logfile")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.path:
@@ -1120,7 +1137,7 @@ class DownloadJobsCommand(Command):
             help="generate signed URL to download job output")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         job_id = args.download
@@ -1161,7 +1178,7 @@ class KillJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -1227,7 +1244,7 @@ class DeleteJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -1277,6 +1294,10 @@ class AnalyticsCommand(Command):
         _register_command(subparsers, "doc", DocAnalyticsCommand)
         _register_command(subparsers, "upload", UploadAnalyticsCommand)
         _register_command(subparsers, "delete", DeleteAnalyticsCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class ListAnalyticsCommand(Command):
@@ -1380,7 +1401,7 @@ class ListAnalyticsCommand(Command):
             help="only pending analytics")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         query = AnalyticsQuery().add_all_fields()
@@ -1438,7 +1459,7 @@ class InfoAnalyticsCommand(Command):
             help="whether to print all available fields")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         analytics = [
@@ -1464,7 +1485,7 @@ class DocAnalyticsCommand(Command):
             "-p", "--path", metavar="PATH", help="path to write doc JSON")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         doc = api.get_analytic_doc(args.id)
@@ -1509,7 +1530,7 @@ class UploadAnalyticsCommand(Command):
             help="whether to print only the ID of the uploaded analytic")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         # Upload analytic documentation
@@ -1549,7 +1570,7 @@ class DeleteAnalyticsCommand(Command):
             help="whether to force delete without confirmation")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         analytic_ids = args.ids
@@ -1588,7 +1609,7 @@ class StatusCommand(Command):
             help="check if jobs cluster is up")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         status = api.get_platform_status()
@@ -1765,15 +1786,50 @@ def _abort_if_requested():
         sys.exit(0)
 
 
+def _has_subparsers(parser):
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return True
+
+    return False
+
+
+def _iter_subparsers(parser):
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            for subparser in itervalues(action.choices):
+                yield subparser
+
+
+class _RecursiveHelpAction(argparse._HelpAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        self._recurse(parser)
+        parser.exit()
+
+    @staticmethod
+    def _recurse(parser):
+        print("\n%s\n%s" % ("*" * 80, parser.format_help()))
+        for subparser in _iter_subparsers(parser):
+            _RecursiveHelpAction._recurse(subparser)
+
+
 def _register_main_command(command, version=None):
     parser = argparse.ArgumentParser(description=command.__doc__.rstrip())
+
+    parser.set_defaults(run=lambda args: command.run(parser, args))
+    command.setup(parser)
+
     if version:
         parser.add_argument(
             "-v", "--version", action="version", version=version,
             help="show version info")
 
-    parser.set_defaults(run=command.run)
-    command.setup(parser)
+    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+        parser.add_argument(
+            "--all-help", action=_RecursiveHelpAction,
+            help="show help recurisvely and exit")
+
     return parser
 
 
@@ -1782,18 +1838,27 @@ def _register_command(parent, name, command):
         name, help=command.__doc__.splitlines()[0],
         description=command.__doc__.rstrip(),
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.set_defaults(run=command.run)
+
+    parser.set_defaults(run=lambda args: command.run(parser, args))
     command.setup(parser)
+
+    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+        parser.add_argument(
+            "--all-help", action=_RecursiveHelpAction,
+            help="show help recurisvely and exit")
+
     return parser
+
+
+#
+# Whether to add a flag to that recursively prints help for all parsers that
+# have subparsers
+#
+_ADD_RECURSIVE_HELP_FLAGS = True
 
 
 def main():
     '''Executes the `voxel51` tool with the given command-line args.'''
     parser = _register_main_command(Voxel51Command, version=voxc.VERSION_LONG)
-
-    if len(sys.argv) == 1:
-        parser.print_help()
-        return
-
     args = parser.parse_args()
     args.run(args)
