@@ -8,4 +8,6 @@ __pycache__
 /docs/build/
 /docs/source/*.rst
 !/docs/source/index.rst
-!/docs/source/readme.rst
+!/docs/source/README.rst
+!/docs/source/CLI.rst
+!/docs/source/APPLICATIONS.rst
