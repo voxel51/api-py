@@ -1803,7 +1803,7 @@ def _iter_subparsers(parser):
 
 class _RecursiveHelpAction(argparse._HelpAction):
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser, *args, **kwargs):
         self._recurse(parser)
         parser.exit()
 
