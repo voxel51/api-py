@@ -248,7 +248,7 @@ optional arguments:
 
 
 *******************************************************************************
-usage: voxel51 data download [-h] [-p PATH] [-u ID] ID
+usage: voxel51 data download [-h] [-p PATH] [-u] ID
 
 Download data from the platform.
 
@@ -268,7 +268,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -p PATH, --path PATH  path to download data
-  -u ID, --url ID       generate signed URL to download data
+  -u, --url             generate signed URL to download data
 
 
 *******************************************************************************
@@ -620,7 +620,7 @@ optional arguments:
 
 
 *******************************************************************************
-usage: voxel51 jobs log [-h] [-p PATH] ID
+usage: voxel51 jobs log [-h] [-p PATH] [-u] ID
 
 Download job logfiles.
 
@@ -631,16 +631,20 @@ Download job logfiles.
         # Download job logfile to disk
         voxel51 jobs log <id> --path '/path/for/job.log'
 
+        # Generate signed URL to download job logfile
+        voxel51 jobs log <id> --url
+
 positional arguments:
   ID                    the job ID of interest
 
 optional arguments:
   -h, --help            show this help message and exit
   -p PATH, --path PATH  path to write logfile
+  -u, --url             generate signed URL to download job logfile
 
 
 *******************************************************************************
-usage: voxel51 jobs download [-h] [-p PATH] [-u ID] ID
+usage: voxel51 jobs download [-h] [-p PATH] [-u] ID
 
 Download job outputs.
 
@@ -660,7 +664,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -p PATH, --path PATH  path to write output
-  -u ID, --url ID       generate signed URL to download job output
+  -u, --url             generate signed URL to download job output
 
 
 *******************************************************************************
