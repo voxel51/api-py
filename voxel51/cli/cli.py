@@ -333,7 +333,7 @@ class DownloadDataCommand(Command):
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to download data")
         parser.add_argument(
-            "-u", "--url", metavar="ID",
+            "-u", "--url", action="store_true",
             help="generate signed URL to download data")
 
     @staticmethod
@@ -1091,6 +1091,9 @@ class LogJobsCommand(Command):
 
         # Download job logfile to disk
         voxel51 jobs log <id> --path '/path/for/job.log'
+
+        # Generate signed URL to download job logfile
+        voxel51 jobs log <id> --url
     '''
 
     @staticmethod
@@ -1098,18 +1101,27 @@ class LogJobsCommand(Command):
         parser.add_argument("id", metavar="ID", help="the job ID of interest")
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write logfile")
+        parser.add_argument(
+            "-u", "--url", action="store_true",
+            help="generate signed URL to download job logfile")
 
     @staticmethod
     def run(parser, args):
         api = API()
 
+        if args.url:
+            url = api.get_job_logfile_download_url(args.id)
+            print(url)
+            return
+
         if args.path:
             api.download_job_logfile(args.id, output_path=args.path)
             print(
                 "Logfile for job '%s' written to '%s'" % (args.id, args.path))
-        else:
-            logfile = api.download_job_logfile(args.id, output_path=args.path)
-            print(logfile)
+            return
+
+        logfile = api.download_job_logfile(args.id, output_path=args.path)
+        print(logfile)
 
 
 class DownloadJobsCommand(Command):
@@ -1133,7 +1145,7 @@ class DownloadJobsCommand(Command):
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write output")
         parser.add_argument(
-            "-u", "--url", metavar="ID",
+            "-u", "--url", action="store_true",
             help="generate signed URL to download job output")
 
     @staticmethod
@@ -1657,6 +1669,9 @@ def _print_active_token_info():
 
 
 def _print_data_table(data, show_count=False, show_all_fields=False):
+    if show_count:
+        total_size = _render_bytes(sum(d["size"] for d in data))
+
     render_fcns = {
         "name": _render_name,
         "size": _render_bytes,
@@ -1675,8 +1690,7 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
 
     print(table_str)
     if show_count:
-        total_size = _render_bytes(sum(d["size"] for d in data))
-        print("\nShowing %d data, %s\n" % (len(records), total_size))
+        print("\nShowing %d data, %s\n" % (len(data), total_size))
 
 
 def _print_data_uploads(uploads):
@@ -1703,7 +1717,7 @@ def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
 
     print(table_str)
     if show_count:
-        print("\nShowing %d job(s)\n" % len(records))
+        print("\nShowing %d job(s)\n" % len(jobs))
 
 
 def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
@@ -1726,7 +1740,7 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
 
     print(table_str)
     if show_count:
-        print("\nFound %d analytic(s)\n" % len(records))
+        print("\nFound %d analytic(s)\n" % len(analytics))
 
 
 def _print_dict_as_json(d):
@@ -1736,7 +1750,8 @@ def _print_dict_as_json(d):
 
 def _print_dict_as_table(d):
     contents = list(d.items())
-    table_str = tabulate(contents, tablefmt="plain")
+    table_str = tabulate(
+        contents, headers=["Analytic", ""], tablefmt=TABLE_FORMAT)
     print(table_str)
 
 
