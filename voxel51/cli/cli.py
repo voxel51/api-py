@@ -35,8 +35,8 @@ from voxel51.users.query import AnalyticsQuery, DataQuery, JobsQuery
 import voxel51.users.utils as voxu
 
 
-MAX_NAME_COLUMN_WIDTH = 51
-TABLE_FORMAT = "simple"
+_MAX_NAME_COLUMN_WIDTH = 51
+_TABLE_FORMAT = "simple"
 
 
 class Command(object):
@@ -127,12 +127,11 @@ class ActivateAuthCommand(Command):
 
     @staticmethod
     def setup(parser):
-        parser.add_argument(
-            "activate", help="path to API token to activate")
+        parser.add_argument("token", help="path to API token to activate")
 
     @staticmethod
     def run(parser, args):
-        voxa.activate_token(args.activate)
+        voxa.activate_token(args.token)
 
 
 class DeactivateAuthCommand(Command):
@@ -171,12 +170,12 @@ class ListDataCommand(Command):
 
     Examples:
         # List data according to the given query
-        voxel51 data list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-fields]
+        voxel51 data list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-fields] \\
             [--count]
 
         # List the last 10 data uploaded to the platform
@@ -565,12 +564,12 @@ class ListJobsCommand(Command):
 
     Examples:
         # List jobs according to the given query
-        voxel51 jobs list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-fields]
+        voxel51 jobs list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-fields] \\
             [--count]
 
         # Flags for jobs in a particular state
@@ -1371,13 +1370,13 @@ class ListAnalyticsCommand(Command):
 
     Examples:
         # List analytics according to the given query
-        voxel51 analytics list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-versions]
-            [--all-fields]
+        voxel51 analytics list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-versions] \\
+            [--all-fields] \\
             [--count]
 
         # Flags for analytics with particular scopes
@@ -1700,7 +1699,7 @@ def _print_platform_status_info(status, token):
 
     table_str = tabulate(
         records, headers=["service", "operational", "message"],
-        tablefmt=TABLE_FORMAT)
+        tablefmt=_TABLE_FORMAT)
     print(table_str)
 
 
@@ -1714,7 +1713,7 @@ def _print_active_token_info():
         ("path", token_path),
     ]
     table_str = tabulate(
-        contents, headers=["API token", ""], tablefmt=TABLE_FORMAT)
+        contents, headers=["API token", ""], tablefmt=_TABLE_FORMAT)
     print(table_str)
 
 
@@ -1731,12 +1730,12 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
     _render_fields(data, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(data, headers="keys", tablefmt=TABLE_FORMAT)
+        table_str = tabulate(data, headers="keys", tablefmt=_TABLE_FORMAT)
     else:
         fields = [
             "id", "name", "size", "type", "upload_date", "expiration_date"]
         records = _render_records(data, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
+        table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1744,7 +1743,7 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
 
 
 def _print_data_uploads(uploads):
-    table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
+    table_str = tabulate(uploads, headers="keys", tablefmt=_TABLE_FORMAT)
     print("\n" + table_str + "\n")
 
 
@@ -1757,13 +1756,13 @@ def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
     _render_fields(jobs, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(jobs, headers="keys", tablefmt=TABLE_FORMAT)
+        table_str = tabulate(jobs, headers="keys", tablefmt=_TABLE_FORMAT)
     else:
         fields = [
             "id", "name", "state", "archived", "upload_date",
             "expiration_date"]
         records = _render_records(jobs, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
+        table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1780,13 +1779,13 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
     _render_fields(analytics, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(analytics, headers="keys", tablefmt=TABLE_FORMAT)
+        table_str = tabulate(analytics, headers="keys", tablefmt=_TABLE_FORMAT)
     else:
         fields = [
             "id", "name", "version", "scope", "supports_cpu", "supports_gpu",
             "pending", "upload_date"]
         records = _render_records(analytics, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
+        table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1801,13 +1800,13 @@ def _print_dict_as_json(d):
 def _print_dict_as_table(d):
     contents = list(d.items())
     table_str = tabulate(
-        contents, headers=["Analytic", ""], tablefmt=TABLE_FORMAT)
+        contents, headers=["Analytic", ""], tablefmt=_TABLE_FORMAT)
     print(table_str)
 
 
 def _render_name(name):
-    if len(name) > MAX_NAME_COLUMN_WIDTH:
-        name = name[:(MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
+    if len(name) > _MAX_NAME_COLUMN_WIDTH:
+        name = name[:(_MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
     return name
 
 
