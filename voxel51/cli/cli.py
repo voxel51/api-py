@@ -307,7 +307,8 @@ class UploadDataCommand(Command):
             if args.print_id:
                 print(metadata["id"])
             else:
-                uploads.append({"id": metadata["id"], "path": path})
+                metadata["path"] = path
+                uploads.append(metadata)
 
         if not args.print_id:
             _print_data_uploads(uploads)
