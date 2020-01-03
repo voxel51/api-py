@@ -37,8 +37,11 @@ class BaseQuery(object):
         limit (int): the maximum number of records to return
     '''
 
-    def __init__(self, supported_fields):
-        self._supported_fields = supported_fields
+    # Supported query fields. Subclasses must set this
+    SUPPORTED_FIELDS = None
+
+    def __init__(self):
+        '''Initializes the BaseQuery.'''
         self.fields = []
         self.search = []
         self.sort = None
@@ -80,7 +83,7 @@ class BaseQuery(object):
         Returns:
             the updated query instance
         '''
-        self.add_fields(self._supported_fields)
+        self.add_fields(self.SUPPORTED_FIELDS)
         return self
 
     def add_search(self, field, search_str):
@@ -210,7 +213,7 @@ class BaseQuery(object):
         return urlencode(self.to_dict())
 
     def _is_supported_field(self, field):
-        return field in self._supported_fields
+        return field in self.SUPPORTED_FIELDS
 
 
 class AnalyticsQuery(BaseQuery):
@@ -232,11 +235,13 @@ class AnalyticsQuery(BaseQuery):
             in the query response. By default, this is False
     '''
 
+    SUPPORTED_FIELDS = [
+        "id", "name", "version", "upload_date", "scope", "supports_cpu",
+        "supports_gpu", "pending", "description"]
+
     def __init__(self):
         '''Initializes an AnalyticsQuery instance.'''
-        super(AnalyticsQuery, self).__init__([
-            "id", "name", "version", "upload_date", "description",
-            "scope", "supports_cpu", "supports_gpu", "pending"])
+        super(AnalyticsQuery, self).__init__()
         self.all_versions = False
 
     def set_all_versions(self, all_versions):
@@ -269,11 +274,9 @@ class DataQuery(BaseQuery):
         limit (int): the maximum number of records to return
     '''
 
-    def __init__(self):
-        '''Initializes a DataQuery instance.'''
-        super(DataQuery, self).__init__([
-            "id", "name", "encoding", "type", "size", "upload_date",
-            "expiration_date"])
+    SUPPORTED_FIELDS = [
+        "id", "name", "encoding", "type", "size", "upload_date",
+        "expiration_date"]
 
 
 class JobsQuery(BaseQuery):
@@ -294,9 +297,7 @@ class JobsQuery(BaseQuery):
         limit (int): the maximum number of records to return
     '''
 
-    def __init__(self):
-        '''Initializes a JobsQuery instance.'''
-        super(JobsQuery, self).__init__([
-            "id", "name", "state", "archived", "upload_date", "analytic_id",
-            "auto_start", "compute_mode", "start_date", "completion_date",
-            "fail_date", "failure_type", "expiration_date"])
+    SUPPORTED_FIELDS = [
+        "id", "name", "state", "archived", "upload_date", "analytic_id",
+        "auto_start", "compute_mode", "start_date", "completion_date",
+        "fail_date", "failure_type", "expiration_date"]
