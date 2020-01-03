@@ -1357,6 +1357,8 @@ class AnalyticsCommand(Command):
         _register_command(subparsers, "info", InfoAnalyticsCommand)
         _register_command(subparsers, "doc", DocAnalyticsCommand)
         _register_command(subparsers, "upload", UploadAnalyticsCommand)
+        _register_command(
+            subparsers, "upload-image", UploadImageAnalyticsCommand)
         _register_command(subparsers, "delete", DeleteAnalyticsCommand)
 
     @staticmethod
@@ -1567,28 +1569,17 @@ class UploadAnalyticsCommand(Command):
     '''Upload analytics to the platform.
 
     Examples:
-        # Upload documentation for analytic
-        voxel51 analytics upload --doc '/path/to/doc.json'
-            [--analytic-type TYPE]
-
-        # Upload analytic image
-        voxel51 analytics upload --image <id>
-            --path '/path/to/image.tar.gz' --image-type cpu|gpu
+        # Upload analytic
+        voxel51 analytics upload '/path/to/doc.json' [--analytic-type TYPE]
     '''
 
     @staticmethod
     def setup(parser):
         parser.add_argument(
-            "--doc", metavar="PATH", help="analytic documentation to upload")
+            "doc", metavar="PATH", help="analytic documentation")
         parser.add_argument(
-            "--analytic-type", help="type of analytic")
-        parser.add_argument(
-            "--image", metavar="ID",
-            help="analytic ID to upload image for")
-        parser.add_argument(
-            "--path", metavar="PATH", help="analytic image to upload")
-        parser.add_argument(
-            "--image-type", help="type of image being uploaded")
+            "-t", "--analytic-type", help="type of analytic "
+            "(PLATFORM|IMAGE_TO_VIDEO). The default is PLATFORM")
         parser.add_argument(
             "--print-id", action="store_true",
             help="whether to print only the ID of the uploaded analytic")
@@ -1597,23 +1588,44 @@ class UploadAnalyticsCommand(Command):
     def run(parser, args):
         api = API()
 
-        # Upload analytic documentation
-        if args.doc:
-            metadata = api.upload_analytic(
-                args.doc, analytic_type=args.analytic_type)
-            if args.print_id:
-                print(metadata["id"])
-            else:
-                _print_dict_as_table(metadata)
+        metadata = api.upload_analytic(
+            args.doc, analytic_type=args.analytic_type)
 
-        # Upload analytic image
-        if args.image:
-            analytic_id = args.image
-            image_type = args.image_type
-            api.upload_analytic_image(analytic_id, args.path, image_type)
-            print(
-                "%s image for analytic %s uploaded"
-                % (image_type.upper(), analytic_id))
+        if args.print_id:
+            print(metadata["id"])
+        else:
+            _print_dict_as_table(metadata)
+
+
+class UploadImageAnalyticsCommand(Command):
+    '''Upload analytic images to the platform.
+
+    Examples:
+        # Upload image for analytic
+        voxel51 analytics upload-image \\
+            --id <id> --path '/path/to/image.tar.gz' --image-type TYPE
+    '''
+
+    @staticmethod
+    def setup(parser):
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-i", "--id", metavar="ID", required=True, help="analytic ID")
+        fields.add_argument(
+            "-p", "--path", metavar="PATH", required=True,
+            help="analytic image tarfile to upload")
+        fields.add_argument(
+            "-t", "--image-type", metavar="TYPE", required=True,
+            help="type of image (CPU|GPU)")
+
+    @staticmethod
+    def run(parser, args):
+        api = API()
+
+        api.upload_analytic_image(args.id, args.path, args.image_type)
+        print(
+            "%s image for analytic %s uploaded" %
+            (args.image_type.upper(), args.id))
 
 
 class DeleteAnalyticsCommand(Command):
