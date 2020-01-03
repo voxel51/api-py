@@ -42,6 +42,13 @@ class AnalyticType(object):
     IMAGE_TO_VIDEO = "IMAGE_TO_VIDEO"
 
 
+class AnalyticImageType(object):
+    '''Enum describing the possible types of analytic images.'''
+
+    CPU = "CPU"
+    GPU = "GPU"
+
+
 class API(object):
     '''Main class for managing a session with the Voxel51 Platform API.
 
@@ -247,7 +254,7 @@ class API(object):
         Args:
             analytic_id (str): the analytic ID
             image_tar_path (str): the path to the image tarfile
-            image_type (str): the image computation type, "cpu" or "gpu"
+            image_type (AnalyticImageType): the type of analytic image
 
         Raises:
             :class:`APIError` if the request was unsuccessful
