@@ -1746,12 +1746,13 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
     _render_fields(data, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(data, headers="keys", tablefmt=_TABLE_FORMAT)
+        fields = DataQuery.SUPPORTED_FIELDS
     else:
         fields = [
             "id", "name", "size", "type", "upload_date", "expiration_date"]
-        records = _render_records(data, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
+
+    records = _render_records(data, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1772,13 +1773,14 @@ def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
     _render_fields(jobs, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(jobs, headers="keys", tablefmt=_TABLE_FORMAT)
+        fields = JobsQuery.SUPPORTED_FIELDS
     else:
         fields = [
             "id", "name", "state", "archived", "upload_date",
             "expiration_date"]
-        records = _render_records(jobs, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
+
+    records = _render_records(jobs, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1795,13 +1797,14 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
     _render_fields(analytics, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(analytics, headers="keys", tablefmt=_TABLE_FORMAT)
+        fields = AnalyticsQuery.SUPPORTED_FIELDS
     else:
         fields = [
             "id", "name", "version", "scope", "supports_cpu", "supports_gpu",
             "pending", "upload_date"]
-        records = _render_records(analytics, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
+
+    records = _render_records(analytics, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
