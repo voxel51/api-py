@@ -760,16 +760,19 @@ class UploadJobsCommand(Command):
 
     Examples:
         # Upload job request
-        voxel51 jobs upload '/path/to/request.json'
+        voxel51 jobs upload --request '/path/to/request.json' \\
             --name <job-name> [--auto-start]
     '''
 
     @staticmethod
     def setup(parser):
-        parser.add_argument(
-            "path", metavar="PATH", help="job request to upload")
-        parser.add_argument(
-            "-n", "--name", metavar="NAME", help="job name")
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-r", "--request", metavar="PATH", required=True,
+            help="path to job request to upload")
+        fields.add_argument(
+            "-n", "--name", metavar="NAME", required=True, help="job name")
+
         parser.add_argument(
             "--auto-start", action="store_true",
             help="whether to automatically start job")
