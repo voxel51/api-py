@@ -156,6 +156,7 @@ class DataCommand(Command):
         _register_command(subparsers, "list", ListDataCommand)
         _register_command(subparsers, "info", InfoDataCommand)
         _register_command(subparsers, "upload", UploadDataCommand)
+        _register_command(subparsers, "post-url", PostURLDataCommand)
         _register_command(subparsers, "download", DownloadDataCommand)
         _register_command(subparsers, "ttl", TTLDataCommand)
         _register_command(subparsers, "delete", DeleteDataCommand)
@@ -311,6 +312,55 @@ class UploadDataCommand(Command):
 
         if not args.print_id:
             _print_data_uploads(uploads)
+
+
+class PostURLDataCommand(Command):
+    '''Posts data via URL to the platform.
+
+    Examples:
+        # Post data via URL
+        voxel51 data post-url \\
+            --url <url> \\
+            --filename <filename> \\
+            --mime-type <mime-type> \\
+            --size <size-bytes> \\
+            --expiration-date <expiration-date>
+    '''
+
+    @staticmethod
+    def setup(parser):
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-u", "--url", metavar="URL", required=True, help="the data URL")
+        fields.add_argument(
+            "-f", "--filename", metavar="NAME", required=True,
+            help="the data filename")
+        fields.add_argument(
+            "-m", "--mime-type", metavar="TYPE", required=True,
+            help="the data MIME type")
+        fields.add_argument(
+            "-s", "--size", metavar="SIZE", type=int, required=True,
+            help="the data size, in bytes")
+        fields.add_argument(
+            "-e", "--expiration-date", metavar="DATE", required=True,
+            help="the data expiration date")
+
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID of the uploaded data")
+
+    @staticmethod
+    def run(parser, args):
+        api = API()
+
+        metadata = api.post_data_as_url(
+            args.url, args.filename, args.mime_type, args.size,
+            args.expiration_date)
+
+        if args.print_id:
+            print(metadata["id"])
+        else:
+            _print_data_uploads([metadata])
 
 
 class DownloadDataCommand(Command):
