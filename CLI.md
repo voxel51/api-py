@@ -109,7 +109,7 @@ optional arguments:
 
 
 *******************************************************************************
-usage: voxel51 auth activate [-h] activate
+usage: voxel51 auth activate [-h] token
 
 Activate an API token.
 
@@ -118,7 +118,7 @@ Activate an API token.
         voxel51 auth activate '/path/to/token.json'
 
 positional arguments:
-  activate    path to API token to activate
+  token       path to API token to activate
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -135,7 +135,7 @@ optional arguments:
 
 *******************************************************************************
 usage: voxel51 data [-h] [--all-help]
-                    {list,info,upload,download,ttl,delete} ...
+                    {list,info,upload,post-url,download,ttl,delete} ...
 
 Tools for working with data.
 
@@ -144,10 +144,11 @@ optional arguments:
   --all-help            show help recurisvely and exit
 
 available commands:
-  {list,info,upload,download,ttl,delete}
+  {list,info,upload,post-url,download,ttl,delete}
     list                List data uploaded to the platform.
     info                Get information about data uploaded to the platform.
     upload              Upload data to the platform.
+    post-url            Posts data via URL to the platform.
     download            Download data from the platform.
     ttl                 Update TTL of data on the platform.
     delete              Delete data from the platform.
@@ -161,12 +162,12 @@ List data uploaded to the platform.
 
     Examples:
         # List data according to the given query
-        voxel51 data list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-fields]
+        voxel51 data list \
+            [--limit <limit>] \
+            [--search [<field>:]<str>[,...]] \
+            [--sort-by <field>] \
+            [--ascending] \
+            [--all-fields] \
             [--count]
 
         # List the last 10 data uploaded to the platform
@@ -245,6 +246,36 @@ positional arguments:
 optional arguments:
   -h, --help  show this help message and exit
   --print-id  whether to print only the ID(s) of the uploaded data
+
+
+*******************************************************************************
+usage: voxel51 data post-url [-h] -u URL -f NAME -m TYPE -s SIZE -e DATE
+                             [--print-id]
+
+Posts data via URL to the platform.
+
+    Examples:
+        # Post data via URL
+        voxel51 data post-url \
+            --url <url> \
+            --filename <filename> \
+            --mime-type <mime-type> \
+            --size <size-bytes> \
+            --expiration-date <expiration-date>
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --print-id            whether to print only the ID of the uploaded data
+
+required arguments:
+  -u URL, --url URL     the data URL
+  -f NAME, --filename NAME
+                        the data filename
+  -m TYPE, --mime-type TYPE
+                        the data MIME type
+  -s SIZE, --size SIZE  the data size, in bytes
+  -e DATE, --expiration-date DATE
+                        the data expiration date
 
 
 *******************************************************************************
@@ -361,12 +392,12 @@ List jobs on the platform.
 
     Examples:
         # List jobs according to the given query
-        voxel51 jobs list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-fields]
+        voxel51 jobs list \
+            [--limit <limit>] \
+            [--search [<field>:]<str>[,...]] \
+            [--sort-by <field>] \
+            [--ascending] \
+            [--all-fields] \
             [--count]
 
         # Flags for jobs in a particular state
@@ -469,23 +500,24 @@ optional arguments:
 
 
 *******************************************************************************
-usage: voxel51 jobs upload [-h] [-n NAME] [--auto-start] [--print-id] PATH
+usage: voxel51 jobs upload [-h] -r PATH -n NAME [--auto-start] [--print-id]
 
 Upload job requests to the platform.
 
     Examples:
         # Upload job request
-        voxel51 jobs upload '/path/to/request.json'
+        voxel51 jobs upload --request '/path/to/request.json' \
             --name <job-name> [--auto-start]
-
-positional arguments:
-  PATH                  job request to upload
 
 optional arguments:
   -h, --help            show this help message and exit
-  -n NAME, --name NAME  job name
   --auto-start          whether to automatically start job
   --print-id            whether to print only the ID(s) of the job
+
+required arguments:
+  -r PATH, --request PATH
+                        path to job request to upload
+  -n NAME, --name NAME  job name
 
 
 *******************************************************************************
@@ -712,7 +744,8 @@ optional arguments:
 
 
 *******************************************************************************
-usage: voxel51 analytics [-h] [--all-help] {list,info,doc,upload,delete} ...
+usage: voxel51 analytics [-h] [--all-help]
+                         {list,info,doc,upload,upload-image,delete} ...
 
 Tools for working with analytics.
 
@@ -721,11 +754,12 @@ optional arguments:
   --all-help            show help recurisvely and exit
 
 available commands:
-  {list,info,doc,upload,delete}
+  {list,info,doc,upload,upload-image,delete}
     list                List analytics on the platform.
     info                Get information about analytics on the platform.
     doc                 Get documentation about analytics.
     upload              Upload analytics to the platform.
+    upload-image        Upload analytic images to the platform.
     delete              Delete analytics from the platform.
 
 
@@ -743,13 +777,13 @@ List analytics on the platform.
 
     Examples:
         # List analytics according to the given query
-        voxel51 analytics list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-versions]
-            [--all-fields]
+        voxel51 analytics list \
+            [--limit <limit>] \
+            [--search [<field>:]<str>[,...]] \
+            [--sort-by <field>] \
+            [--ascending] \
+            [--all-versions] \
+            [--all-fields] \
             [--count]
 
         # Flags for analytics with particular scopes
@@ -855,32 +889,42 @@ optional arguments:
 
 
 *******************************************************************************
-usage: voxel51 analytics upload [-h] [--doc PATH]
-                                [--analytic-type ANALYTIC_TYPE] [--image ID]
-                                [--path PATH] [--image-type IMAGE_TYPE]
-                                [--print-id]
+usage: voxel51 analytics upload [-h] [-t ANALYTIC_TYPE] [--print-id] PATH
 
 Upload analytics to the platform.
 
     Examples:
-        # Upload documentation for analytic
-        voxel51 analytics upload --doc '/path/to/doc.json'
-            [--analytic-type TYPE]
+        # Upload analytic
+        voxel51 analytics upload '/path/to/doc.json' [--analytic-type TYPE]
 
-        # Upload analytic image
-        voxel51 analytics upload --image <id>
-            --path '/path/to/image.tar.gz' --image-type cpu|gpu
+positional arguments:
+  PATH                  analytic documentation
 
 optional arguments:
   -h, --help            show this help message and exit
-  --doc PATH            analytic documentation to upload
-  --analytic-type ANALYTIC_TYPE
-                        type of analytic
-  --image ID            analytic ID to upload image for
-  --path PATH           analytic image to upload
-  --image-type IMAGE_TYPE
-                        type of image being uploaded
+  -t ANALYTIC_TYPE, --analytic-type ANALYTIC_TYPE
+                        type of analytic (PLATFORM|IMAGE_TO_VIDEO). The default is PLATFORM
   --print-id            whether to print only the ID of the uploaded analytic
+
+
+*******************************************************************************
+usage: voxel51 analytics upload-image [-h] -i ID -p PATH -t TYPE
+
+Upload analytic images to the platform.
+
+    Examples:
+        # Upload image for analytic
+        voxel51 analytics upload-image \
+            --id <id> --path '/path/to/image.tar.gz' --image-type TYPE
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+required arguments:
+  -i ID, --id ID        analytic ID
+  -p PATH, --path PATH  analytic image tarfile to upload
+  -t TYPE, --image-type TYPE
+                        type of image (CPU|GPU)
 
 
 *******************************************************************************
