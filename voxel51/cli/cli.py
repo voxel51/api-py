@@ -1738,7 +1738,7 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
         total_size = _render_bytes(sum(d["size"] for d in data))
 
     render_fcns = {
-        "name": _render_name,
+        "name": _render_long_str,
         "size": _render_bytes,
         "upload_date": _render_datetime,
         "expiration_date": _render_datetime,
@@ -1766,7 +1766,7 @@ def _print_data_uploads(uploads):
 
 def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
     render_fcns = {
-        "name": _render_name,
+        "name": _render_long_str,
         "upload_date": _render_datetime,
         "expiration_date": _render_datetime,
     }
@@ -1793,6 +1793,7 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
         "supports_gpu": bool,
         "pending": bool,
         "upload_date": _render_datetime,
+        "description": _render_long_str,
     }
     _render_fields(analytics, render_fcns)
 
@@ -1823,7 +1824,7 @@ def _print_dict_as_table(d):
     print(table_str)
 
 
-def _render_name(name):
+def _render_long_str(name):
     if len(name) > _MAX_NAME_COLUMN_WIDTH:
         name = name[:(_MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
     return name
