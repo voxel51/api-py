@@ -1769,6 +1769,9 @@ def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
         "name": _render_long_str,
         "upload_date": _render_datetime,
         "expiration_date": _render_datetime,
+        "start_date": _render_datetime,
+        "completion_date": _render_datetime,
+        "auto_start": bool,
     }
     _render_fields(jobs, render_fcns)
 
@@ -1837,6 +1840,9 @@ def _render_bytes(size):
 
 
 def _render_datetime(datetime_str):
+    if not datetime_str:
+        return ""
+
     dt = dateutil.parser.isoparse(datetime_str)
     return dt.astimezone(get_localzone()).strftime("%Y-%m-%d %H:%M:%S %Z")
 
@@ -1851,7 +1857,7 @@ def _render_fields(d, render_fcns):
 def _render_records(d, fields):
     records = []
     for di in d:
-        records.append(tuple(di[f] for f in fields))
+        records.append(tuple(di.get(f, "") for f in fields))
     return records
 
 
