@@ -55,6 +55,29 @@ A token can be deactivated via `voxel51 auth deactivate`.
 After you have activated an API token, you have full access to the API.
 
 
+## Tab completion
+
+To enable tab completion in `bash`, add the following line to your `~/.bashrc`:
+
+```shell
+eval "$(register-python-argcomplete voxel51)"
+```
+
+To enable tab completion in `zsh`, add these lines to your `~/.zshrc`:
+
+```shell
+autoload bashcompinit
+bashcompinit
+eval "$(register-python-argcomplete voxel51)"
+```
+
+To enable tab completion in `tcsh`, add these lines to your `~/.tcshrc`:
+
+```shell
+eval `register-python-argcomplete --shell tcsh voxel51`
+```
+
+
 ## Usage
 
 The following usage information was generated via `voxel51 --all-help`:
