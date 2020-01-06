@@ -22,6 +22,8 @@ try:
 except ImportError:
     from urllib import urlencode  # Python 2
 
+from voxel51.users.api import APIError
+
 
 class BaseQuery(object):
     '''Base class for API queries.
@@ -96,8 +98,9 @@ class BaseQuery(object):
         Returns:
             the updated query instance
         '''
-        if self._is_supported_field(field):
-            self.search.append("%s:%s" % (field, search_str))
+        if not self._is_supported_field(field):
+            raise APIError("Invalid search parameter %s" % field, 400)
+        self.search.append("%s:%s" % (field, search_str))
         return self
 
     def add_search_or(self, field, search_strs):
