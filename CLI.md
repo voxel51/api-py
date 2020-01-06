@@ -57,13 +57,13 @@ After you have activated an API token, you have full access to the API.
 
 ## Tab completion
 
-To enable `bash` tab completion, add the following line to your `~/.bashrc`:
+To enable tab completion in `bash`, add the following line to your `~/.bashrc`:
 
 ```shell
 eval "$(register-python-argcomplete voxel51)"
 ```
 
-To enable  `zsh` tab completion, add these lines to your `~/.zshrc`:
+To enable tab completion in `zsh`, add these lines to your `~/.zshrc`:
 
 ```shell
 autoload bashcompinit
@@ -71,7 +71,7 @@ bashcompinit
 eval "$(register-python-argcomplete voxel51)"
 ```
 
-To enable  `tcsh` tab completion, add these lines to your `~/.tcshrc`:
+To enable tab completion in `tcsh`, add these lines to your `~/.tcshrc`:
 
 ```shell
 eval `register-python-argcomplete --shell tcsh voxel51`
