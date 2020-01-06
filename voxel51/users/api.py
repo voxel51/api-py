@@ -1112,14 +1112,6 @@ class API(object):
         res = self._requests.post(endpoint, headers=self._header, json=body)
         _validate_response(res)
         statuses = _parse_json_response(res)["responses"]
-
-        # Cleanup statuses and add `success` field
-        for status in itervalues(statuses):
-            success = ("error" not in status)
-            if success:
-                status.clear()
-            status["success"] = success
-
         return statuses
 
     def _stream_download(self, url, output_path):
