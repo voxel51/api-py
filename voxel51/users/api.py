@@ -261,7 +261,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(
             self.base_url, "analytics", analytic_id, "images")
-        params = {"type": image_type.lower()}
+        params = {"type": image_type}
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
         with open(image_tar_path, "rb") as df:

@@ -35,8 +35,8 @@ from voxel51.users.query import AnalyticsQuery, DataQuery, JobsQuery
 import voxel51.users.utils as voxu
 
 
-MAX_NAME_COLUMN_WIDTH = 51
-TABLE_FORMAT = "simple"
+_MAX_NAME_COLUMN_WIDTH = 51
+_TABLE_FORMAT = "simple"
 
 
 class Command(object):
@@ -127,12 +127,11 @@ class ActivateAuthCommand(Command):
 
     @staticmethod
     def setup(parser):
-        parser.add_argument(
-            "activate", help="path to API token to activate")
+        parser.add_argument("token", help="path to API token to activate")
 
     @staticmethod
     def run(parser, args):
-        voxa.activate_token(args.activate)
+        voxa.activate_token(args.token)
 
 
 class DeactivateAuthCommand(Command):
@@ -156,6 +155,7 @@ class DataCommand(Command):
         _register_command(subparsers, "list", ListDataCommand)
         _register_command(subparsers, "info", InfoDataCommand)
         _register_command(subparsers, "upload", UploadDataCommand)
+        _register_command(subparsers, "post-url", PostURLDataCommand)
         _register_command(subparsers, "download", DownloadDataCommand)
         _register_command(subparsers, "ttl", TTLDataCommand)
         _register_command(subparsers, "delete", DeleteDataCommand)
@@ -170,12 +170,12 @@ class ListDataCommand(Command):
 
     Examples:
         # List data according to the given query
-        voxel51 data list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-fields]
+        voxel51 data list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-fields] \\
             [--count]
 
         # List the last 10 data uploaded to the platform
@@ -307,10 +307,60 @@ class UploadDataCommand(Command):
             if args.print_id:
                 print(metadata["id"])
             else:
-                uploads.append({"id": metadata["id"], "path": path})
+                metadata["path"] = path
+                uploads.append(metadata)
 
         if not args.print_id:
             _print_data_uploads(uploads)
+
+
+class PostURLDataCommand(Command):
+    '''Posts data via URL to the platform.
+
+    Examples:
+        # Post data via URL
+        voxel51 data post-url \\
+            --url <url> \\
+            --filename <filename> \\
+            --mime-type <mime-type> \\
+            --size <size-bytes> \\
+            --expiration-date <expiration-date>
+    '''
+
+    @staticmethod
+    def setup(parser):
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-u", "--url", metavar="URL", required=True, help="the data URL")
+        fields.add_argument(
+            "-f", "--filename", metavar="NAME", required=True,
+            help="the data filename")
+        fields.add_argument(
+            "-m", "--mime-type", metavar="TYPE", required=True,
+            help="the data MIME type")
+        fields.add_argument(
+            "-s", "--size", metavar="SIZE", type=int, required=True,
+            help="the data size, in bytes")
+        fields.add_argument(
+            "-e", "--expiration-date", metavar="DATE", required=True,
+            help="the data expiration date")
+
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID of the uploaded data")
+
+    @staticmethod
+    def run(parser, args):
+        api = API()
+
+        metadata = api.post_data_as_url(
+            args.url, args.filename, args.mime_type, args.size,
+            args.expiration_date)
+
+        if args.print_id:
+            print(metadata["id"])
+        else:
+            _print_data_uploads([metadata])
 
 
 class DownloadDataCommand(Command):
@@ -515,12 +565,12 @@ class ListJobsCommand(Command):
 
     Examples:
         # List jobs according to the given query
-        voxel51 jobs list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-fields]
+        voxel51 jobs list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-fields] \\
             [--count]
 
         # Flags for jobs in a particular state
@@ -711,16 +761,19 @@ class UploadJobsCommand(Command):
 
     Examples:
         # Upload job request
-        voxel51 jobs upload '/path/to/request.json'
+        voxel51 jobs upload --request '/path/to/request.json' \\
             --name <job-name> [--auto-start]
     '''
 
     @staticmethod
     def setup(parser):
-        parser.add_argument(
-            "path", metavar="PATH", help="job request to upload")
-        parser.add_argument(
-            "-n", "--name", metavar="NAME", help="job name")
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-r", "--request", metavar="PATH", required=True,
+            help="path to job request to upload")
+        fields.add_argument(
+            "-n", "--name", metavar="NAME", required=True, help="job name")
+
         parser.add_argument(
             "--auto-start", action="store_true",
             help="whether to automatically start job")
@@ -1305,6 +1358,8 @@ class AnalyticsCommand(Command):
         _register_command(subparsers, "info", InfoAnalyticsCommand)
         _register_command(subparsers, "doc", DocAnalyticsCommand)
         _register_command(subparsers, "upload", UploadAnalyticsCommand)
+        _register_command(
+            subparsers, "upload-image", UploadImageAnalyticsCommand)
         _register_command(subparsers, "delete", DeleteAnalyticsCommand)
 
     @staticmethod
@@ -1321,13 +1376,13 @@ class ListAnalyticsCommand(Command):
 
     Examples:
         # List analytics according to the given query
-        voxel51 analytics list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
-            [--all-versions]
-            [--all-fields]
+        voxel51 analytics list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-versions] \\
+            [--all-fields] \\
             [--count]
 
         # Flags for analytics with particular scopes
@@ -1515,28 +1570,17 @@ class UploadAnalyticsCommand(Command):
     '''Upload analytics to the platform.
 
     Examples:
-        # Upload documentation for analytic
-        voxel51 analytics upload --doc '/path/to/doc.json'
-            [--analytic-type TYPE]
-
-        # Upload analytic image
-        voxel51 analytics upload --image <id>
-            --path '/path/to/image.tar.gz' --image-type cpu|gpu
+        # Upload analytic
+        voxel51 analytics upload '/path/to/doc.json' [--analytic-type TYPE]
     '''
 
     @staticmethod
     def setup(parser):
         parser.add_argument(
-            "--doc", metavar="PATH", help="analytic documentation to upload")
+            "doc", metavar="PATH", help="analytic documentation")
         parser.add_argument(
-            "--analytic-type", help="type of analytic")
-        parser.add_argument(
-            "--image", metavar="ID",
-            help="analytic ID to upload image for")
-        parser.add_argument(
-            "--path", metavar="PATH", help="analytic image to upload")
-        parser.add_argument(
-            "--image-type", help="type of image being uploaded")
+            "-t", "--analytic-type", help="type of analytic "
+            "(PLATFORM|IMAGE_TO_VIDEO). The default is PLATFORM")
         parser.add_argument(
             "--print-id", action="store_true",
             help="whether to print only the ID of the uploaded analytic")
@@ -1545,23 +1589,44 @@ class UploadAnalyticsCommand(Command):
     def run(parser, args):
         api = API()
 
-        # Upload analytic documentation
-        if args.doc:
-            metadata = api.upload_analytic(
-                args.doc, analytic_type=args.analytic_type)
-            if args.print_id:
-                print(metadata["id"])
-            else:
-                _print_dict_as_table(metadata)
+        metadata = api.upload_analytic(
+            args.doc, analytic_type=args.analytic_type)
 
-        # Upload analytic image
-        if args.image:
-            analytic_id = args.image
-            image_type = args.image_type
-            api.upload_analytic_image(analytic_id, args.path, image_type)
-            print(
-                "%s image for analytic %s uploaded"
-                % (image_type.upper(), analytic_id))
+        if args.print_id:
+            print(metadata["id"])
+        else:
+            _print_dict_as_table(metadata)
+
+
+class UploadImageAnalyticsCommand(Command):
+    '''Upload analytic images to the platform.
+
+    Examples:
+        # Upload image for analytic
+        voxel51 analytics upload-image \\
+            --id <id> --path '/path/to/image.tar.gz' --image-type TYPE
+    '''
+
+    @staticmethod
+    def setup(parser):
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-i", "--id", metavar="ID", required=True, help="analytic ID")
+        fields.add_argument(
+            "-p", "--path", metavar="PATH", required=True,
+            help="analytic image tarfile to upload")
+        fields.add_argument(
+            "-t", "--image-type", metavar="TYPE", required=True,
+            help="type of image (CPU|GPU)")
+
+    @staticmethod
+    def run(parser, args):
+        api = API()
+
+        api.upload_analytic_image(args.id, args.path, args.image_type)
+        print(
+            "%s image for analytic %s uploaded" %
+            (args.image_type.upper(), args.id))
 
 
 class DeleteAnalyticsCommand(Command):
@@ -1650,7 +1715,7 @@ def _print_platform_status_info(status, token):
 
     table_str = tabulate(
         records, headers=["service", "operational", "message"],
-        tablefmt=TABLE_FORMAT)
+        tablefmt=_TABLE_FORMAT)
     print(table_str)
 
 
@@ -1664,7 +1729,7 @@ def _print_active_token_info():
         ("path", token_path),
     ]
     table_str = tabulate(
-        contents, headers=["API token", ""], tablefmt=TABLE_FORMAT)
+        contents, headers=["API token", ""], tablefmt=_TABLE_FORMAT)
     print(table_str)
 
 
@@ -1673,7 +1738,7 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
         total_size = _render_bytes(sum(d["size"] for d in data))
 
     render_fcns = {
-        "name": _render_name,
+        "name": _render_long_str,
         "size": _render_bytes,
         "upload_date": _render_datetime,
         "expiration_date": _render_datetime,
@@ -1681,12 +1746,13 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
     _render_fields(data, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(data, headers="keys", tablefmt=TABLE_FORMAT)
+        fields = DataQuery.SUPPORTED_FIELDS
     else:
         fields = [
             "id", "name", "size", "type", "upload_date", "expiration_date"]
-        records = _render_records(data, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
+
+    records = _render_records(data, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1694,26 +1760,30 @@ def _print_data_table(data, show_count=False, show_all_fields=False):
 
 
 def _print_data_uploads(uploads):
-    table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
+    table_str = tabulate(uploads, headers="keys", tablefmt=_TABLE_FORMAT)
     print("\n" + table_str + "\n")
 
 
 def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
     render_fcns = {
-        "name": _render_name,
+        "name": _render_long_str,
         "upload_date": _render_datetime,
         "expiration_date": _render_datetime,
+        "start_date": _render_datetime,
+        "completion_date": _render_datetime,
+        "auto_start": bool,
     }
     _render_fields(jobs, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(jobs, headers="keys", tablefmt=TABLE_FORMAT)
+        fields = JobsQuery.SUPPORTED_FIELDS
     else:
         fields = [
             "id", "name", "state", "archived", "upload_date",
             "expiration_date"]
-        records = _render_records(jobs, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
+
+    records = _render_records(jobs, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1726,17 +1796,19 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
         "supports_gpu": bool,
         "pending": bool,
         "upload_date": _render_datetime,
+        "description": _render_long_str,
     }
     _render_fields(analytics, render_fcns)
 
     if show_all_fields:
-        table_str = tabulate(analytics, headers="keys", tablefmt=TABLE_FORMAT)
+        fields = AnalyticsQuery.SUPPORTED_FIELDS
     else:
         fields = [
             "id", "name", "version", "scope", "supports_cpu", "supports_gpu",
             "pending", "upload_date"]
-        records = _render_records(analytics, fields)
-        table_str = tabulate(records, headers=fields, tablefmt=TABLE_FORMAT)
+
+    records = _render_records(analytics, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
 
     print(table_str)
     if show_count:
@@ -1751,13 +1823,13 @@ def _print_dict_as_json(d):
 def _print_dict_as_table(d):
     contents = list(d.items())
     table_str = tabulate(
-        contents, headers=["Analytic", ""], tablefmt=TABLE_FORMAT)
+        contents, headers=["Analytic", ""], tablefmt=_TABLE_FORMAT)
     print(table_str)
 
 
-def _render_name(name):
-    if len(name) > MAX_NAME_COLUMN_WIDTH:
-        name = name[:(MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
+def _render_long_str(name):
+    if len(name) > _MAX_NAME_COLUMN_WIDTH:
+        name = name[:(_MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
     return name
 
 
@@ -1768,6 +1840,9 @@ def _render_bytes(size):
 
 
 def _render_datetime(datetime_str):
+    if not datetime_str:
+        return ""
+
     dt = dateutil.parser.isoparse(datetime_str)
     return dt.astimezone(get_localzone()).strftime("%Y-%m-%d %H:%M:%S %Z")
 
@@ -1782,7 +1857,7 @@ def _render_fields(d, render_fcns):
 def _render_records(d, fields):
     records = []
     for di in d:
-        records.append(tuple(di[f] for f in fields))
+        records.append(tuple(di.get(f, "") for f in fields))
     return records
 
 
