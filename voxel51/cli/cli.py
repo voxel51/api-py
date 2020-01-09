@@ -1862,10 +1862,10 @@ def _render_records(d, fields):
     return records
 
 
-def _get_batch_failures(batch_response):
+def _get_batch_failures(response):
     return {
-        id: status.get("message") for id, status in iteritems(batch_response)
-        if not status["success"]
+        id: status.get("error", {}).get("message", "????")
+        for id, status in iteritems(response) if not status["success"]
     }
 
 
