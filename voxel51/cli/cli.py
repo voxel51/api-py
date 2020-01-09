@@ -14,16 +14,16 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
-from future.utils import iteritems
+from future.utils import iteritems, itervalues
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
 import argparse
 import json
-import logging
 import sys
 
+import argcomplete
 import dateutil.parser
 from tabulate import tabulate
 from tzlocal import get_localzone
@@ -36,11 +36,8 @@ from voxel51.users.query import AnalyticsQuery, DataQuery, JobsQuery
 import voxel51.users.utils as voxu
 
 
-logger = logging.getLogger(__name__)
-
-
-MAX_NAME_COLUMN_WIDTH = 51
-TABLE_FORMAT = "simple"
+_MAX_NAME_COLUMN_WIDTH = 51
+_TABLE_FORMAT = "simple"
 
 
 class Command(object):
@@ -61,14 +58,15 @@ class Command(object):
         raise NotImplementedError("subclass must implement setup()")
 
     @staticmethod
-    def run(args):
-        '''Execute the command on the given args.
+    def run(parser, args):
+        '''Executes the command on the given args.
 
         args:
+            parser: the `argparse.ArgumentParser` instance for the command
             args: an `argparse.Namespace` instance containing the arguments
                 for the command
         '''
-        pass
+        raise NotImplementedError("subclass must implement run()")
 
 
 class Voxel51Command(Command):
@@ -81,6 +79,11 @@ class Voxel51Command(Command):
         _register_command(subparsers, "data", DataCommand)
         _register_command(subparsers, "jobs", JobsCommand)
         _register_command(subparsers, "analytics", AnalyticsCommand)
+        _register_command(subparsers, "status", StatusCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class AuthCommand(Command):
@@ -92,6 +95,10 @@ class AuthCommand(Command):
         _register_command(subparsers, "show", ShowAuthCommand)
         _register_command(subparsers, "activate", ActivateAuthCommand)
         _register_command(subparsers, "deactivate", DeactivateAuthCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class ShowAuthCommand(Command):
@@ -107,7 +114,7 @@ class ShowAuthCommand(Command):
         pass
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         _print_active_token_info()
 
 
@@ -121,12 +128,11 @@ class ActivateAuthCommand(Command):
 
     @staticmethod
     def setup(parser):
-        parser.add_argument(
-            "activate", help="path to API token to activate")
+        parser.add_argument("token", help="path to API token to activate")
 
     @staticmethod
-    def run(args):
-        voxa.activate_token(args.activate)
+    def run(parser, args):
+        voxa.activate_token(args.token)
 
 
 class DeactivateAuthCommand(Command):
@@ -137,7 +143,7 @@ class DeactivateAuthCommand(Command):
         pass
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         voxa.deactivate_token()
 
 
@@ -150,9 +156,14 @@ class DataCommand(Command):
         _register_command(subparsers, "list", ListDataCommand)
         _register_command(subparsers, "info", InfoDataCommand)
         _register_command(subparsers, "upload", UploadDataCommand)
+        _register_command(subparsers, "post-url", PostURLDataCommand)
         _register_command(subparsers, "download", DownloadDataCommand)
         _register_command(subparsers, "ttl", TTLDataCommand)
         _register_command(subparsers, "delete", DeleteDataCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class ListDataCommand(Command):
@@ -160,11 +171,12 @@ class ListDataCommand(Command):
 
     Examples:
         # List data according to the given query
-        voxel51 data list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
+        voxel51 data list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-fields] \\
             [--count]
 
         # List the last 10 data uploaded to the platform
@@ -206,17 +218,20 @@ class ListDataCommand(Command):
             "-s", "--search", metavar="SEARCH",
             help="search to limit results when listing data")
         parser.add_argument(
-            "-c", "--count", action="store_true",
-            help="whether to show the number of data in the list")
-        parser.add_argument(
             "--sort-by", metavar="FIELD",
             help="field to sort by when listing data")
         parser.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
+        parser.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of data in the list")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         query = DataQuery().add_all_fields()
@@ -232,7 +247,8 @@ class ListDataCommand(Command):
             query = query.add_search_direct(args.search)
 
         data = api.query_data(query)["data"]
-        _print_data_table(data, show_count=args.count)
+        _print_data_table(
+            data, show_count=args.count, show_all_fields=args.all_fields)
 
 
 class InfoDataCommand(Command):
@@ -241,19 +257,25 @@ class InfoDataCommand(Command):
     Examples:
         # Get data info
         voxel51 data info <id> [...]
+
+        # Get all available fields for data
+        voxel51 data info --all-fields <id> [...]
     '''
 
     @staticmethod
     def setup(parser):
         parser.add_argument(
             "ids", nargs="+", metavar="ID", help="the data ID(s) of interest")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         data = [api.get_data_details(data_id) for data_id in args.ids]
-        _print_data_table(data)
+        _print_data_table(data, show_all_fields=args.all_fields)
 
 
 class UploadDataCommand(Command):
@@ -268,19 +290,78 @@ class UploadDataCommand(Command):
     def setup(parser):
         parser.add_argument(
             "paths", nargs="+", metavar="PATH", help="the file(s) to upload")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID(s) of the uploaded data")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         uploads = []
         for path in args.paths:
-            logger.info("Uploading data '%s'", path)
-            metadata = api.upload_data(path)
-            uploads.append({"id": metadata["id"], "path": path})
+            if not args.print_id:
+                print("Uploading data '%s'" % path)
 
-        table_str = tabulate(uploads, headers="keys", tablefmt=TABLE_FORMAT)
-        logger.info("\n" + table_str + "\n")
+            metadata = api.upload_data(path)
+
+            if args.print_id:
+                print(metadata["id"])
+            else:
+                metadata["path"] = path
+                uploads.append(metadata)
+
+        if not args.print_id:
+            _print_data_uploads(uploads)
+
+
+class PostURLDataCommand(Command):
+    '''Posts data via URL to the platform.
+
+    Examples:
+        # Post data via URL
+        voxel51 data post-url \\
+            --url <url> \\
+            --filename <filename> \\
+            --mime-type <mime-type> \\
+            --size <size-bytes> \\
+            --expiration-date <expiration-date>
+    '''
+
+    @staticmethod
+    def setup(parser):
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-u", "--url", metavar="URL", required=True, help="the data URL")
+        fields.add_argument(
+            "-f", "--filename", metavar="NAME", required=True,
+            help="the data filename")
+        fields.add_argument(
+            "-m", "--mime-type", metavar="TYPE", required=True,
+            help="the data MIME type")
+        fields.add_argument(
+            "-s", "--size", metavar="SIZE", type=int, required=True,
+            help="the data size, in bytes")
+        fields.add_argument(
+            "-e", "--expiration-date", metavar="DATE", required=True,
+            help="the data expiration date")
+
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID of the uploaded data")
+
+    @staticmethod
+    def run(parser, args):
+        api = API()
+
+        metadata = api.post_data_as_url(
+            args.url, args.filename, args.mime_type, args.size,
+            args.expiration_date)
+
+        if args.print_id:
+            print(metadata["id"])
+        else:
+            _print_data_uploads([metadata])
 
 
 class DownloadDataCommand(Command):
@@ -303,22 +384,22 @@ class DownloadDataCommand(Command):
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to download data")
         parser.add_argument(
-            "-u", "--url", metavar="ID",
+            "-u", "--url", action="store_true",
             help="generate signed URL to download data")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         data_id = args.id
 
         if args.url:
             url = api.get_data_download_url(data_id)
-            logger.info(url)
+            print(url)
             return
 
         output_path = api.download_data(data_id, output_path=args.path)
-        logger.info("Downloaded '%s' to '%s'", data_id, output_path)
+        print("Downloaded '%s' to '%s'" % (data_id, output_path))
 
 
 class TTLDataCommand(Command):
@@ -353,7 +434,7 @@ class TTLDataCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if not args.days and not args.date:
@@ -366,13 +447,13 @@ class TTLDataCommand(Command):
 
         if args.dry_run:
             for data_id in data_ids:
-                logger.info(data_id)
+                print(data_id)
             return
 
         num_data = len(data_ids)
 
         if args.all:
-            logger.info("Found %d data to update TTL", num_data)
+            print("Found %d data to update TTL" % num_data)
             if num_data > 0 and not args.force:
                 _abort_if_requested()
 
@@ -384,11 +465,12 @@ class TTLDataCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Data TTL(s) updated")
+            print("Data TTL(s) updated")
         else:
             for data_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to update TTL of data '%s': %s", data_id, message)
+                print(
+                    "Failed to update TTL of data '%s': %s" %
+                    (data_id, message))
 
 
 class DeleteDataCommand(Command):
@@ -418,7 +500,7 @@ class DeleteDataCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -428,13 +510,13 @@ class DeleteDataCommand(Command):
 
         if args.dry_run:
             for data_id in data_ids:
-                logger.info(data_id)
+                print(data_id)
             return
 
         num_data = len(data_ids)
 
         if args.all:
-            logger.info("Found %d data to delete", num_data)
+            print("Found %d data to delete" % num_data)
             if num_data > 0 and not args.force:
                 _abort_if_requested()
 
@@ -445,11 +527,10 @@ class DeleteDataCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Data deleted")
+            print("Data deleted")
         else:
             for data_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to delete data '%s': %s", data_id, message)
+                print("Failed to delete data '%s': %s" % (data_id, message))
 
 
 class JobsCommand(Command):
@@ -472,6 +553,10 @@ class JobsCommand(Command):
         _register_command(subparsers, "kill", KillJobsCommand)
         _register_command(subparsers, "delete", DeleteJobsCommand)
 
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
+
 
 class ListJobsCommand(Command):
     '''List jobs on the platform.
@@ -481,11 +566,12 @@ class ListJobsCommand(Command):
 
     Examples:
         # List jobs according to the given query
-        voxel51 jobs list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--ascending]
+        voxel51 jobs list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-fields] \\
             [--count]
 
         # Flags for jobs in a particular state
@@ -547,14 +633,17 @@ class ListJobsCommand(Command):
             "-s", "--search", metavar="SEARCH",
             help="search to limit results when listing jobs")
         parser.add_argument(
-            "-c", "--count", action="store_true",
-            help="whether to show the number of jobs in the list")
-        parser.add_argument(
             "--sort-by", metavar="FIELD",
             help="field to sort by when listing jobs")
         parser.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
+        parser.add_argument(
+            "-c", "--count", action="store_true",
+            help="whether to show the number of jobs in the list")
 
         states = parser.add_argument_group("state arguments")
         states.add_argument(
@@ -591,7 +680,7 @@ class ListJobsCommand(Command):
             "--expired-only", action="store_true", help="only expired jobs")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         query = JobsQuery().add_all_fields()
@@ -637,7 +726,8 @@ class ListJobsCommand(Command):
         if args.exclude_expired:
             jobs = [job for job in jobs if not api.is_job_expired(job=job)]
 
-        _print_jobs_table(jobs, show_count=args.count)
+        _print_jobs_table(
+            jobs, show_count=args.count, show_all_fields=args.all_fields)
 
 
 class InfoJobsCommand(Command):
@@ -646,19 +736,25 @@ class InfoJobsCommand(Command):
     Examples:
         # Get job(s) info
         voxel51 jobs info <id> [...]
+
+        # Get all available fields for jobs
+        voxel51 jobs info --all-fields <id> [...]
     '''
 
     @staticmethod
     def setup(parser):
         parser.add_argument(
             "ids", nargs="+", metavar="ID", help="the job ID(s) of interest")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         jobs = [api.get_job_details(job_id) for job_id in args.ids]
-        _print_jobs_table(jobs)
+        _print_jobs_table(jobs, show_all_fields=args.all_fields)
 
 
 class UploadJobsCommand(Command):
@@ -666,31 +762,41 @@ class UploadJobsCommand(Command):
 
     Examples:
         # Upload job request
-        voxel51 jobs upload '/path/to/request.json'
+        voxel51 jobs upload --request '/path/to/request.json' \\
             --name <job-name> [--auto-start]
     '''
 
     @staticmethod
     def setup(parser):
-        parser.add_argument(
-            "path", metavar="PATH", help="job request to upload")
-        parser.add_argument(
-            "-n", "--name", metavar="NAME", help="job name")
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-r", "--request", metavar="PATH", required=True,
+            help="path to job request to upload")
+        fields.add_argument(
+            "-n", "--name", metavar="NAME", required=True, help="job name")
+
         parser.add_argument(
             "--auto-start", action="store_true",
             help="whether to automatically start job")
+        parser.add_argument(
+            "--print-id", action="store_true",
+            help="whether to print only the ID(s) of the job")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         request = JobRequest.from_json(args.path)
-        job_id = api.upload_job_request(
+        metadata = api.upload_job_request(
             request, args.name, auto_start=args.auto_start)
-        if args.auto_start:
-            logger.info("Created and started job '%s'", job_id)
+        job_id = metadata["id"]
+
+        if args.print_id:
+            print(job_id)
+        elif args.auto_start:
+            print("Created and started job '%s'" % job_id)
         else:
-            logger.info("Created job '%s'", job_id)
+            print("Created job '%s'" % job_id)
 
 
 class StartJobsCommand(Command):
@@ -720,7 +826,7 @@ class StartJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -736,13 +842,13 @@ class StartJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to start", num_jobs)
+            print("Found %d job(s) to start" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -753,10 +859,10 @@ class StartJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) started")
+            print("Job(s) started")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning("Failed to start job '%s': %s", job_id, message)
+                print("Failed to start job '%s': %s" % (job_id, message))
 
 
 class ArchiveJobsCommand(Command):
@@ -786,7 +892,7 @@ class ArchiveJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -801,13 +907,13 @@ class ArchiveJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to archive", num_jobs)
+            print("Found %d job(s) to archive" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -818,11 +924,10 @@ class ArchiveJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) archived")
+            print("Job(s) archived")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to archive job '%s': %s", job_id, message)
+                print("Failed to archive job '%s': %s" % (job_id, message))
 
 
 class UnarchiveJobsCommand(Command):
@@ -852,7 +957,7 @@ class UnarchiveJobsCommand(Command):
             "than actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -870,13 +975,13 @@ class UnarchiveJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to unarchive", num_jobs)
+            print("Found %d job(s) to unarchive" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -887,11 +992,10 @@ class UnarchiveJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) unarchived")
+            print("Job(s) unarchived")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to unarchive job '%s': %s", job_id, message)
+                print("Failed to unarchive job '%s': %s" % (job_id, message))
 
 
 class TTLJobsCommand(Command):
@@ -926,7 +1030,7 @@ class TTLJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if not args.days and not args.date:
@@ -946,13 +1050,13 @@ class TTLJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d jobs to update TTL", num_jobs)
+            print("Found %d jobs to update TTL" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -964,11 +1068,11 @@ class TTLJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job TTL(s) updated")
+            print("Job TTL(s) updated")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to update TTL of job '%s': %s", job_id, message)
+                print(
+                    "Failed to update TTL of job '%s': %s" % (job_id, message))
 
 
 class RequestJobsCommand(Command):
@@ -989,17 +1093,17 @@ class RequestJobsCommand(Command):
             "-p", "--path", metavar="PATH", help="path to write request JSON")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         request = api.get_job_request(args.id)
 
         if args.path:
             request.to_json(args.path)
-            logger.info(
-                "Request for job '%s' written to '%s'", args.id, args.path)
+            print(
+                "Request for job '%s' written to '%s'" % (args.id, args.path))
         else:
-            logger.info(request)
+            print(request)
 
 
 class StatusJobsCommand(Command):
@@ -1020,15 +1124,14 @@ class StatusJobsCommand(Command):
             "-p", "--path", metavar="PATH", help="path to write status JSON")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         status = api.get_job_status(args.id)
 
         if args.path:
             voxu.write_json(status, args.path)
-            logger.info(
-                "Status for job '%s' written to '%s'", args.id, args.path)
+            print("Status for job '%s' written to '%s'" % (args.id, args.path))
         else:
             _print_dict_as_json(status)
 
@@ -1042,6 +1145,9 @@ class LogJobsCommand(Command):
 
         # Download job logfile to disk
         voxel51 jobs log <id> --path '/path/for/job.log'
+
+        # Generate signed URL to download job logfile
+        voxel51 jobs log <id> --url
     '''
 
     @staticmethod
@@ -1049,18 +1155,27 @@ class LogJobsCommand(Command):
         parser.add_argument("id", metavar="ID", help="the job ID of interest")
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write logfile")
+        parser.add_argument(
+            "-u", "--url", action="store_true",
+            help="generate signed URL to download job logfile")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
+
+        if args.url:
+            url = api.get_job_logfile_download_url(args.id)
+            print(url)
+            return
 
         if args.path:
             api.download_job_logfile(args.id, output_path=args.path)
-            logger.info(
-                "Logfile for job '%s' written to '%s'", args.id, args.path)
-        else:
-            logfile = api.download_job_logfile(args.id, output_path=args.path)
-            logger.info(logfile)
+            print(
+                "Logfile for job '%s' written to '%s'" % (args.id, args.path))
+            return
+
+        logfile = api.download_job_logfile(args.id, output_path=args.path)
+        print(logfile)
 
 
 class DownloadJobsCommand(Command):
@@ -1084,22 +1199,22 @@ class DownloadJobsCommand(Command):
         parser.add_argument(
             "-p", "--path", metavar="PATH", help="path to write output")
         parser.add_argument(
-            "-u", "--url", metavar="ID",
+            "-u", "--url", action="store_true",
             help="generate signed URL to download job output")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         job_id = args.download
 
         if args.url:
             url = api.get_job_output_download_url(job_id)
-            logger.info(url)
+            print(url)
             return
 
         output_path = api.download_job_output(job_id, output_path=args.path)
-        logger.info("Downloaded '%s' to '%s'", job_id, output_path)
+        print("Downloaded '%s' to '%s'" % (job_id, output_path))
 
 
 class KillJobsCommand(Command):
@@ -1129,7 +1244,7 @@ class KillJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -1145,13 +1260,13 @@ class KillJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to kill", num_jobs)
+            print("Found %d job(s) to kill" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -1162,10 +1277,10 @@ class KillJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) killed")
+            print("Job(s) killed")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning("Failed to kill job '%s': %s", job_id, message)
+                print("Failed to kill job '%s': %s" % (job_id, message))
 
 
 class DeleteJobsCommand(Command):
@@ -1195,7 +1310,7 @@ class DeleteJobsCommand(Command):
             "actually performing the action")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         if args.all:
@@ -1211,13 +1326,13 @@ class DeleteJobsCommand(Command):
 
         if args.dry_run:
             for job_id in job_ids:
-                logger.info(job_id)
+                print(job_id)
             return
 
         num_jobs = len(job_ids)
 
         if args.all:
-            logger.info("Found %d job(s) to delete", num_jobs)
+            print("Found %d job(s) to delete" % num_jobs)
             if num_jobs > 0 and not args.force:
                 _abort_if_requested()
 
@@ -1228,11 +1343,10 @@ class DeleteJobsCommand(Command):
 
         failures = _get_batch_failures(response)
         if not failures:
-            logger.info("Job(s) deleted")
+            print("Job(s) deleted")
         else:
             for job_id, message in iteritems(failures):
-                logger.warning(
-                    "Failed to delete job '%s': %s", job_id, message)
+                print("Failed to delete job '%s': %s" % (job_id, message))
 
 
 class AnalyticsCommand(Command):
@@ -1245,7 +1359,13 @@ class AnalyticsCommand(Command):
         _register_command(subparsers, "info", InfoAnalyticsCommand)
         _register_command(subparsers, "doc", DocAnalyticsCommand)
         _register_command(subparsers, "upload", UploadAnalyticsCommand)
+        _register_command(
+            subparsers, "upload-image", UploadImageAnalyticsCommand)
         _register_command(subparsers, "delete", DeleteAnalyticsCommand)
+
+    @staticmethod
+    def run(parser, args):
+        parser.print_help()
 
 
 class ListAnalyticsCommand(Command):
@@ -1257,12 +1377,13 @@ class ListAnalyticsCommand(Command):
 
     Examples:
         # List analytics according to the given query
-        voxel51 analytics list
-            [--limit <limit>]
-            [--search [<field>:]<str>[,...]]
-            [--sort-by <field>]
-            [--all-versions]
-            [--ascending]
+        voxel51 analytics list \\
+            [--limit <limit>] \\
+            [--search [<field>:]<str>[,...]] \\
+            [--sort-by <field>] \\
+            [--ascending] \\
+            [--all-versions] \\
+            [--all-fields] \\
             [--count]
 
         # Flags for analytics with particular scopes
@@ -1318,11 +1439,14 @@ class ListAnalyticsCommand(Command):
             "--sort-by", metavar="FIELD",
             help="field to sort by when listing analytics")
         parser.add_argument(
-            "-a", "--all-versions", action="store_true",
-            help="whether to include all versions of analytics")
-        parser.add_argument(
             "--ascending", action="store_true",
             help="whether to sort in ascending order")
+        parser.add_argument(
+            "--all-versions", action="store_true",
+            help="whether to include all versions of analytics")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
         parser.add_argument(
             "-c", "--count", action="store_true",
             help="whether to show the number of analytics in the list")
@@ -1345,7 +1469,7 @@ class ListAnalyticsCommand(Command):
             help="only pending analytics")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         query = AnalyticsQuery().add_all_fields()
@@ -1378,7 +1502,8 @@ class ListAnalyticsCommand(Command):
                 query = query.add_search("pending", False)
 
         analytics = api.query_analytics(query)["analytics"]
-        _print_analytics_table(analytics, show_count=args.count)
+        _print_analytics_table(
+            analytics, show_count=args.count, show_all_fields=args.all_fields)
 
 
 class InfoAnalyticsCommand(Command):
@@ -1387,6 +1512,9 @@ class InfoAnalyticsCommand(Command):
     Examples:
         # Get analytic(s) info
         voxel51 analytics info <id> [...]
+
+        # Get all available fields for analytics
+        voxel51 analytics info --all-fields <id> [...]
     '''
 
     @staticmethod
@@ -1394,14 +1522,17 @@ class InfoAnalyticsCommand(Command):
         parser.add_argument(
             "ids", nargs="+", metavar="ID",
             help="the analytic ID(s) of interest")
+        parser.add_argument(
+            "-a", "--all-fields", action="store_true",
+            help="whether to print all available fields")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         analytics = [
             api.get_analytic_details(analytic_id) for analytic_id in args.ids]
-        _print_analytics_table(analytics)
+        _print_analytics_table(analytics, show_all_fields=args.all_fields)
 
 
 class DocAnalyticsCommand(Command):
@@ -1422,16 +1553,16 @@ class DocAnalyticsCommand(Command):
             "-p", "--path", metavar="PATH", help="path to write doc JSON")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         doc = api.get_analytic_doc(args.id)
 
         if args.path:
             voxu.write_json(doc, args.path)
-            logger.info(
-                "Documentation for analytic '%s' written to '%s'",
-                args.id, args.path)
+            print(
+                "Documentation for analytic '%s' written to '%s'" %
+                (args.id, args.path))
         else:
             _print_dict_as_json(doc)
 
@@ -1440,53 +1571,63 @@ class UploadAnalyticsCommand(Command):
     '''Upload analytics to the platform.
 
     Examples:
-        # Upload documentation for analytic
-        voxel51 analytics upload --doc '/path/to/doc.json'
-            [--analytic-type TYPE] [--print-id]
-
-        # Upload analytic image
-        voxel51 analytics upload --image <id>
-            --path '/path/to/image.tar.gz' --image-type cpu|gpu
+        # Upload analytic
+        voxel51 analytics upload '/path/to/doc.json' [--analytic-type TYPE]
     '''
 
     @staticmethod
     def setup(parser):
         parser.add_argument(
-            "--doc", metavar="PATH", help="analytic documentation to upload")
+            "doc", metavar="PATH", help="analytic documentation")
         parser.add_argument(
-            "--analytic-type", help="type of analytic")
+            "-t", "--analytic-type", help="type of analytic "
+            "(PLATFORM|IMAGE_TO_VIDEO). The default is PLATFORM")
         parser.add_argument(
             "--print-id", action="store_true",
             help="whether to print only the ID of the uploaded analytic")
-        parser.add_argument(
-            "--image", metavar="ID",
-            help="analytic ID to upload image for")
-        parser.add_argument(
-            "--path", metavar="PATH", help="analytic image to upload")
-        parser.add_argument(
-            "--image-type", help="type of image being uploaded")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
-        # Upload analytic documentation
-        if args.doc:
-            metadata = api.upload_analytic(
-                args.doc, analytic_type=args.analytic_type)
-            if args.print_id:
-                logger.info(metadata["id"])
-            else:
-                _print_dict_as_table(metadata)
+        metadata = api.upload_analytic(
+            args.doc, analytic_type=args.analytic_type)
 
-        # Upload analytic image
-        if args.image:
-            analytic_id = args.image
-            image_type = args.image_type
-            api.upload_analytic_image(analytic_id, args.path, image_type)
-            logger.info(
-                "%s image for analytic %s uploaded", image_type.upper(),
-                analytic_id)
+        if args.print_id:
+            print(metadata["id"])
+        else:
+            _print_dict_as_table(metadata)
+
+
+class UploadImageAnalyticsCommand(Command):
+    '''Upload analytic images to the platform.
+
+    Examples:
+        # Upload image for analytic
+        voxel51 analytics upload-image \\
+            --id <id> --path '/path/to/image.tar.gz' --image-type TYPE
+    '''
+
+    @staticmethod
+    def setup(parser):
+        fields = parser.add_argument_group("required arguments")
+        fields.add_argument(
+            "-i", "--id", metavar="ID", required=True, help="analytic ID")
+        fields.add_argument(
+            "-p", "--path", metavar="PATH", required=True,
+            help="analytic image tarfile to upload")
+        fields.add_argument(
+            "-t", "--image-type", metavar="TYPE", required=True,
+            help="type of image (CPU|GPU)")
+
+    @staticmethod
+    def run(parser, args):
+        api = API()
+
+        api.upload_analytic_image(args.id, args.path, args.image_type)
+        print(
+            "%s image for analytic %s uploaded" %
+            (args.image_type.upper(), args.id))
 
 
 class DeleteAnalyticsCommand(Command):
@@ -1507,106 +1648,189 @@ class DeleteAnalyticsCommand(Command):
             help="whether to force delete without confirmation")
 
     @staticmethod
-    def run(args):
+    def run(parser, args):
         api = API()
 
         analytic_ids = args.ids
 
         num_analytics = len(analytic_ids)
-        logger.info("Found %d analytic(s) to delete", num_analytics)
+        print("Found %d analytic(s) to delete" % num_analytics)
         if num_analytics > 0 and not args.force:
             _abort_if_requested()
 
         for analytic_id in analytic_ids:
             api.delete_analytic(analytic_id)
-            logger.info("Analytic '%s' deleted", analytic_id)
+            print("Analytic '%s' deleted" % analytic_id)
+
+
+class StatusCommand(Command):
+    '''Tools for checking the status of the platform.
+
+    Examples:
+        # Check status of all platform services
+        voxel51 status
+
+        # Check whether platform is up
+        voxel51 status --platform
+
+        # Check whether jobs cluster is up
+        voxel51 status --jobs-cluster
+    '''
+
+    @staticmethod
+    def setup(parser):
+        parser.add_argument(
+            "-p", "--platform", action="store_true",
+            help="check if platform is up")
+        parser.add_argument(
+            "-j", "--jobs-cluster", action="store_true",
+            help="check if jobs cluster is up")
+
+    @staticmethod
+    def run(parser, args):
+        api = API()
+
+        status = api.get_platform_status()
+
+        if args.platform:
+            print(status["platform"])
+
+        if args.jobs_cluster:
+            print(status["jobs"])
+
+        if not args.platform and not args.jobs_cluster:
+            _print_platform_status_info(status, api.token)
+
+
+def _print_platform_status_info(status, token):
+    records = []
+    for service, is_up in iteritems(status):
+        if is_up:
+            msg = "system operational!"
+        elif token.base_api_url == "https://api.voxel51.com":
+            msg = "system down; see https://status.voxel51.com for more info"
+        else:
+            msg = "system down; contact your sys admin for more info"
+
+        records.append((service, is_up, msg))
+
+    table_str = tabulate(
+        records, headers=["service", "operational", "message"],
+        tablefmt=_TABLE_FORMAT)
+    print(table_str)
 
 
 def _print_active_token_info():
     token_path = voxa.get_active_token_path()
     token = voxa.load_token(token_path=token_path)
     contents = [
-        ("id", token.id),
+        ("token id", token.id),
         ("creation date", _render_datetime(token.creation_date)),
-        ("base API URL", token.base_api_url),
+        ("base api url", token.base_api_url),
         ("path", token_path),
     ]
     table_str = tabulate(
-        contents, headers=["API token", ""], tablefmt=TABLE_FORMAT)
-    logger.info(table_str)
+        contents, headers=["API token", ""], tablefmt=_TABLE_FORMAT)
+    print(table_str)
 
 
-def _print_data_table(data, show_count=False):
-    records = [
-        (
-            d["id"], _render_name(d["name"]), _render_bytes(d["size"]),
-            d["type"], _render_datetime(d["upload_date"]),
-            _render_datetime(d["expiration_date"])
-        ) for d in data]
-
-    table_str = tabulate(
-        records, headers=[
-            "id", "name", "size", "type", "upload_date", "expiration_date"],
-        tablefmt=TABLE_FORMAT)
-
-    logger.info(table_str)
+def _print_data_table(data, show_count=False, show_all_fields=False):
     if show_count:
         total_size = _render_bytes(sum(d["size"] for d in data))
-        logger.info("\nShowing %d data, %s\n", len(records), total_size)
+
+    render_fcns = {
+        "name": _render_long_str,
+        "size": _render_bytes,
+        "upload_date": _render_datetime,
+        "expiration_date": _render_datetime,
+    }
+    _render_fields(data, render_fcns)
+
+    if show_all_fields:
+        fields = DataQuery.SUPPORTED_FIELDS
+    else:
+        fields = [
+            "id", "name", "size", "type", "upload_date", "expiration_date"]
+
+    records = _render_records(data, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
+
+    print(table_str)
+    if show_count:
+        print("\nShowing %d data, %s\n" % (len(data), total_size))
 
 
-def _print_jobs_table(jobs, show_count=False):
-    records = [
-        (
-            j["id"], _render_name(j["name"]), j["state"], j["archived"],
-            _render_datetime(j["upload_date"]),
-            _render_datetime(j["expiration_date"])
-        ) for j in jobs]
+def _print_data_uploads(uploads):
+    table_str = tabulate(uploads, headers="keys", tablefmt=_TABLE_FORMAT)
+    print("\n" + table_str + "\n")
 
-    table_str = tabulate(
-        records, headers=[
+
+def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
+    render_fcns = {
+        "name": _render_long_str,
+        "upload_date": _render_datetime,
+        "expiration_date": _render_datetime,
+        "start_date": _render_datetime,
+        "completion_date": _render_datetime,
+        "auto_start": bool,
+    }
+    _render_fields(jobs, render_fcns)
+
+    if show_all_fields:
+        fields = JobsQuery.SUPPORTED_FIELDS
+    else:
+        fields = [
             "id", "name", "state", "archived", "upload_date",
-            "expiration_date"],
-        tablefmt=TABLE_FORMAT)
+            "expiration_date"]
 
-    logger.info(table_str)
+    records = _render_records(jobs, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
+
+    print(table_str)
     if show_count:
-        logger.info("\nShowing %d job(s)\n", len(records))
+        print("\nShowing %d job(s)\n" % len(jobs))
 
 
-def _print_analytics_table(analytics, show_count=False):
-    records = [
-        (
-            a["id"], a["name"], a["version"], a["scope"],
-            bool(a["supports_cpu"]), bool(a["supports_gpu"]),
-            bool(a["pending"]), _render_datetime(a["upload_date"]),
-        ) for a in analytics]
+def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
+    render_fcns = {
+        "supports_cpu": bool,
+        "supports_gpu": bool,
+        "pending": bool,
+        "upload_date": _render_datetime,
+        "description": _render_long_str,
+    }
+    _render_fields(analytics, render_fcns)
 
-    table_str = tabulate(
-        records, headers=[
+    if show_all_fields:
+        fields = AnalyticsQuery.SUPPORTED_FIELDS
+    else:
+        fields = [
             "id", "name", "version", "scope", "supports_cpu", "supports_gpu",
-            "pending", "upload_date"],
-        tablefmt=TABLE_FORMAT)
+            "pending", "upload_date"]
 
-    logger.info(table_str)
+    records = _render_records(analytics, fields)
+    table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
+
+    print(table_str)
     if show_count:
-        logger.info("\nFound %d analytic(s)\n", len(records))
+        print("\nFound %d analytic(s)\n" % len(analytics))
 
 
 def _print_dict_as_json(d):
     s = json.dumps(d, indent=4)
-    logger.info(s)
+    print(s)
 
 
 def _print_dict_as_table(d):
     contents = list(d.items())
-    table_str = tabulate(contents, tablefmt="plain")
-    logger.info(table_str)
+    table_str = tabulate(
+        contents, headers=["Analytic", ""], tablefmt=_TABLE_FORMAT)
+    print(table_str)
 
 
-def _render_name(name):
-    if len(name) > MAX_NAME_COLUMN_WIDTH:
-        name = name[:(MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
+def _render_long_str(name):
+    if len(name) > _MAX_NAME_COLUMN_WIDTH:
+        name = name[:(_MAX_NAME_COLUMN_WIDTH - 4)] + " ..."
     return name
 
 
@@ -1617,8 +1841,25 @@ def _render_bytes(size):
 
 
 def _render_datetime(datetime_str):
+    if not datetime_str:
+        return ""
+
     dt = dateutil.parser.isoparse(datetime_str)
     return dt.astimezone(get_localzone()).strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def _render_fields(d, render_fcns):
+    for di in d:
+        for ki, vi in iteritems(di):
+            if ki in render_fcns:
+                di[ki] = render_fcns[ki](vi)
+
+
+def _render_records(d, fields):
+    records = []
+    for di in d:
+        records.append(tuple(di.get(f, "") for f in fields))
+    return records
 
 
 def _get_batch_failures(response):
@@ -1636,15 +1877,51 @@ def _abort_if_requested():
         sys.exit(0)
 
 
+def _has_subparsers(parser):
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return True
+
+    return False
+
+
+def _iter_subparsers(parser):
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            for subparser in itervalues(action.choices):
+                yield subparser
+
+
+class _RecursiveHelpAction(argparse._HelpAction):
+
+    def __call__(self, parser, *args, **kwargs):
+        self._recurse(parser)
+        parser.exit()
+
+    @staticmethod
+    def _recurse(parser):
+        print("\n%s\n%s" % ("*" * 79, parser.format_help()))
+        for subparser in _iter_subparsers(parser):
+            _RecursiveHelpAction._recurse(subparser)
+
+
 def _register_main_command(command, version=None):
     parser = argparse.ArgumentParser(description=command.__doc__.rstrip())
+
+    parser.set_defaults(run=lambda args: command.run(parser, args))
+    command.setup(parser)
+
     if version:
         parser.add_argument(
             "-v", "--version", action="version", version=version,
             help="show version info")
 
-    parser.set_defaults(run=command.run)
-    command.setup(parser)
+    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+        parser.add_argument(
+            "--all-help", action=_RecursiveHelpAction,
+            help="show help recurisvely and exit")
+
+    argcomplete.autocomplete(parser)
     return parser
 
 
@@ -1653,18 +1930,27 @@ def _register_command(parent, name, command):
         name, help=command.__doc__.splitlines()[0],
         description=command.__doc__.rstrip(),
         formatter_class=argparse.RawTextHelpFormatter)
-    parser.set_defaults(run=command.run)
+
+    parser.set_defaults(run=lambda args: command.run(parser, args))
     command.setup(parser)
+
+    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+        parser.add_argument(
+            "--all-help", action=_RecursiveHelpAction,
+            help="show help recurisvely and exit")
+
     return parser
+
+
+#
+# Whether to add a flag to that recursively prints help for all parsers that
+# have subparsers
+#
+_ADD_RECURSIVE_HELP_FLAGS = True
 
 
 def main():
     '''Executes the `voxel51` tool with the given command-line args.'''
     parser = _register_main_command(Voxel51Command, version=voxc.VERSION_LONG)
-
-    if len(sys.argv) == 1:
-        parser.print_help()
-        return
-
     args = parser.parse_args()
     args.run(args)

@@ -5,4 +5,6 @@ Voxel51 Platform API Python Client Library
    :maxdepth: 2
 
    README
+   CLI
+   APPLICATIONS
    voxel51

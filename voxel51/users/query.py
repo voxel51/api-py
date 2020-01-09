@@ -22,6 +22,8 @@ try:
 except ImportError:
     from urllib import urlencode  # Python 2
 
+from voxel51.users.api import APIError
+
 
 class BaseQuery(object):
     '''Base class for API queries.
@@ -37,8 +39,11 @@ class BaseQuery(object):
         limit (int): the maximum number of records to return
     '''
 
-    def __init__(self, supported_fields):
-        self._supported_fields = supported_fields
+    # Supported query fields. Subclasses must set this
+    SUPPORTED_FIELDS = None
+
+    def __init__(self):
+        '''Initializes the BaseQuery.'''
         self.fields = []
         self.search = []
         self.sort = None
@@ -80,7 +85,7 @@ class BaseQuery(object):
         Returns:
             the updated query instance
         '''
-        self.add_fields(self._supported_fields)
+        self.add_fields(self.SUPPORTED_FIELDS)
         return self
 
     def add_search(self, field, search_str):
@@ -96,8 +101,9 @@ class BaseQuery(object):
         Returns:
             the updated query instance
         '''
-        if self._is_supported_field(field):
-            self.search.append("%s:%s" % (field, search_str))
+        if not self._is_supported_field(field):
+            raise APIError("Invalid search parameter %s" % field, 400)
+        self.search.append("%s:%s" % (field, search_str))
         return self
 
     def add_search_or(self, field, search_strs):
@@ -210,7 +216,7 @@ class BaseQuery(object):
         return urlencode(self.to_dict())
 
     def _is_supported_field(self, field):
-        return field in self._supported_fields
+        return field in self.SUPPORTED_FIELDS
 
 
 class AnalyticsQuery(BaseQuery):
@@ -221,9 +227,9 @@ class AnalyticsQuery(BaseQuery):
 
     Attributes:
         fields (list): the list of fields to include in the returned records.
-            The supported query fields are `id`, `name`, `version`,
-            `upload_date`, `description`, `scope`, `supports_cpu`,
-            `supports_gpu`, and `pending`
+            The supported query fields are `id`, `name`, `version`, `scope`,
+            `supports_cpu`, `supports_gpu`, `pending`, `upload_date`, and
+            `description`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
@@ -232,11 +238,13 @@ class AnalyticsQuery(BaseQuery):
             in the query response. By default, this is False
     '''
 
+    SUPPORTED_FIELDS = [
+        "id", "name", "version", "scope", "supports_cpu", "supports_gpu",
+        "pending", "upload_date", "description"]
+
     def __init__(self):
         '''Initializes an AnalyticsQuery instance.'''
-        super(AnalyticsQuery, self).__init__([
-            "id", "name", "version", "upload_date", "description",
-            "scope", "supports_cpu", "supports_gpu", "pending"])
+        super(AnalyticsQuery, self).__init__()
         self.all_versions = False
 
     def set_all_versions(self, all_versions):
@@ -261,19 +269,17 @@ class DataQuery(BaseQuery):
 
     Attributes:
         fields (list): the list of fields to include in the returned records.
-            The supported query fields are `id`, `name`, `encoding`, `type`,
-            `size`, `upload_date`, and `expiration_date`
+            The supported query fields are `id`, `name`, `size`, `type`,
+            `upload_date`, `expiration_date`, and `encoding`
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
         limit (int): the maximum number of records to return
     '''
 
-    def __init__(self):
-        '''Initializes a DataQuery instance.'''
-        super(DataQuery, self).__init__([
-            "id", "name", "encoding", "type", "size", "upload_date",
-            "expiration_date"])
+    SUPPORTED_FIELDS = [
+        "id", "name", "size", "type", "upload_date", "expiration_date",
+        "encoding"]
 
 
 class JobsQuery(BaseQuery):
@@ -285,18 +291,17 @@ class JobsQuery(BaseQuery):
     Attributes:
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `state`, `archived`,
-            `upload_date`, `analytic_id`, `auto_start`, `compute_mode`,
-            `start_date`, `completion_date`, `fail_date`, `failure_type`, and
-            `expiration_date`
+            `upload_date`, `expiration_date`, `analytic_id`, `compute_mode`,
+            `auto_start`, `start_date`, `completion_date`, `fail_date`, and
+            `failure_type`
+
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
         offset (int): an offset index for the returned records list
         limit (int): the maximum number of records to return
     '''
 
-    def __init__(self):
-        '''Initializes a JobsQuery instance.'''
-        super(JobsQuery, self).__init__([
-            "id", "name", "state", "archived", "upload_date", "analytic_id",
-            "auto_start", "compute_mode", "start_date", "completion_date",
-            "fail_date", "failure_type", "expiration_date"])
+    SUPPORTED_FIELDS = [
+        "id", "name", "state", "archived", "upload_date", "expiration_date",
+        "analytic_id", "compute_mode", "auto_start", "start_date",
+        "completion_date", "fail_date", "failure_type"]

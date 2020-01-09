@@ -13,7 +13,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import *
-from future.utils import itervalues
 # pragma pylint: enable=redefined-builtin
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
@@ -40,6 +39,13 @@ class AnalyticType(object):
 
     PLATFORM = "PLATFORM"
     IMAGE_TO_VIDEO = "IMAGE_TO_VIDEO"
+
+
+class AnalyticImageType(object):
+    '''Enum describing the possible types of analytic images.'''
+
+    CPU = "CPU"
+    GPU = "GPU"
 
 
 class API(object):
@@ -247,14 +253,14 @@ class API(object):
         Args:
             analytic_id (str): the analytic ID
             image_tar_path (str): the path to the image tarfile
-            image_type (str): the image computation type, "cpu" or "gpu"
+            image_type (AnalyticImageType): the type of analytic image
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(
             self.base_url, "analytics", analytic_id, "images")
-        params = {"type": image_type.lower()}
+        params = {"type": image_type}
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
         with open(image_tar_path, "rb") as df:
@@ -345,7 +351,8 @@ class API(object):
         return _parse_json_response(res)["data"]
 
     def post_data_as_url(
-            self, url, filename, mime_type, size, ttl, encoding=None):
+            self, url, filename, mime_type, size, expiration_date,
+            encoding=None):
         '''Posts data via URL.
 
         The data is not accessed nor uploaded at this time. Instead, the
@@ -353,17 +360,21 @@ class API(object):
 
         The URL must be accessible via an HTTP GET request.
 
+        The URL (typically a signed URL) should be accessible until the
+        expiration date that you specify. Note that the expiration date of data
+        posted via this route cannot be updated later.
+
         Args:
             url (str): a URL (typically a signed URL) that can be accessed
                 publicly via an HTTP GET request
             filename (str): the filename of the data
             mime_type (str): the MIME type of the data
             size (int): the size of the data, in bytes
-            ttl (datetime|str, optional): a TTL for the data. If none is
-                provided, the default TTL is used. If a string is provided, it
-                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
-                If a non-UTC timezone is included in the datetime or string, it
-                will be respected
+            expiration_date (datetime|str, optional): the expiration date for
+                the URL you provided. If a string is provided, it must be in
+                ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC
+                timezone is included in the datetime or string, it will be
+                respected
             encoding (str, optional): an optional encoding of the file
 
         Returns:
@@ -378,7 +389,7 @@ class API(object):
             "filename": filename,
             "mimetype": mime_type,
             "size": size,
-            "data_ttl": _parse_datetime(ttl),
+            "data_ttl": _parse_datetime(expiration_date),
         }
         if encoding:
             data["encoding"] = encoding
@@ -1100,14 +1111,6 @@ class API(object):
         res = self._requests.post(endpoint, headers=self._header, json=body)
         _validate_response(res)
         statuses = _parse_json_response(res)["responses"]
-
-        # Cleanup statuses and add `success` field
-        for status in itervalues(statuses):
-            success = ("error" not in status)
-            if success:
-                status.clear()
-            status["success"] = success
-
         return statuses
 
     def _stream_download(self, url, output_path):
