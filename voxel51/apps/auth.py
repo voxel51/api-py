@@ -27,7 +27,10 @@ import voxel51.users.utils as voxu
 logger = logging.getLogger(__name__)
 
 
-TOKEN_ENVIRON_VAR = "VOXEL51_APP_TOKEN"
+TOKEN_ENV_VAR = "VOXEL51_APP_TOKEN"
+PRIVATE_KEY_ENV_VAR = "VOXEL51_APP_PRIVATE_KEY"
+BASE_API_URL_ENV_VAR = "VOXEL51_APP_BASE_URL"
+
 KEY_HEADER = "x-voxel51-application"
 USER_HEADER = "x-voxel51-application-user"
 TOKEN_PATH = os.path.join(
@@ -62,27 +65,29 @@ def deactivate_application_token():
 
 
 def get_active_application_token_path():
-    '''Gets the path to the active application token.
+    '''Gets the path to the active application token, if any.
 
     If the ``VOXEL51_APP_TOKEN`` environment variable is set, that path is
     used. Otherwise, ``~/.voxel51/app-token.json`` is used.
 
-    Returns:
-        the path to the active application token
+    Note that if the ``VOXEL51_APP_PRIVATE_KEY`` environment variable is set,
+    this function will always return None, since that environment variable
+    always takes precedence over other methods for locating the active token.
 
-    Raises:
-        :class:`ApplicationTokenError` if no application token was found
+    Returns:
+        the path to the active application token, or None if no token was found
     '''
-    token_path = os.environ.get(TOKEN_ENVIRON_VAR, None)
+    private_key = os.environ.get(PRIVATE_KEY_ENV_VAR, None)
+    if private_key:
+        return None
+
+    token_path = os.environ.get(TOKEN_ENV_VAR, None)
     if token_path is not None:
         if not os.path.isfile(token_path):
             raise ApplicationTokenError(
-                "No application token found at '%s=%s'" %
-                (TOKEN_ENVIRON_VAR, token_path))
+                "No file found at '%s=%s'" % (TOKEN_ENV_VAR, token_path))
     elif os.path.isfile(TOKEN_PATH):
         token_path = TOKEN_PATH
-    else:
-        raise ApplicationTokenError("No application token found")
 
     return token_path
 
@@ -90,12 +95,18 @@ def get_active_application_token_path():
 def load_application_token(token_path=None):
     '''Loads the active application token.
 
+    The following strategy is used to locate the active API token:
+
+        (1) Use the provided ``token_path``
+        (2) Use the ``VOXEL51_APP_PRIVATE_KEY`` and ``VOXEL51_APP_BASE_URL``
+            environment variables
+        (3) Use the ``VOXEL51_APP_TOKEN`` environment variable
+        (4) Load the active token from ``~/.voxel51/app-token.json``
+
     Args:
-        token_path (str, optional): the path to an :class:`ApplicationToken`
-            JSON file. If no path is provided, the ``VOXEL51_APP_TOKEN``
-            environment variable is checked and, if set, the token is loaded
-            from that path. Otherwise, it is loaded from
-            ``~/.voxel51/app-token.json``
+        token_path (str, optional): the path to a :class:`ApplicationToken`
+            JSON file. If no path is provided, the active token is loaded using
+            the strategy described above
 
     Returns:
         an :class:`ApplicationToken` instance
@@ -103,9 +114,27 @@ def load_application_token(token_path=None):
     Raises:
         :class:`ApplicationTokenError` if no valid application token was found
     '''
-    if token_path is None:
-        token_path = get_active_application_token_path()
-    elif not os.path.isfile(token_path):
+    # Load token from provided path
+    if token_path is not None:
+        return _load_application_token_from_path(token_path)
+
+    # Load token from environment variables, if possible
+    private_key = os.environ.get(PRIVATE_KEY_ENV_VAR, None)
+    base_api_url = os.environ.get(BASE_API_URL_ENV_VAR, None)
+    if private_key:
+        return ApplicationToken.from_private_key(
+            private_key, base_api_url=base_api_url)
+
+    # Try to load token from path
+    token_path = get_active_application_token_path()
+    if token_path is not None:
+        return _load_application_token_from_path(token_path)
+
+    raise ApplicationTokenError("No application token found")
+
+
+def _load_application_token_from_path(token_path):
+    if not os.path.isfile(token_path):
         raise ApplicationTokenError(
             "No application token found at '%s'" % token_path)
 
@@ -117,7 +146,14 @@ def load_application_token(token_path=None):
 
 
 class ApplicationToken(Token):
-    '''A class encapsulating an application's API authentication token.'''
+    '''A class encapsulating an application's API authentication token.
+
+    Attributes:
+        base_api_url (str): the base URL of the API for the token
+        creation_date (str): the creation date of the token
+        id (str): the ID of the token
+        private_key (str): the private key of the token
+    '''
 
     def get_header(self, username=None):
         '''Returns a header dictionary for authenticating requests with
@@ -130,7 +166,7 @@ class ApplicationToken(Token):
         Returns:
             a header dictionary
         '''
-        header = {KEY_HEADER: self._private_key}
+        header = {KEY_HEADER: self.private_key}
         if username:
             header[USER_HEADER] = username
         return header
