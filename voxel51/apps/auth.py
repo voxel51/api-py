@@ -135,8 +135,7 @@ def load_application_token(token_path=None):
 
 def _load_application_token_from_path(token_path):
     if not os.path.isfile(token_path):
-        raise ApplicationTokenError(
-            "No application token found at '%s'" % token_path)
+        raise ApplicationTokenError("No file found at '%s'" % token_path)
 
     try:
         return ApplicationToken.from_json(token_path)

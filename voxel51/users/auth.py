@@ -132,7 +132,7 @@ def load_token(token_path=None):
 
 def _load_token_from_path(token_path):
     if not os.path.isfile(token_path):
-        raise TokenError("No API token found at '%s'" % token_path)
+        raise TokenError("No file found at '%s'" % token_path)
 
     try:
         return Token.from_json(token_path)
