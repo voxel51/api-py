@@ -74,8 +74,9 @@ class API(object):
 
         Args:
             token (voxel51.users.auth.Token, optional): a
-                :class:`voxel51.users.auth.Token` to use. If none, the strategy
-                described above is used to locate the active token
+                :class:`voxel51.users.auth.Token` to use. If no token is
+                provided, the strategy described above is used to locate the
+                active token
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''

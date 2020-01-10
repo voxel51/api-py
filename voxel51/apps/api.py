@@ -60,8 +60,9 @@ class ApplicationAPI(API):
 
         Args:
             token (voxel51.apps.auth.ApplicationToken, optional): an optional
-                :class:`voxel51.apps.auth.ApplicationToken` to use. If none,
-                the strategy described above is used to locate the active token
+                :class:`voxel51.apps.auth.ApplicationToken` to use. If no
+                token is provided, the strategy described above is used to
+                locate the active token
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''
