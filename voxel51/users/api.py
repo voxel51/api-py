@@ -51,6 +51,16 @@ class AnalyticImageType(object):
 class API(object):
     '''Main class for managing a session with the Voxel51 Platform API.
 
+    Using this API requires a valid API token. The following strategy is used
+    to locate your active API token:
+
+        (1) Use the :class:`voxel51.users.auth.Token` provided when
+            constructing the :class:`API` instance
+        (2) Use the ``VOXEL51_API_PRIVATE_KEY`` and ``VOXEL51_API_BASE_URL``
+            environment variables
+        (3) Use the ``VOXEL51_API_TOKEN`` environment variable
+        (4) Load the active token from ``~/.voxel51/api-token.json``
+
     Attributes:
         base_url (string): the base URL of the API
         token (voxel51.users.auth.Token): the authentication token for this
@@ -63,11 +73,9 @@ class API(object):
         '''Creates an API instance.
 
         Args:
-            token (voxel51.users.auth.Token, optional): a Token to use. If no
-                token is provided, the ``VOXEL51_API_TOKEN`` environment
-                variable is checked and, if set, the token is loaded from that
-                path. Otherwise, the token is loaded from
-                ``~/.voxel51/api-token.json``
+            token (voxel51.users.auth.Token, optional): a
+                :class:`voxel51.users.auth.Token` to use. If none, the strategy
+                described above is used to locate the active token
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''
