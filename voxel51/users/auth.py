@@ -118,8 +118,8 @@ def load_token(token_path=None):
 
     # Load token from environment variables, if possible
     private_key = os.environ.get(PRIVATE_KEY_ENV_VAR, None)
-    base_api_url = os.environ.get(BASE_API_URL_ENV_VAR, None)
     if private_key:
+        base_api_url = os.environ.get(BASE_API_URL_ENV_VAR, None)
         return Token.from_private_key(private_key, base_api_url=base_api_url)
 
     # Try to load token from path
