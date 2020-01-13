@@ -11,6 +11,32 @@ from setuptools import setup, find_packages
 import voxel51.constants as voxc
 
 
+setup_requires = [
+    "future",
+]
+
+install_requires = [
+    "argcomplete",
+    "future",
+    "python-dateutil",
+    "requests",
+    "requests-toolbelt",
+    "six",
+    "tabulate",
+    "tzlocal",
+    'futures; python_version<"3"',
+]
+
+extras_require = {
+    "dev": [
+        "m2r",
+        "pycodestyle",
+        "pylint",
+        "sphinx",
+        "sphinxcontrib-napoleon",
+    ]
+}
+
 setup(
     name=voxc.NAME,
     version=voxc.VERSION,
@@ -26,4 +52,8 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     scripts=["voxel51/cli/voxel51"],
+    setup_requires=setup_requires,
+    install_requires=install_requires,
+    extras_require=extras_require,
+    python_requires="~2.7, >=3",
 )
