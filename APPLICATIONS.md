@@ -39,8 +39,15 @@ variable in your shell to point to your API token file:
 export VOXEL51_APP_TOKEN=/path/to/your/app-token.json
 ```
 
-Alternatively, you can permanently activate an application token by executing
-the following commands:
+Alternatively, you can directly set the `VOXEL51_APP_PRIVATE_KEY` environment
+variable in your shell to the private key of your API token:
+
+```shell
+export VOXEL51_APP_PRIVATE_KEY=XXXXXXXX
+```
+
+Finally, you can permanently activate an application token by executing the
+following commands:
 
 ```py
 from voxel51.apps.auth import activate_application_token

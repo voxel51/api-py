@@ -28,7 +28,14 @@ to your API token file:
 export VOXEL51_API_TOKEN=/path/to/your/api-token.json
 ```
 
-Alternatively, you can permanently activate a token by executing the following
+Alternatively, you can directly set the `VOXEL51_API_PRIVATE_KEY` environment
+variable in your shell to the private key of your API token:
+
+```shell
+export VOXEL51_API_PRIVATE_KEY=XXXXXXXX
+```
+
+Finally, you can permanently activate a token by executing the following
 commands:
 
 ```shell
@@ -43,9 +50,10 @@ To show information about your active token, you can execute:
 ```shell
 $ voxel51 auth show
 API token
--------------  ------------------------------------
-id             2649113c-e5ca-4008-a2f3-a24a9db806b9
+-------------  ---------------------------------------------------
+token id       2649113c-e5ca-4008-a2f3-a24a9db806b9
 creation date  2018-11-30 01:12:28 EST
+private key    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyYW5kIj ...
 base api url   https://api.voxel51.com
 path           /path/to/your/api-token.json
 ```
