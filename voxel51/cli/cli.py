@@ -1704,15 +1704,9 @@ class StatusCommand(Command):
 
 def _print_platform_status_info(status, token):
     records = []
-    for service, is_up in iteritems(status):
-        if is_up:
-            msg = "system operational!"
-        elif token.base_api_url == "https://api.voxel51.com":
-            msg = "system down; see https://status.voxel51.com for more info"
-        else:
-            msg = "system down; contact your sys admin for more info"
-
-        records.append((service, is_up, msg))
+    for service, status_item in iteritems(status):
+        records.append(
+            (service, status_item['operational'], status_item['message']))
 
     table_str = tabulate(
         records, headers=["service", "operational", "message"],
