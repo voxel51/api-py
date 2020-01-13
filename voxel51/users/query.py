@@ -304,4 +304,4 @@ class JobsQuery(BaseQuery):
     SUPPORTED_FIELDS = [
         "id", "name", "state", "archived", "upload_date", "expiration_date",
         "analytic_id", "compute_mode", "auto_start", "start_date",
-        "completion_date", "fail_date", "failure_type"]
+        "completion_date", "fail_date", "failure_type", "expired"]
