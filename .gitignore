@@ -11,3 +11,5 @@ __pycache__
 !/docs/source/README.rst
 !/docs/source/CLI.rst
 !/docs/source/APPLICATIONS.rst
+
+poetry.lock
