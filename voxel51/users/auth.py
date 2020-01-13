@@ -33,7 +33,7 @@ BASE_API_URL_ENV_VAR = "VOXEL51_API_BASE_URL"
 TOKEN_PATH = os.path.join(
     os.path.expanduser("~"), ".voxel51", "api-token.json")
 
-DEAFULT_BASE_API_URL = "https://api.voxel51.com"
+DEFAULT_BASE_API_URL = "https://api.voxel51.com"
 HELP_URL = "https://voxel51.com/docs/api/?python#authentication"
 
 
@@ -202,7 +202,7 @@ class Token(object):
         return cls({
             "access_token": {
                 "private_key": private_key,
-                "base_api_url": base_api_url or DEAFULT_BASE_API_URL,
+                "base_api_url": base_api_url or DEFAULT_BASE_API_URL,
             }
         })
 
@@ -210,7 +210,7 @@ class Token(object):
     def _parse_base_api_url(access_token):
         base_api_url = access_token.get("base_api_url", None)
         if base_api_url is None:
-            base_api_url = DEAFULT_BASE_API_URL
+            base_api_url = DEFAULT_BASE_API_URL
             logger.warning(
                 "No base API URL found in token; defaulting to '%s'. To "
                 "resolve this message, download a new API token from the "
