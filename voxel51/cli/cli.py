@@ -1706,7 +1706,7 @@ def _print_platform_status_info(status, token):
     records = []
     for service, status_item in iteritems(status):
         records.append(
-            (service, status_item['operational'], status_item['message']))
+            (service, status_item["operational"], status_item["message"]))
 
     table_str = tabulate(
         records, headers=["service", "operational", "message"],
