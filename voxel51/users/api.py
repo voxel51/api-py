@@ -52,7 +52,7 @@ class API(object):
     '''Main class for managing a session with the Voxel51 Platform API.
 
     Using this API requires a valid API token. The following strategy is used
-    to locate your active API token:
+    to locate your active API token (in order of precedence):
 
         (1) Use the :class:`voxel51.users.auth.Token` provided when
             constructing the :class:`API` instance

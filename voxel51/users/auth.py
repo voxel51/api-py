@@ -93,7 +93,8 @@ def get_active_token_path():
 def load_token(token_path=None):
     '''Loads the active API token.
 
-    The following strategy is used to locate the active API token:
+    The following strategy is used to locate the active API token (in order of
+    precedence):
 
         (1) Use the provided ``token_path``
         (2) Use the ``VOXEL51_API_PRIVATE_KEY`` and ``VOXEL51_API_BASE_URL``

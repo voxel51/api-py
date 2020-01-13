@@ -36,7 +36,7 @@ class ApplicationAPI(API):
     must first activate a user via :func:`ApplicationAPI.with_user`.
 
     Using this API requires a valid application token. The following strategy
-    is used to locate your active application token:
+    is used to locate your active application token (in order of precedence):
 
         (1) Use the :class:`voxel51.apps.auth.ApplicationToken` provided when
             constructing the :class:`ApplicationAPI` instance
