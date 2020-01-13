@@ -6,54 +6,45 @@ Installs the voxel51-api-py package.
 | `voxel51.com <https://voxel51.com/>`_
 |
 '''
-from json import load
-from os import path
 from setuptools import setup, find_packages
 
 
-install_requires = [
-    "argcomplete",
-    "future",
-    "python-dateutil",
-    "requests",
-    "requests-toolbelt",
-    "six",
-    "tabulate",
-    "tzlocal",
-    'futures; python_version<"3"',
-]
-
-extras_require = {
-    "dev": [
-        "m2r",
-        "pycodestyle",
-        "pylint",
-        "sphinx",
-        "sphinxcontrib-napoleon",
-    ]
-}
-
-here = path.abspath(path.dirname(__file__))
-
-with open(path.join(here, "voxel51", "version.json")) as json_file:
-    about = load(json_file)
-
+# @note version info should be kept in-sync with `voxel51/version.json`
 setup(
-    name=about["name"],
-    version=about["version"],
-    description=about["description"],
-    author=about["author"],
-    author_email=about["contact"],
-    url=about["url"],
-    license=about["license"],
+    name="voxel51-api-py",
+    version="0.1.0",
+    description="Python client library for the Voxel51 Platform API",
+    author="Voxel51, Inc.",
+    contact="info@voxel51.com",
+    url="https://github.com/voxel51/api-py",
+    license="BSD-4-Clause",
     packages=find_packages(),
+    include_package_data=True,
     classifiers=[
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
     scripts=["voxel51/cli/voxel51"],
-    install_requires=install_requires,
-    extras_require=extras_require,
+    install_requires=[
+        "argcomplete",
+        "future",
+        'futures; python_version<"3"',
+        "python-dateutil",
+        "requests",
+        "requests-toolbelt",
+        "six",
+        "tabulate",
+        "tzlocal",
+    ],
+    extras_require={
+        "dev": [
+            "m2r",
+            "pycodestyle",
+            "pylint",
+            "sphinx",
+            "sphinxcontrib-napoleon",
+        ]
+    },
     python_requires=">=2.7",
 )
