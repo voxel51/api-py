@@ -55,5 +55,5 @@ setup(
     setup_requires=setup_requires,
     install_requires=install_requires,
     extras_require=extras_require,
-    python_requires="~2.7, >=3",
+    python_requires=">=2.7",
 )
