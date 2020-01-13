@@ -6,14 +6,10 @@ Installs the voxel51-api-py package.
 | `voxel51.com <https://voxel51.com/>`_
 |
 '''
+from json import load
+from os import path
 from setuptools import setup, find_packages
 
-import voxel51.constants as voxc
-
-
-setup_requires = [
-    "future",
-]
 
 install_requires = [
     "argcomplete",
@@ -37,14 +33,19 @@ extras_require = {
     ]
 }
 
+here = path.abspath(path.dirname(__file__))
+
+with open(path.join(here, "voxel51", "version.json")) as json_file:
+    about = load(json_file)
+
 setup(
-    name=voxc.NAME,
-    version=voxc.VERSION,
-    description=voxc.DESCRIPTION,
-    author=voxc.AUTHOR,
-    author_email=voxc.CONTACT,
-    url=voxc.URL,
-    license=voxc.LICENSE,
+    name=about["name"],
+    version=about["version"],
+    description=about["description"],
+    author=about["author"],
+    author_email=about["contact"],
+    url=about["url"],
+    license=about["license"],
     packages=find_packages(),
     classifiers=[
         "Operating System :: OS Independent",
@@ -52,7 +53,6 @@ setup(
         "Programming Language :: Python :: 3",
     ],
     scripts=["voxel51/cli/voxel51"],
-    setup_requires=setup_requires,
     install_requires=install_requires,
     extras_require=extras_require,
     python_requires=">=2.7",
