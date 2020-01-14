@@ -47,5 +47,4 @@ setup(
         ]
     },
     python_requires=">=2.7",
-    include_package_data=True,
 )
