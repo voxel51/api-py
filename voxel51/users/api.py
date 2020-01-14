@@ -181,7 +181,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "analytics")
         res = self._requests.get(
-            endpoint, headers=self._header, params=analytics_query.to_dict())
+            endpoint, headers=self._header, json=analytics_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -325,7 +325,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "data")
         res = self._requests.get(
-            endpoint, headers=self._header, params=data_query.to_dict())
+            endpoint, headers=self._header, json=data_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -595,7 +595,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs")
         res = self._requests.get(
-            endpoint, headers=self._header, params=jobs_query.to_dict())
+            endpoint, headers=self._header, json=jobs_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
 
