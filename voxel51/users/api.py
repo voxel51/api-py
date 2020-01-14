@@ -293,6 +293,23 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    def batch_get_analytic_details(self, analytic_ids):
+        '''Gets details about the analytics with the given IDs.
+
+        Args:
+            analytic_ids (list): the analytic IDs
+
+        Returns:
+            a dictionary mapping analytic IDs to dictionaries indicating
+                whether the analytic was successfully retrieved. The ``status``
+                field will be set to ``True`` on success or ``False`` on
+                failure
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("analytics", "details", analytic_ids)
+
     # DATA ####################################################################
 
     def list_data(self):
@@ -510,6 +527,22 @@ class API(object):
         endpoint = voxu.urljoin(self.base_url, "data", data_id)
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
+
+    def batch_get_data_details(self, data_ids):
+        '''Gets details about the data with the given IDs.
+
+        Args:
+            data_ids (list): the data IDs
+
+        Returns:
+            a dictionary mapping data IDs to dictionaries indicating whether
+                the data was successfully retrieved. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("data", "details", data_ids)
 
     def batch_update_data_ttl(self, data_ids, days=None, expiration_date=None):
         '''Updates the expiration dates of the data with the given IDs.
@@ -971,6 +1004,22 @@ class API(object):
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "kill")
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
+
+    def batch_get_job_details(self, job_ids):
+        '''Gets details about the jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Returns:
+            a dictionary mapping job IDs to dictionaries indicating whether
+                the job was successfully retrieved. The ``status`` field will
+                be set to ``True`` on success or ``False`` on failure
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "details", job_ids)
 
     def batch_start_jobs(self, job_ids):
         '''Starts the jobs with the given IDs.
