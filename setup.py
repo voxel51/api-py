@@ -29,13 +29,14 @@ setup(
     install_requires=[
         "argcomplete",
         "future",
-        'futures; python_version<"3"',
         "python-dateutil",
         "requests",
         "requests-toolbelt",
         "six",
         "tabulate",
         "tzlocal",
+        'futures; python_version<"3"',
+        'importlib_metadata; python_version<"3.8"',
     ],
     extras_require={
         "dev": [
