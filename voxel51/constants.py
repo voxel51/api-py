@@ -16,24 +16,19 @@ from builtins import *
 # pragma pylint: enable=wildcard-import
 
 import os
-from sys import version_info
 
-if version_info >= (3,8):
-    from importlib.metadata import metadata
-else:
-    from importlib_metadata import metadata
+try:
+    from importlib.metadata import metadata  # Python 3.8
+except ModuleNotFoundError:
+    from importlib_metadata import metadata  # Python < 3.8
 
-#
-# IMPORTANT: this module can't import other modules from this package!
-#
 
-# Package metadata
-PACKAGE_METADATA = metadata("voxel51-api-py")
-NAME = PACKAGE_METADATA["name"]
-VERSION = PACKAGE_METADATA["version"]
-DESCRIPTION = PACKAGE_METADATA["description"]
-AUTHOR = PACKAGE_METADATA["author"]
-CONTACT = PACKAGE_METADATA["contact"]
-URL = PACKAGE_METADATA["url"]
-LICENSE = PACKAGE_METADATA["license"]
+_META = metadata("voxel51-api-py")
+NAME = _META["name"]
+VERSION = _META["version"]
+DESCRIPTION = _META["description"]
+AUTHOR = _META["author"]
+CONTACT = _META["contact"]
+URL = _META["url"]
+LICENSE = _META["license"]
 VERSION_LONG = "%s v%s, %s" % (NAME, VERSION, AUTHOR)
