@@ -9,7 +9,6 @@ Installs the voxel51-api-py package.
 from setuptools import setup, find_packages
 
 
-# @note version info should be kept in-sync with `voxel51/version.json`
 setup(
     name="voxel51-api-py",
     version="0.1.0",
