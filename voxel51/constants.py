@@ -15,27 +15,18 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
-import json
-import os
-
-#
-# IMPORTANT: this module can't import other modules from this package!
-#
+try:
+    from importlib.metadata import metadata  # Python 3.8
+except ModuleNotFoundError:
+    from importlib_metadata import metadata  # Python < 3.8
 
 
-# Paths and directories
-VOXEL51_DIR = os.path.abspath(os.path.dirname(__file__))
-VERSION_JSON_PATH = os.path.join(VOXEL51_DIR, "version.json")
-
-
-# Version
-with open(VERSION_JSON_PATH, "rt") as f:
-    _VER = json.load(f)
-NAME = _VER["name"]
-VERSION = _VER["version"]
-DESCRIPTION = _VER["description"]
-AUTHOR = _VER["author"]
-CONTACT = _VER["contact"]
-URL = _VER["url"]
-LICENSE = _VER["license"]
+_META = metadata("voxel51-api-py")
+NAME = _META["name"]
+VERSION = _META["version"]
+DESCRIPTION = _META["description"]
+AUTHOR = _META["author"]
+CONTACT = _META["contact"]
+URL = _META["url"]
+LICENSE = _META["license"]
 VERSION_LONG = "%s v%s, %s" % (NAME, VERSION, AUTHOR)

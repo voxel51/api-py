@@ -8,22 +8,43 @@ Installs the voxel51-api-py package.
 '''
 from setuptools import setup, find_packages
 
-import voxel51.constants as voxc
-
 
 setup(
-    name=voxc.NAME,
-    version=voxc.VERSION,
-    description=voxc.DESCRIPTION,
-    author=voxc.AUTHOR,
-    author_email=voxc.CONTACT,
-    url=voxc.URL,
-    license=voxc.LICENSE,
+    name="voxel51-api-py",
+    version="0.1.0",
+    description="Python client library for the Voxel51 Platform API",
+    author="Voxel51, Inc.",
+    contact="info@voxel51.com",
+    url="https://github.com/voxel51/api-py",
+    license="BSD-4-Clause",
     packages=find_packages(),
+    include_package_data=True,
     classifiers=[
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
     scripts=["voxel51/cli/voxel51"],
+    install_requires=[
+        "argcomplete",
+        "future",
+        "python-dateutil",
+        "requests",
+        "requests-toolbelt",
+        "six",
+        "tabulate",
+        "tzlocal",
+        'futures; python_version<"3"',
+        'importlib_metadata; python_version<"3.8"',
+    ],
+    extras_require={
+        "dev": [
+            "m2r",
+            "pycodestyle",
+            "pylint",
+            "sphinx",
+            "sphinxcontrib-napoleon",
+        ]
+    },
+    python_requires=">=2.7",
 )

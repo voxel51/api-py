@@ -16,11 +16,11 @@ To install the library, first clone it:
 git clone https://github.com/voxel51/api-py
 ```
 
-and then run the install script:
+and then install via pip:
 
 ```shell
 cd api-py
-bash install.bash
+pip install -e .
 ```
 
 
