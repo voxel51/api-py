@@ -786,7 +786,7 @@ class UploadJobsCommand(Command):
     def run(parser, args):
         api = API()
 
-        request = JobRequest.from_json(args.path)
+        request = JobRequest.from_json(args.request)
         metadata = api.upload_job_request(
             request, args.name, auto_start=args.auto_start)
         job_id = metadata["id"]
