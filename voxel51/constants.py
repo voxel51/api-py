@@ -15,8 +15,6 @@ from builtins import *
 # pragma pylint: enable=unused-wildcard-import
 # pragma pylint: enable=wildcard-import
 
-import os
-
 try:
     from importlib.metadata import metadata  # Python 3.8
 except ModuleNotFoundError:
