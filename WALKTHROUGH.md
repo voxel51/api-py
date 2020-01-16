@@ -1,7 +1,7 @@
 # Client Library Walkthrough
 
 This guide will cover step-by-step how to utilize the full power of the Voxel51
-Platform using this handy Python Client Library.
+Platform using this handy Python Client Library and Command Line Interface (CLI)
 
 <img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
 
@@ -42,11 +42,19 @@ cd api-py
 pip install -e .
 ```
 
+Check your installation with the CLI:
+
+```sh
+voxel51 --version
+```
+
 ### Optional Resources
 
-Sample video [download](https://drive.google.com/open?id=12wvTci0sWljhNQKT-Wld2Edzhg893yNh)
+Sample video [Download](https://drive.google.com/open?id=12wvTci0sWljhNQKT-Wld2Edzhg893yNh)  
+Copy this file to a location local to where you will be following
+this walkthrough.
 
-## Using the Client Library
+## Using the Client Library and CLI
 
 The client library allows a Platform User to perform actions, view data,
 perform queries, request jobs, download output and more! All actions on the
@@ -69,9 +77,19 @@ In order to use the API, you must activate a token, which can be done in a
 number of ways. For a full description of the available methods, see the
 [API Documentation](https://voxel51.com/docs/api/?python#authentication).
 
-In this walkthrough, we'll activate a token via the `activate_token()` method,
-which copies it to your `~/.voxel51/` folder on your machine so that subsequent
-API sessions can automatically locate it.
+In this walkthrough, we will activate a token with the CLI.
+
+```sh
+voxel51 auth activate api-token.json
+```
+
+Review your activated token with:
+
+```sh
+voxel51 auth show
+```
+
+There are other ways to activate a token, here is an example using the library:
 
 ```python
 from voxel51.users.auth import activate_token
@@ -79,6 +97,7 @@ from voxel51.users.auth import activate_token
 activate_token("/path/to/your/api-token.json")
 ```
 
+See more ways to authenticate with the [API Documentation](https://voxel51.com/docs/api/?python#authentication).
 
 ### Step 2: Create an API instance
 
@@ -97,6 +116,29 @@ print(api.list_data()) # See what data you have uploaded
 print(api.list_jobs()) # See what jobs you have requested
 ```
 
+The CLI uses the same underlying logic to perform the same actions:
+
+```sh
+voxel51 analytics list
+voxel51 data list
+voxel51 jobs list
+```
+
+Any listing, queries, and basic API operations are supported via the CLI.
+
+#### Optional note: Pretty printing
+
+If you choose to follow along with the python client library, you may want to 
+setup pretty printing:
+
+```python
+import pprint
+pp = pprint.PrettyPrinter(indent=2).pprint
+```
+
+Call `pp()` on anything you wish to print, as there will be nested objects to 
+unpack and investigate.
+
 ### Step 3: Data
 
 [Docs](https://voxel51.com/docs/api/?python#data)
@@ -105,7 +147,6 @@ Uploading our first Data:
 
 ```python
 data = api.upload_data("video1.mp4")
-print(data)
 data_id = data["id"]
 ```
 
@@ -117,7 +158,7 @@ Data ID's can always be found by listing or querying our data.
 
 ```python
 # Show all Data for our user
-print(api.list_data())
+api.list_data()
 ```
 
 Now with queries:
@@ -142,7 +183,7 @@ data_id = results["data"][0]["id"] # Get the data ID of the first result
 Here we are querying our Data for the most recent data we uploaded by name.
 There is plenty more we can do with queries, for Data, Jobs, and Analytics!
 
-### TTL and expiration
+#### TTL and expiration
 
 All Data will expire; this expiration time can be adjusted at upload time or
 updated at any later time. TTL (Time to live) parameters accept ISO date
@@ -155,15 +196,18 @@ date_to_expire = datetime.today() + timedelta(days=3)
 
 data_id = api.upload_data("video1.mp4", ttl=date_to_expire)["id"]
 
+query = DataQuery()
+query.add_fields(["id", "name", "expiration_date"])
+query.add_search("id", data)
+data = api.query_data(query)["data"][0]
+print(data)
+
 # Or update TTL on data already uploaded!
 
 api.update_data_ttl(data_id, days=5)
 
-query = DataQuery()
-query.add_fields(["id", "name", "expiration_date"])
-query.sort_by("expiration_date", descending=True)
-results = api.query_data(query)
-print(results)
+data = api.query_data(query)["data"][0]
+print(data)
 ```
 
 Special note: Updating the expiration date to a date in the past will result in
@@ -175,6 +219,8 @@ query = DataQuery()
 query.add_search("id", data_id)
 api.query_data(query) # No Results!
 ```
+
+#### Deleting Data
 
 Deleting data is better done with the delete method:
 
@@ -205,9 +251,12 @@ Analytics also are queryable:
 
 ```python
 from voxel51.users.query import AnalyticsQuery
+
+ANALYTIC_NAME = "voxel51/vehicle-sense"
+
 query = AnalyticsQuery()
 query.add_field("id")
-query.add_search("name", "analytic-name")
+query.add_search("name", ANALYTIC_NAME) # Search for an analytic by name
 results = api.query_analytics(query)
 analytic_id = results["analytics"][0]["id"]
 details = api.get_analytic_details(analytic_id)
@@ -238,8 +287,6 @@ Things you need for a `JobRequest`:
  - data_id (for Data that matches input type)
 
 ```python
-ANALYTIC_NAME = "voxel51/vehicle-sense"
-
 from voxel51.users.jobs import JobRequest
 data_id = api.upload_data("video1.mp4")["id"]
 job_req = JobRequest(analytic=ANALYTIC_NAME)
@@ -282,18 +329,11 @@ Or query:
 
 ```python
 from voxel51.users.query import JobsQuery
-job_query = JobsQuery()
-job_query.add_fields(["name", "state"])
-job_query.add_search("name", "GPUjob")
-print(api.query_jobs(job_query))
-```
-
-```python
-from voxel51.users.query import JobsQuery
-job_query = JobsQuery()
-job_query.add_fields(["name", "state"])
-job_query.sort_by("state", descending=False)
-print(api.query_jobs(job_query))
+query = JobsQuery()
+query.add_fields(["name", "state"])
+query.sort_by("state", descending=False)
+results = api.query_jobs(query)
+print(results)
 ```
 
 Jobs enter different `states` throughout their lifetime. Job outputs can not be
@@ -326,7 +366,7 @@ from voxel51.users.api import API
 from voxel51.users.jobs import JobRequest
 import os
 
-input_data_dir = "/path/to/dir/of/videos"
+input_data_dir = "input/dir"
 job_output_dir = "output/dir"
 
 ANALYTIC_NAME = "voxel51/vehicle-sense"
