@@ -1,7 +1,7 @@
 # Client Library Walkthrough
 
 This guide will cover step-by-step how to utilize the full power of the Voxel51
-Platform using this handy Python Client Library!
+Platform using this handy Python Client Library.
 
 <img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
 
@@ -15,7 +15,7 @@ Installing this library is very simple and has few dependencies.
  - Python 3 (or 2) https://www.python.org/downloads/
  - pip (which installs with Python)
 
-If you are not sure what is available on your system, ask!
+Verify your system has the expected packages:
 
 ```sh
 python --version
@@ -42,14 +42,11 @@ cd api-py
 pip install -e .
 ```
 
-That's it!
-
-
 ## Using the Client Library
 
 The client library allows a Platform User to perform actions, view data, perform
-queries, request jobs, download output and more!
-All actions on the Platform must be done as a `User` meaning the requests must be
+queries, request jobs, download output and more.
+All actions on the Platform must be done as a `User` meaning all requests must be
 authenticated.
 There are several ways we can `Authenticate` ourselves when using the client library.
 
@@ -73,7 +70,8 @@ from voxel51.users.auth import activate_token
 
 activate_token("/path/to/your/api-token.json")
 ```
-This is one of many ways you can authenticate your client!
+
+There is more than one way to activate a token for use with the client library.
 More details and alternatives are shown in the
 [README](https://github.com/voxel51/api-py#sign-up-and-authentication).
 
@@ -84,6 +82,7 @@ More details and alternatives are shown in the
 
 All actions are performed on an API instance which provides all of the methods
 that communicate with the API directly.
+
 ```python
 from voxel51.users.api import API
 
@@ -98,7 +97,7 @@ print(api.list_jobs()) # See what jobs you have requested
 
 [Docs](https://voxel51.com/docs/api/?python#data)
 
-Let's upload our first Data!
+Uploading our first Data:
 
 ```python
 data = api.upload_data("video1.mp4")
@@ -110,29 +109,30 @@ The upload function blocks and returns with the response from the Platform of
 the assigned Data ID.  This ID is important to store and reference in later
 requests.
 
-Finding the ID again is no problem, we can search for it!
+Data ID's can always be found by listing or querying our data.
 
 ```python
 # Show all Data for our user
 print(api.list_data())
 ```
 
-This is one way to find Data, but let's search for it using Querys!
+Now with queries:
 
 ```python
 from voxel51.users.query import DataQuery
 
+# Review the fields we can use for searching, sorting and filtering
+print(DataQuery.SUPPORTED_FIELDS)
+
 # Build a Query
 query = DataQuery()
-# Review the fields we can use for searching, sorting and filtering
-print(query.SUPPORTED_FIELDS)
-
-query.add_field("id")
-query.add_search("name", "video1.mp4")
-query.sort_by("upload_date", descending=True)
+query.add_field("id") # Return only id's
+query.add_search("name", "video1.mp4") # search for Data with name="video1.mp4"
+query.sort_by("upload_date", descending=True) # sort for latest
 results = api.query_data(query)
 print(results)
-data_id = results["data"][0]["id"]
+
+data_id = results["data"][0]["id"] # Get the data ID of the first result
 ```
 
 Here we are querying our Data for the most recent data we uploaded by name.
@@ -162,7 +162,7 @@ results = api.query_data(query)
 print(results)
 ```
 
-Updating a TTL to force expiration will result in the Data being deleted!
+Special note: Updating a TTL to force expiration will result in the Data being deleted!
 
 ```python
 api.update_data_ttl(data_id, days=-10)
@@ -178,12 +178,12 @@ data_id = api.list_data()[0]["id"]
 api.delete_data(data_id)
 ```
 
-### Step 5: Analytics
+### Step 4: Analytics
 
 [Docs](https://voxel51.com/docs/api/?python#analytics)
 
 Analytics are what Jobs run.  Before we can make a `JobRequest` we need Data
-and an Analytic!
+and an Analytic.
 
 ```python
 api.list_analytics()
@@ -208,7 +208,7 @@ details = api.get_analytic_details(analytic_id)
 ```
 
 Analytics also have specifications for their inputs, parameters, and outputs.
-Let's fetch them so we know how to build our JobRequest!
+Let's fetch them so we know how to build our JobRequest.
 
 ```python
 doc = api.get_analytic_doc(analytic_id)
@@ -217,17 +217,16 @@ parameters = doc["parameters"]
 outputs = doc["outputs"]
 ```
 
-Inputs specifies what kind of data we can supply to a job with this analytic.
-Parameters give us ability to customize some things about how the analytic performs.
-Outputs tell us what the Analytic will produce as the result of a Job.
-For more details [Check out the docs!](https://voxel51.com/docs/api/?python#analytics-download-documentation)
+`Inputs` specifies what kind of data we can supply to a job with this analytic.
+`Parameters` give us ability to customize some things about how the analytic performs.
+`Outputs` tell us what the Analytic will produce as the result of a Job.
+For more details [Check out the docs](https://voxel51.com/docs/api/?python#analytics-download-documentation)
 
 
-### Step 4: Jobs
+### Step 5: Jobs
 
 [Docs](https://voxel51.com/docs/api/?python#jobs)
 
-Now it is time to make a JobRequest!
 Things you need for a JobRequest:
  - analytic name (optional: version)
  - data_id (for Data that matches input type)
@@ -257,7 +256,7 @@ job = api.upload_job_request(job_req, "customJobName")
 api.start_job(job["id"])
 ```
 
-Jobs can also be given a preference of compute to use for the Analytic (if it supports it!)
+Jobs can also be given a preference of compute to use for the Analytic, if supported.
 
 ```python
 from voxel51.users.jobs import JobComputeMode, JobRequest
@@ -267,13 +266,13 @@ job_req.set_input("video", data_id=data_id)
 api.upload_job_request(job_request=job_req, job_name="GPUjob")
 ```
 
-You can view your Jobs!
+View your jobs:
 
 ```python
 api.list_jobs()
 ```
 
-And Query!
+Or query:
 
 ```python
 from voxel51.users.query import JobsQuery
