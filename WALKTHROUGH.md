@@ -42,6 +42,10 @@ cd api-py
 pip install -e .
 ```
 
+### Optional Resources
+
+Sample video [download](https://drive.google.com/open?id=12wvTci0sWljhNQKT-Wld2Edzhg893yNh)
+
 ## Using the Client Library
 
 The client library allows a Platform User to perform actions, view data, perform
