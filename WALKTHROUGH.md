@@ -12,7 +12,7 @@ Installing this library is very simple and has few dependencies.
 
 ### Dependencies
 
- - Python 3 (or 2) https://www.python.org/downloads/
+ - Python 3 (or 2.7): https://www.python.org/downloads/
  - pip (which installs with Python)
 
 Verify your system has the expected packages:
@@ -22,19 +22,19 @@ python --version
 pip --version
 ```
 
-### Install
+### Installation
 
 You can install the API client library on your system python packages, or in a
 virtual environment.
 
-Optional: Create and activate your virtual environment.
+(optional) Create and activate your virtual environment:
 
 ```sh
 virtualenv venv
 source venv/bin/activate
 ```
 
-Required: Clone and install the package
+(required) Clone and install the package:
 
 ```sh
 git clone https://github.com/voxel51/api-py.git
@@ -48,26 +48,30 @@ Sample video [download](https://drive.google.com/open?id=12wvTci0sWljhNQKT-Wld2E
 
 ## Using the Client Library
 
-The client library allows a Platform User to perform actions, view data, perform
-queries, request jobs, download output and more.
-All actions on the Platform must be done as a `User` meaning all requests must be
-authenticated.
-There are several ways we can `Authenticate` ourselves when using the client library.
+The client library allows a Platform User to perform actions, view data,
+perform queries, request jobs, download output and more! All actions on the
+Platform must be done as a user, meaning the requests must be authenticated.
 
-### Step 1: Authenticating
+
+### Step 1: Authenticate
 
 [Docs](https://voxel51.com/docs/api/?python#authentication)
 
-First you must obtain an API Token which is only available after logging into the
-Console.
- - Login to the Console https://console.voxel51.com/login
- - Go to your Account Tokens page https://console.voxel51.com/account/tokens
- - Click `Create Token` and save the file.
+First you must obtain an API Token from your Platform Console:
+ - Login at https://console.voxel51.com/login
+ - Navigate to your Account Tokens page https://console.voxel51.com/account/tokens
+ - Click `Create Token` and save the file
 
-Tokens are only able to be downloaded once.  You may delete and create more tokens
+Tokens are only able to be downloaded once. You may delete and create tokens
 at any time.
 
-Save your token to a safe location on your filesystem and copy the path.
+In order to use the API, you must activate a token, which can be done in a
+number of ways. For a full description of the available methods, see the
+[API Documentation](https://voxel51.com/docs/api/?python#authentication).
+
+In this walkthrough, we'll activate a token via the `activate_token()` method,
+which copies it to your `~/.voxel51/` folder on your machine so that subsequent
+API sessions can automatically locate it.
 
 ```python
 from voxel51.users.auth import activate_token
@@ -75,12 +79,8 @@ from voxel51.users.auth import activate_token
 activate_token("/path/to/your/api-token.json")
 ```
 
-There is more than one way to activate a token for use with the client library.
-More details and alternatives are shown in the
-[README](https://github.com/voxel51/api-py#sign-up-and-authentication).
 
-
-### Step 2: Create API instance
+### Step 2: Create an API instance
 
 [Docs](https://voxel51.com/docs/api/?python#authentication)
 
@@ -144,9 +144,9 @@ There is plenty more we can do with queries, for Data, Jobs, and Analytics!
 
 ### TTL and expiration
 
-All Data will expire, this expiration time can be adjusted at upload time or updated
-any time after.
-TTL (Time to live) parameters accept ISO date strings or `datetime` objects.
+All Data will expire; this expiration time can be adjusted at upload time or
+updated at any later time. TTL (Time to live) parameters accept ISO date
+strings or `datetime` objects.
 
 ```python
 from datetime import datetime, timedelta
@@ -166,7 +166,8 @@ results = api.query_data(query)
 print(results)
 ```
 
-Special note: Updating a TTL to force expiration will result in the Data being deleted!
+Special note: Updating the expiration date to a date in the past will result in
+the Data being deleted!
 
 ```python
 api.update_data_ttl(data_id, days=-10)
@@ -186,20 +187,21 @@ api.delete_data(data_id)
 
 [Docs](https://voxel51.com/docs/api/?python#analytics)
 
-Analytics are what Jobs run.  Before we can make a `JobRequest` we need Data
-and an Analytic.
+Analytics are what Jobs run. Before we can make a `JobRequest` we need Data and
+an Analytic!
 
 ```python
 api.list_analytics()
 ```
 
-Analytics have versions, the latest is shown by default
+Analytics have versions; the latest version is shown by default. Older versions
+can also be retrieved:
 
 ```python
 api.list_analytics(all_versions=True)
 ```
 
-Analytics also are queryable
+Analytics also are queryable:
 
 ```python
 from voxel51.users.query import AnalyticsQuery
@@ -212,7 +214,7 @@ details = api.get_analytic_details(analytic_id)
 ```
 
 Analytics also have specifications for their inputs, parameters, and outputs.
-Let's fetch them so we know how to build our JobRequest.
+Let's fetch them so we know how to build our `JobRequest`.
 
 ```python
 doc = api.get_analytic_doc(analytic_id)
@@ -222,16 +224,16 @@ outputs = doc["outputs"]
 ```
 
 `Inputs` specifies what kind of data we can supply to a job with this analytic.
-`Parameters` give us ability to customize some things about how the analytic performs.
-`Outputs` tell us what the Analytic will produce as the result of a Job.
-For more details [Check out the docs](https://voxel51.com/docs/api/?python#analytics-download-documentation)
+`Parameters` give us ability to customize some things about how the analytic performs. `Outputs` tell us what the Analytic will produce as the result of a
+Job. For more details,
+[check out the docs!](https://voxel51.com/docs/api/?python#analytics-download-documentation)
 
 
 ### Step 5: Jobs
 
 [Docs](https://voxel51.com/docs/api/?python#jobs)
 
-Things you need for a JobRequest:
+Things you need for a `JobRequest`:
  - analytic name (optional: version)
  - data_id (for Data that matches input type)
 
@@ -246,8 +248,8 @@ job_req.set_parameter("accel", 1.0)
 job = api.upload_job_request(job_req, "customJobName")
 ```
 
-This uploads the job request, but does not start it.
-A job can be started 2 ways:
+This uploads the job request, but does not start it. A job can be started two
+ways:
 
 ```python
 api.upload_job_request(job_req, "autoStartMe", auto_start=True)
@@ -301,8 +303,8 @@ downloaded until the job state is `COMPLETED`.
 
 ### Step 6: Workflow
 
-Suppose we have data we want to process with an Analytic and download the output
-all in one script.  Let's see what that would look like:
+Suppose we have data we want to process with an Analytic and download the
+output all in one script. Let's see what that would look like:
 
 ```python
 import voxel51.users.api as vapi
