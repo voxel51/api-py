@@ -201,7 +201,7 @@ Analytics also are queryable
 from voxel51.users.query import AnalyticsQuery
 query = AnalyticsQuery()
 query.add_field("id")
-query.add_search("name", "vehicle")
+query.add_search("name", "analytic-name")
 results = api.query_analytics(query)
 analytic_id = results["analytics"][0]["id"]
 details = api.get_analytic_details(analytic_id)
@@ -233,11 +233,13 @@ Things you need for a JobRequest:
  - data_id (for Data that matches input type)
 
 ```python
+ANALYTIC_NAME = "voxel51/vehicle-sense"
+
 from voxel51.users.jobs import JobRequest
 data_id = api.upload_data("video1.mp4")["id"]
-job_req = JobRequest(analytic="voxel51/vehicle-sense")
+job_req = JobRequest(analytic=ANALYTIC_NAME)
 job_req.set_input("video", data_id=data_id)
-job_req.set_parameter("accel", "1.0")
+job_req.set_parameter("accel", 1.0)
 job = api.upload_job_request(job_req, "customJobName")
 ```
 
@@ -260,7 +262,7 @@ Jobs can also be given a preference of compute to use for the Analytic (if it su
 ```python
 from voxel51.users.jobs import JobComputeMode, JobRequest
 
-job_req = JobRequest("voxel51/vehicle-sense", compute_mode=JobComputeMode.GPU)
+job_req = JobRequest(ANALYTIC_NAME, compute_mode=JobComputeMode.GPU)
 job_req.set_input("video", data_id=data_id)
 api.upload_job_request(job_request=job_req, job_name="GPUjob")
 ```
@@ -305,7 +307,7 @@ import voxel51.users.jobs as vjob
 
 api = vapi.API()
 data_id = api.upload_data("video1.mp4")["id"]
-job_request = vjob.JobRequest("voxel51/vehicle-sense")
+job_request = vjob.JobRequest(ANALYTIC_NAME)
 job_request.set_input("video", data_id=data_id)
 job_id = api.upload_job_request(job_request, "jobName", auto_start=True)["id"]
 api.wait_until_job_completes(job_id) # This blocks until the job completes
@@ -322,7 +324,7 @@ import os
 input_data_dir = "/path/to/dir/of/videos"
 job_output_dir = "output/dir"
 
-analytic_name = "voxel51/vehicle-sense"
+ANALYTIC_NAME = "voxel51/vehicle-sense"
 
 api = API()
 
@@ -333,9 +335,9 @@ def upload_and_run(input_data):
     print("Uploaded", input_data)
 
     print("Starting job for", input_data)
-    job_request = JobRequest(analytic_name)
+    job_request = JobRequest(ANALYTIC_NAME)
     job_request.set_input("video", data_id=data_id)
-    job = api.upload_job_request(job_request, analytic_name + "-test",
+    job = api.upload_job_request(job_request, ANALYTIC_NAME + "-test",
                                  auto_start=True)
     print("Job started for", input_data)
     return job["id"]
