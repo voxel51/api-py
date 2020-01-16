@@ -834,8 +834,8 @@ class API(object):
             raise APIError("Either `job_id` or `job` must be provided", 400)
 
         # Note that we could just return `job.expired` here, but we are
-        # computing this value dynamically from `expiration_date` in case the
-        # job metadata was generated awhile ago...
+        # computing this value dynamically from `job.expiration_date` in case
+        # the job metadata was generated awhile ago...
         expiration = dateutil.parser.parse(job["expiration_date"])
         now = datetime.utcnow()
         return now >= expiration.replace(tzinfo=None)
