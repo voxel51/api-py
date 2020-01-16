@@ -132,12 +132,10 @@ If you choose to follow along with the python client library, you may want to
 setup pretty printing:
 
 ```python
-import pprint
-pp = pprint.PrettyPrinter(indent=2).pprint
+from pprint import pprint as print
 ```
 
-Call `pp()` on anything you wish to print, as there will be nested objects to 
-unpack and investigate.
+*Warning: This aliases over the native print function in your python shell!*
 
 ### Step 3: Data
 
@@ -147,6 +145,7 @@ Uploading our first Data:
 
 ```python
 data = api.upload_data("video1.mp4")
+print(data)
 data_id = data["id"]
 ```
 
@@ -158,7 +157,7 @@ Data ID's can always be found by listing or querying our data.
 
 ```python
 # Show all Data for our user
-api.list_data()
+print(api.list_data())
 ```
 
 Now with queries:
@@ -183,6 +182,10 @@ data_id = results["data"][0]["id"] # Get the data ID of the first result
 Here we are querying our Data for the most recent data we uploaded by name.
 There is plenty more we can do with queries, for Data, Jobs, and Analytics!
 
+Data can also be posted by signed url.  
+[Read the Docs](https://voxel51.com/docs/api/?python#data-post-data-as-url) for more detail!
+
+
 #### TTL and expiration
 
 All Data will expire; this expiration time can be adjusted at upload time or
@@ -198,7 +201,7 @@ data_id = api.upload_data("video1.mp4", ttl=date_to_expire)["id"]
 
 query = DataQuery()
 query.add_fields(["id", "name", "expiration_date"])
-query.add_search("id", data)
+query.add_search("id", data_id)
 data = api.query_data(query)["data"][0]
 print(data)
 
@@ -217,7 +220,7 @@ the Data being deleted!
 api.update_data_ttl(data_id, days=-10)
 query = DataQuery()
 query.add_search("id", data_id)
-api.query_data(query) # No Results!
+print(api.query_data(query)) # No Results!
 ```
 
 #### Deleting Data
@@ -237,22 +240,22 @@ Analytics are what Jobs run. Before we can make a `JobRequest` we need Data and
 an Analytic!
 
 ```python
-api.list_analytics()
+print(api.list_analytics())
 ```
 
 Analytics have versions; the latest version is shown by default. Older versions
 can also be retrieved:
 
 ```python
-api.list_analytics(all_versions=True)
+print(api.list_analytics(all_versions=True))
 ```
 
 Analytics also are queryable:
 
 ```python
-from voxel51.users.query import AnalyticsQuery
-
 ANALYTIC_NAME = "voxel51/vehicle-sense"
+
+from voxel51.users.query import AnalyticsQuery
 
 query = AnalyticsQuery()
 query.add_field("id")
@@ -260,6 +263,7 @@ query.add_search("name", ANALYTIC_NAME) # Search for an analytic by name
 results = api.query_analytics(query)
 analytic_id = results["analytics"][0]["id"]
 details = api.get_analytic_details(analytic_id)
+print(details)
 ```
 
 Analytics also have specifications for their inputs, parameters, and outputs.
@@ -267,9 +271,9 @@ Let's fetch them so we know how to build our `JobRequest`.
 
 ```python
 doc = api.get_analytic_doc(analytic_id)
-inputs = doc["inputs"]
-parameters = doc["parameters"]
-outputs = doc["outputs"]
+print(doc["inputs"])
+print(doc["parameters"])
+print(doc["outputs"])
 ```
 
 `Inputs` specifies what kind of data we can supply to a job with this analytic.
@@ -293,6 +297,7 @@ job_req = JobRequest(analytic=ANALYTIC_NAME)
 job_req.set_input("video", data_id=data_id)
 job_req.set_parameter("accel", 1.0)
 job = api.upload_job_request(job_req, "customJobName")
+print(job)
 ```
 
 This uploads the job request, but does not start it. A job can be started two
@@ -322,7 +327,7 @@ api.upload_job_request(job_request=job_req, job_name="GPUjob")
 View your jobs:
 
 ```python
-api.list_jobs()
+print(api.list_jobs())
 ```
 
 Or query:
@@ -374,27 +379,27 @@ ANALYTIC_NAME = "voxel51/vehicle-sense"
 api = API()
 
 def upload_and_run(input_data):
-    print("Uploading", input_data)
+    print("Uploading {}".format(input_data))
     data = api.upload_data(input_data)
     data_id = data["id"]
-    print("Uploaded", input_data)
-    print("Starting job for", input_data)
+    print("Uploaded {}".format(input_data))
+    print("Starting job for {}".format(input_data))
     job_request = JobRequest(ANALYTIC_NAME)
     job_request.set_input("video", data_id=data_id)
     job = api.upload_job_request(job_request, ANALYTIC_NAME + "-test",
                                  auto_start=True)
-    print("Job started for", input_data)
+    print("Job started for {}".format(input_data))
     return job["id"]
 
 
 def wait_and_download(args):
     job_id = args[0]
     job_output_path = args[1]
-    print("Waiting for job", job_id)
+    print("Waiting for job {}".format(job_id))
     api.wait_until_job_completes(job_id)
-    print("Job Complete! Downloading", job_id)
+    print("Job Complete! Downloading {}".format(job_id))
     api.download_job_output(job_id, job_output_path)
-    print("Downloaded", job_id)
+    print("Downloaded {}".format(job_id))
 
 
 # Create list of data
