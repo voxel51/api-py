@@ -1695,10 +1695,10 @@ class StatusCommand(Command):
             print(status["jobs"])
 
         if not args.platform and not args.jobs_cluster:
-            _print_platform_status_info(status, api.token)
+            _print_platform_status_info(status)
 
 
-def _print_platform_status_info(status, token):
+def _print_platform_status_info(status):
     records = []
     for service, status_item in iteritems(status):
         records.append(
