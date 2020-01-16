@@ -718,13 +718,13 @@ class ListJobsCommand(Command):
             elif not args.include_archived:
                 query = query.add_search("archived", False)
 
-        jobs = api.query_jobs(query)["jobs"]
-
-        # default: include expired
+        # default: include expired and unexpired
         if args.expired_only:
-            jobs = [job for job in jobs if api.is_job_expired(job=job)]
+            query = query.add_search("expired", True)
         if args.exclude_expired:
-            jobs = [job for job in jobs if not api.is_job_expired(job=job)]
+            query = query.add_search("expired", False)
+
+        jobs = api.query_jobs(query)["jobs"]
 
         _print_jobs_table(
             jobs, show_count=args.count, show_all_fields=args.all_fields)
@@ -964,12 +964,10 @@ class UnarchiveJobsCommand(Command):
             query = (JobsQuery()
                 .add_all_fields()
                 .add_search("archived", True)
+                .add_search("expired", False)
                 .sort_by("upload_date", descending=False))
             jobs = api.query_jobs(query)["jobs"]
-
-            # Exclude expired jobs
-            job_ids = [
-                job["id"] for job in jobs if not api.is_job_expired(job=job)]
+            job_ids = [job["id"] for job in jobs]
         else:
             job_ids = args.ids
 
@@ -1039,12 +1037,10 @@ class TTLJobsCommand(Command):
         if args.all:
             query = (JobsQuery()
                 .add_all_fields()
+                .add_search("expired", False)
                 .sort_by("upload_date", descending=False))
             jobs = api.query_jobs(query)["jobs"]
-
-            # Exclude expired jobs
-            job_ids = [
-                job["id"] for job in jobs if not api.is_job_expired(job=job)]
+            job_ids = [job["id"] for job in jobs]
         else:
             job_ids = args.ids
 
