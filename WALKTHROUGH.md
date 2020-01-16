@@ -47,35 +47,35 @@ That's it!
 
 ## Using the Client Library
 
-The client library allows a Platform User to perform actions, view data, perform
-queries, request jobs, download output and more!
-All actions on the Platform must be done as a `User` meaning the requests must be
-authenticated.
-There are several ways we can `Authenticate` ourselves when using the client library.
+The client library allows a Platform User to perform actions, view data,
+perform queries, request jobs, download output and more! All actions on the
+Platform must be done as a `User` meaning the requests must be authenticated.
 
 ### Step 1: Authenticating
 
 [Docs](https://voxel51.com/docs/api/?python#authentication)
 
-First you must obtain an API Token which is only available after logging into the
-Console.
- - Login to the Console https://console.voxel51.com/login
- - Go to your Account Tokens page https://console.voxel51.com/account/tokens
- - Click `Create Token` and save the file.
+First you must obtain an API Token from your Platform Console:
+ - Login at https://console.voxel51.com/login
+ - Navigate to your Account Tokens page https://console.voxel51.com/account/tokens
+ - Click `Create Token` and save the file
 
-Tokens are only able to be downloaded once.  You may delete and create more tokens
+Tokens are only able to be downloaded once. You may delete and create tokens
 at any time.
 
-Save your token to a safe location on your filesystem and copy the path.
+In order to use the API, you must activate a token, which can be done in a
+number of ways. For a full description of the available methods, see the
+[API documentation](https://voxel51.com/docs/api/?python#authentication).
+
+In this walkthrough, we'll activate a token via the `activate_token()` method,
+which copies it to your `~/.voxel51/` folder on your machine so that subsequent
+API sessions can automatically locate it.
 
 ```python
 from voxel51.users.auth import activate_token
 
 activate_token("/path/to/your/api-token.json")
 ```
-This is one of many ways you can authenticate your client!
-More details and alternatives are shown in the
-[README](https://github.com/voxel51/api-py#sign-up-and-authentication).
 
 
 ### Step 2: Create API instance
