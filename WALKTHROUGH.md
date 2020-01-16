@@ -332,7 +332,6 @@ def upload_and_run(input_data):
     data = api.upload_data(input_data)
     data_id = data["id"]
     print("Uploaded", input_data)
-
     print("Starting job for", input_data)
     job_request = JobRequest(ANALYTIC_NAME)
     job_request.set_input("video", data_id=data_id)
