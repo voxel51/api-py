@@ -1,5 +1,5 @@
-Voxel51 Platform API Python Client Library
-==========================================
+Voxel51 Platform Python Client Library
+======================================
 
 .. toctree::
    :maxdepth: 2

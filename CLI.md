@@ -94,7 +94,7 @@ The following usage information was generated via `voxel51 --all-help`:
 *******************************************************************************
 usage: voxel51 [-h] [-v] [--all-help] {auth,data,jobs,analytics,status} ...
 
-Voxel51 Platform API command-line interface.
+Voxel51 Platform command-line interface.
 
 optional arguments:
   -h, --help            show this help message and exit

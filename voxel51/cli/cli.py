@@ -1,6 +1,6 @@
 '''
 Core module that defines the functionality of the `voxel51` command-line
-interface (CLI) for the Voxel51 Platform API.
+interface (CLI) for the Voxel51 Platform.
 
 | Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
@@ -70,7 +70,7 @@ class Command(object):
 
 
 class Voxel51Command(Command):
-    '''Voxel51 Platform API command-line interface.'''
+    '''Voxel51 Platform command-line interface.'''
 
     @staticmethod
     def setup(parser):
