@@ -6,5 +6,6 @@ Voxel51 Platform API Python Client Library
 
    README
    CLI
+   WALKTHROUGH
    APPLICATIONS
    voxel51
