@@ -22,19 +22,19 @@ python --version
 pip --version
 ```
 
-### Install
+### Installation
 
 You can install the API client library on your system python packages, or in a
 virtual environment.
 
-Optional: Create and activate your virtual environment.
+(optional) Create and activate your virtual environment:
 
 ```sh
 virtualenv venv
 source venv/bin/activate
 ```
 
-Required: Clone and install the package
+(required) Clone and install the package:
 
 ```sh
 git clone https://github.com/voxel51/api-py.git
@@ -63,7 +63,7 @@ at any time.
 
 In order to use the API, you must activate a token, which can be done in a
 number of ways. For a full description of the available methods, see the
-[API documentation](https://voxel51.com/docs/api/?python#authentication).
+[API Documentation](https://voxel51.com/docs/api/?python#authentication).
 
 In this walkthrough, we'll activate a token via the `activate_token()` method,
 which copies it to your `~/.voxel51/` folder on your machine so that subsequent
