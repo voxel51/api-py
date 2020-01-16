@@ -51,7 +51,7 @@ The client library allows a Platform User to perform actions, view data,
 perform queries, request jobs, download output and more! All actions on the
 Platform must be done as a `User` meaning the requests must be authenticated.
 
-### Step 1: Authenticating
+### Step 1: Authenticate
 
 [Docs](https://voxel51.com/docs/api/?python#authentication)
 
@@ -78,12 +78,13 @@ activate_token("/path/to/your/api-token.json")
 ```
 
 
-### Step 2: Create API instance
+### Step 2: Create an API instance
 
 [Docs](https://voxel51.com/docs/api/?python#authentication)
 
 All actions are performed on an API instance which provides all of the methods
 that communicate with the API directly.
+
 ```python
 from voxel51.users.api import API
 
@@ -140,9 +141,8 @@ There is plenty more we can do with queries, for Data, Jobs, and Analytics!
 
 ### TTL and expiration
 
-All Data will expire, this expiration time can be adjusted at upload time or updated
-any time after.
-TTL (Time to live) parameters accept ISO date strings or `datetime` objects.
+All Data will expire, this expiration time can be adjusted at upload time or updated any time after. TTL (Time to live) parameters accept ISO date strings
+or `datetime` objects.
 
 ```python
 from datetime import datetime, timedelta
@@ -182,8 +182,8 @@ api.delete_data(data_id)
 
 [Docs](https://voxel51.com/docs/api/?python#analytics)
 
-Analytics are what Jobs run.  Before we can make a `JobRequest` we need Data
-and an Analytic!
+Analytics are what Jobs run. Before we can make a `JobRequest` we need Data and
+an Analytic!
 
 ```python
 api.list_analytics()
@@ -218,9 +218,10 @@ outputs = doc["outputs"]
 ```
 
 Inputs specifies what kind of data we can supply to a job with this analytic.
-Parameters give us ability to customize some things about how the analytic performs.
-Outputs tell us what the Analytic will produce as the result of a Job.
-For more details [Check out the docs!](https://voxel51.com/docs/api/?python#analytics-download-documentation)
+Parameters give us ability to customize some things about how the analytic
+performs. Outputs tell us what the Analytic will produce as the result of a
+Job. For more details,
+[check out the docs!](https://voxel51.com/docs/api/?python#analytics-download-documentation)
 
 
 ### Step 4: Jobs
@@ -241,8 +242,8 @@ job_req.set_parameter("accel", "1.0")
 job = api.upload_job_request(job_req, "customJobName")
 ```
 
-This uploads the job request, but does not start it.
-A job can be started 2 ways:
+This uploads the job request, but does not start it. A job can be started two
+ways:
 
 ```python
 api.upload_job_request(job_req, "autoStartMe", auto_start=True)
@@ -296,8 +297,8 @@ downloaded until the job state is `COMPLETED`.
 
 ### Step 6: Workflow
 
-Suppose we have data we want to process with an Analytic and download the output
-all in one script.  Let's see what that would look like:
+Suppose we have data we want to process with an Analytic and download the
+output all in one script. Let's see what that would look like:
 
 ```python
 import voxel51.users.api as vapi
