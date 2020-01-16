@@ -237,7 +237,14 @@ This project uses
 [Sphinx-Napoleon](https://pypi.python.org/pypi/sphinxcontrib-napoleon)
 to generate its documentation from source.
 
-To generate the documentation, run:
+To generate the documentation, you must have installed the `dev` dependencies
+for the package:
+
+```shell
+pip install -e .[dev]
+```
+
+Then you can generate the docs by running:
 
 ```shell
 bash docs/generate_docs.bash
