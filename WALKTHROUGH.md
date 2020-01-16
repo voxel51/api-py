@@ -12,7 +12,7 @@ Installing this library is very simple and has few dependencies.
 
 ### Dependencies
 
- - Python 3 (or 2) https://www.python.org/downloads/
+ - Python 3 (or 2.7): https://www.python.org/downloads/
  - pip (which installs with Python)
 
 Verify your system has the expected packages:
@@ -46,7 +46,7 @@ pip install -e .
 
 The client library allows a Platform User to perform actions, view data,
 perform queries, request jobs, download output and more! All actions on the
-Platform must be done as a `User` meaning the requests must be authenticated.
+Platform must be done as a user, meaning the requests must be authenticated.
 
 
 ### Step 1: Authenticate
@@ -140,8 +140,9 @@ There is plenty more we can do with queries, for Data, Jobs, and Analytics!
 
 ### TTL and expiration
 
-All Data will expire, this expiration time can be adjusted at upload time or updated any time after. TTL (Time to live) parameters accept ISO date strings
-or `datetime` objects.
+All Data will expire; this expiration time can be adjusted at upload time or
+updated at any later time. TTL (Time to live) parameters accept ISO date
+strings or `datetime` objects.
 
 ```python
 from datetime import datetime, timedelta
@@ -161,7 +162,8 @@ results = api.query_data(query)
 print(results)
 ```
 
-Special note: Updating a TTL to force expiration will result in the Data being deleted!
+Special note: Updating the expiration date to a date in the past will result in
+the Data being deleted!
 
 ```python
 api.update_data_ttl(data_id, days=-10)
@@ -188,13 +190,14 @@ an Analytic!
 api.list_analytics()
 ```
 
-Analytics have versions, the latest is shown by default
+Analytics have versions; the latest version is shown by default. Older versions
+can also be retrieved:
 
 ```python
 api.list_analytics(all_versions=True)
 ```
 
-Analytics also are queryable
+Analytics also are queryable:
 
 ```python
 from voxel51.users.query import AnalyticsQuery
@@ -207,7 +210,7 @@ details = api.get_analytic_details(analytic_id)
 ```
 
 Analytics also have specifications for their inputs, parameters, and outputs.
-Let's fetch them so we know how to build our JobRequest.
+Let's fetch them so we know how to build our `JobRequest`.
 
 ```python
 doc = api.get_analytic_doc(analytic_id)
@@ -226,7 +229,7 @@ Job. For more details,
 
 [Docs](https://voxel51.com/docs/api/?python#jobs)
 
-Things you need for a JobRequest:
+Things you need for a `JobRequest`:
  - analytic name (optional: version)
  - data_id (for Data that matches input type)
 
