@@ -828,13 +828,15 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         if job_id is not None:
-            expiration_date = self.get_job_details(job_id)["expiration_date"]
-        elif job is not None:
-            expiration_date = job["expiration_date"]
-        else:
+            return self.get_job_details(job_id)["expired"]
+
+        if job is None:
             raise APIError("Either `job_id` or `job` must be provided", 400)
 
-        expiration = dateutil.parser.parse(expiration_date)
+        # Note that we could just return `job.expired` here, but we are
+        # computing this value dynamically from `expiration_date` in case the
+        # job metadata was generated awhile ago...
+        expiration = dateutil.parser.parse(job["expiration_date"])
         now = datetime.utcnow()
         return now >= expiration.replace(tzinfo=None)
 
