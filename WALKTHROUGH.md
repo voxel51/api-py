@@ -18,7 +18,7 @@ Installing this library is very simple and has few dependencies.
 
 Verify your system has the expected packages:
 
-```sh
+```shell
 python --version
 pip --version
 ```
@@ -27,14 +27,14 @@ pip --version
 
 *(optional)* Create and activate your virtual environment for this installation:
 
-```sh
+```shell
 virtualenv venv
 source venv/bin/activate
 ```
 
 *(required)* Clone and install the package:
 
-```sh
+```shell
 git clone https://github.com/voxel51/api-py.git
 cd api-py
 pip install -e .
@@ -42,7 +42,7 @@ pip install -e .
 
 Verify that the installation was successful by issuing a CLI command:
 
-```sh
+```shell
 voxel51 --version
 ```
 
@@ -81,13 +81,13 @@ number of ways. For a full description of the available methods, see the
 
 In this walkthrough, we will activate a token with the CLI:
 
-```sh
+```shell
 voxel51 auth activate api-token.json
 ```
 
 You can view details about your activate token with:
 
-```sh
+```shell
 voxel51 auth show
 ```
 
@@ -96,14 +96,14 @@ voxel51 auth show
 Before getting started with Python commands, we recommend using pretty-print
 to make the outputs easier to digest:
 
-```python
+```py
 from pprint import pprint as print
 ```
 
 All actions are performed on an API instance which provides all of the methods
 that communicate with the API directly.
 
-```python
+```py
 from voxel51.users.api import API
 
 api = API()  # implicitly loads and uses your active token
@@ -129,7 +129,7 @@ the subcommands via `voxel51 <command> --help`.
 
 Upload your first Data to the Platform:
 
-```python
+```py
 data = api.upload_data("video1.mp4")
 print(data)
 data_id = data["id"]
@@ -141,7 +141,7 @@ requests.
 
 Data IDs can always be found by listing or querying our Data.
 
-```python
+```py
 # Show all Data for our user
 print(api.list_data())
 ```
@@ -149,7 +149,7 @@ print(api.list_data())
 At any time, you can query the Platform to return fine-grained information
 about your Data:
 
-```python
+```py
 from voxel51.users.query import DataQuery
 
 # Review the fields we can use for searching, sorting and filtering
@@ -179,7 +179,7 @@ is 3 days after upload. However, this date can be customized at upload time or
 updated later. TTL (time to live) parameters accept ISO date strings or
 `datetime` objects.
 
-```python
+```py
 from datetime import datetime, timedelta
 
 # Upload Data and specify its expiration date
@@ -203,7 +203,7 @@ print(data)
 Note that setting the expiration date of Data to the past will result in the
 Data being deleted!
 
-```python
+```py
 api.update_data_ttl(data_id, days=-10)
 query = DataQuery()
 query.add_search("id", data_id)
@@ -214,7 +214,7 @@ print(api.query_data(query))  # no results!
 
 Manually deleting Data is best done with the delete method:
 
-```python
+```py
 data_id = api.list_data()[0]["id"]
 api.delete_data(data_id)
 ```
@@ -225,7 +225,7 @@ Analytics are the processing modules on the Platform that define what kinds of
 Jobs you can run on your Data. In order to run a Job, we need to choose an
 Analytic:
 
-```python
+```py
 print(api.list_analytics())
 ```
 
@@ -233,19 +233,19 @@ Analytics have _names_ and _versions_; unless otherwise specified, the latest
 version of each Analytic is used. However, older versions of Analytics can also
 be accessed:
 
-```python
+```py
 print(api.list_analytics(all_versions=True))
 ```
 
 In this walkthrough, we'll use the VehicleSense Analytic:
 
-```python
+```py
 ANALYTIC_NAME = "voxel51/vehicle-sense"
 ```
 
 Like Data, Analytics are queryable:
 
-```python
+```py
 from voxel51.users.query import AnalyticsQuery
 
 query = AnalyticsQuery()
@@ -260,7 +260,7 @@ print(details)
 Analytics have _inputs_, _parameters_, and _outputs_. Fetch the documentation
 about an Analytic so you know how to run Jobs with it:
 
-```python
+```py
 doc = api.get_analytic_doc(analytic_id)
 print(doc["inputs"])
 print(doc["parameters"])
@@ -282,7 +282,7 @@ creating a `JobRequest`, which specifies:
 
 You can create a Job Request as follows:
 
-```python
+```py
 from voxel51.users.jobs import JobRequest
 
 data_id = api.upload_data("video1.mp4")["id"]
@@ -298,13 +298,13 @@ This uploads the Job Request, but does not start it.
 A Job can be started two ways; either by automatically starting it when you
 upload the Job Request:
 
-```python
+```py
 api.upload_job_request(job_request, "auto-start-me", auto_start=True)
 ```
 
 or by starting a previously uploaded (but currently unstarted) Job:
 
-```python
+```py
 job = api.upload_job_request(job_request, "your-job-name")
 api.start_job(job["id"])
 ```
@@ -312,7 +312,7 @@ api.start_job(job["id"])
 You can customize the compute type used to execute your Jobs, depending on the
 compute types supported by the Analytic that you are running:
 
-```python
+```py
 from voxel51.users.jobs import JobComputeMode, JobRequest
 
 job_request = JobRequest(ANALYTIC_NAME, compute_mode=JobComputeMode.GPU)
@@ -322,13 +322,13 @@ api.upload_job_request(job_request=job_request, job_name="GPUjob")
 
 View your Jobs:
 
-```python
+```py
 print(api.list_jobs())
 ```
 
 As usual, Jobs are queryable:
 
-```python
+```py
 from voxel51.users.query import JobsQuery
 
 query = JobsQuery()
@@ -348,7 +348,7 @@ Job states, [read the docs](https://voxel51.com/docs/api/?python#jobs).
 Suppose we have Data we want to process with an Analytic and download the
 output all in one script. Let's see what that would look like:
 
-```python
+```py
 from voxel51.users.api import API
 from voxel51.users.jobs import JobRequest
 
@@ -369,7 +369,7 @@ api.download_job_output(job_id, "labels.json")
 
 We can take this essential flow and scale it up!
 
-```python
+```py
 import os
 
 from voxel51.users.api import API
