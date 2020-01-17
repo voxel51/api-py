@@ -23,7 +23,7 @@ on the Voxel51 Platform.
 
 ## Quickstart
 
-### Sign-up and Authentication
+### Authentication
 
 To use the API with your application, you must first login to your application
 admin account at https://console.voxel51.com/apps/your-app-name and create an
@@ -31,23 +31,19 @@ API token for your application.
 
 > Keep your application API token private; it is your access key to the API.
 
-Each API request you make must be authenticated by your application token. To
-activate your application token, set the `VOXEL51_APP_TOKEN` environment
-variable in your shell to point to your API token file:
+Each API request you make must be authenticated by your application token.
+There are a variety of ways to activate your token; for a full description,
+see the [Authentication Documentation](https://voxel51.com/docs/applications/#authentication).
+
+A simple approach is to set the `VOXEL51_APP_TOKEN` environment variable in
+your shell to point to your application token file:
 
 ```shell
 export VOXEL51_APP_TOKEN=/path/to/your/app-token.json
 ```
 
-Alternatively, you can directly set the `VOXEL51_APP_PRIVATE_KEY` environment
-variable in your shell to the private key of your API token:
-
-```shell
-export VOXEL51_APP_PRIVATE_KEY=XXXXXXXX
-```
-
-Finally, you can permanently activate an application token by executing the
-following commands:
+Alternatively, you can permanently activate an application token by executing
+the following commands:
 
 ```py
 from voxel51.apps.auth import activate_application_token
@@ -62,7 +58,7 @@ deactivated via the `voxel51.apps.auth.deactivate_application_token()` method.
 After you have activated an application API token, you have full access to the
 API.
 
-### Creating an Application API Session
+### Application API Sessions
 
 To initialize an API session for your application, issue the following
 commands:
@@ -89,7 +85,7 @@ and create a new user:
 api.create_user("<username>")
 ```
 
-### Performing User Actions
+### User Actions
 
 To perform actions for a user of your application, you must first activate the
 user:

@@ -45,29 +45,25 @@ on the Voxel51 Platform, see the [Applications Quickstart](APPLICATIONS).
 This section provides a brief guide to using the Platform API with this client
 library.
 
-### Sign-up and Authentication
+### Authentication
 
 To use the API, you must first create an account at https://console.voxel51.com
 and download an API token.
 
 > Keep your API token private; it is your access key to the API.
 
-Each API request you make must be authenticated by your token. To activate your
-token, set the `VOXEL51_API_TOKEN` environment variable in your shell to point
-to your API token file:
+Each API request you make must be authenticated by your token. There are a
+variety of ways to activate your token; for a full description, see the
+[Authentication Documentation](https://voxel51.com/docs/api/#authentication).
+
+A simple approach is to set the `VOXEL51_API_TOKEN` environment variable in
+your shell to point to your API token file:
 
 ```shell
 export VOXEL51_API_TOKEN=/path/to/your/api-token.json
 ```
 
-Alternatively, you can directly set the `VOXEL51_API_PRIVATE_KEY` environment
-variable in your shell to the private key of your API token:
-
-```shell
-export VOXEL51_API_PRIVATE_KEY=XXXXXXXX
-```
-
-Finally, you can permanently activate a token by executing the following
+Alternatively, you can permanently activate a token by executing the following
 commands:
 
 ```py
@@ -82,7 +78,7 @@ automatically used in all future sessions. A token can be deactivated via the
 
 After you have activated an API token, you have full access to the API.
 
-### Creating an API Session
+### API Sessions
 
 To initialize an API session, issue the following commands:
 
@@ -237,7 +233,14 @@ This project uses
 [Sphinx-Napoleon](https://pypi.python.org/pypi/sphinxcontrib-napoleon)
 to generate its documentation from source.
 
-To generate the documentation, run:
+To generate the documentation, you must have installed the `dev` dependencies
+for the package:
+
+```shell
+pip install -e .[dev]
+```
+
+Then you can generate the docs by running:
 
 ```shell
 bash docs/generate_docs.bash

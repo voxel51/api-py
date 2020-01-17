@@ -17,7 +17,7 @@ from builtins import *
 
 try:
     from importlib.metadata import metadata  # Python 3.8
-except ModuleNotFoundError:
+except ImportError:
     from importlib_metadata import metadata  # Python < 3.8
 
 
