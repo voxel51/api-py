@@ -1,4 +1,4 @@
-# Voxel51 Platform API Python Client Library
+# Voxel51 Platform Python Client Library
 
 A Python client library for the Voxel51 Platform.
 
