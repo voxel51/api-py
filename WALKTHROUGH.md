@@ -343,7 +343,7 @@ downloaded until the job state is `COMPLETED`. For a complete description of
 job states, [see the docs](https://voxel51.com/docs/api/?python#jobs).
 
 
-### Step 6: Workflow
+### Step 6: Workflows
 
 Suppose we have data we want to process with an analytic and download the
 output all in one script. Let's see what that would look like:
@@ -367,7 +367,7 @@ api.wait_until_job_completes(job_id)  # this blocks until the job completes
 api.download_job_output(job_id, "labels.json")
 ```
 
-We can take this essential flow and scale it up!
+Now lets take this basic workflow and scale it up!
 
 ```py
 import os
@@ -384,18 +384,18 @@ api = API()
 
 def upload_and_run(input_data):
     # Upload data
-    print("Uploading {}".format(input_data))
+    print("Uploading %s" % input_data)
     data = api.upload_data(input_data)
     data_id = data["id"]
-    print("Uploaded {}".format(input_data))
+    print("Uploaded %s" % input_data)
 
     # Run job
-    print("Starting job for {}".format(input_data))
+    print("Starting job for %s" % input_data)
     job_request = JobRequest(ANALYTIC_NAME)
     job_request.set_input("video", data_id=data_id)
     job = api.upload_job_request(
         job_request, ANALYTIC_NAME + "-test", auto_start=True)
-    print("Job started for {}".format(input_data))
+    print("Job started for %s" % input_data)
     return job["id"]
 
 
@@ -403,13 +403,13 @@ def wait_and_download(args):
     job_id, job_output_path = args
 
     # Wait until job completes
-    print("Waiting for job {}".format(job_id))
+    print("Waiting for job %s" % job_id)
     api.wait_until_job_completes(job_id)
 
     # Download the output
-    print("Job Complete! Downloading {}".format(job_id))
+    print("Job Complete! Downloading %s" % job_id)
     api.download_job_output(job_id, job_output_path)
-    print("Downloaded {}".format(job_id))
+    print("Downloaded " % job_id)
 
 
 # Create list of data to process
