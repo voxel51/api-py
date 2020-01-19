@@ -1596,7 +1596,7 @@ class UploadAnalyticsCommand(Command):
         if args.print_id:
             print(metadata["id"])
         else:
-            _print_dict_as_table(metadata)
+            _print_upload_analytic_info(metadata)
 
 
 class UploadImageAnalyticsCommand(Command):
@@ -1699,10 +1699,10 @@ class StatusCommand(Command):
             print(status["jobs"])
 
         if not args.platform and not args.jobs_cluster:
-            _print_platform_status_info(status, api.token)
+            _print_platform_status_info(status)
 
 
-def _print_platform_status_info(status, token):
+def _print_platform_status_info(status):
     records = []
     for service, status_item in iteritems(status):
         records.append(
@@ -1811,16 +1811,28 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
         print("\nFound %d analytic(s)\n" % len(analytics))
 
 
-def _print_dict_as_json(d):
-    s = json.dumps(d, indent=4)
-    print(s)
+def _print_upload_analytic_info(metadata):
+    render_fcns = {
+        "supports_cpu": bool,
+        "supports_gpu": bool,
+        "is_image_to_video": bool,
+        "description": _render_long_str,
+    }
+    _render_fields([metadata], render_fcns)
 
+    fields = [
+        "name", "version", "scope", "id", "supports_cpu", "supports_gpu",
+        "is_image_to_video", "description"]
+    contents = [(f, metadata[f]) for f in fields]
 
-def _print_dict_as_table(d):
-    contents = list(d.items())
     table_str = tabulate(
         contents, headers=["Analytic", ""], tablefmt=_TABLE_FORMAT)
     print(table_str)
+
+
+def _print_dict_as_json(d):
+    s = json.dumps(d, indent=4)
+    print(s)
 
 
 def _render_long_str(name):
