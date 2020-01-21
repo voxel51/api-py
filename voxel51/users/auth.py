@@ -201,16 +201,16 @@ class Token(object):
         return cls(token_dict)
 
     @classmethod
-    def from_str(cls, json_str):
+    def from_str(cls, token_str):
         '''Loads a Token from a JSON string.
 
         Args:
-            json_str (str): a string representation of the Token
+            token_str (str): a string representation of the Token
 
         Returns:
             a Token instance
         '''
-        return cls(voxu.load_json(json_str))
+        return cls(voxu.load_json(token_str))
 
     @classmethod
     def from_private_key(cls, private_key, base_api_url=None):
