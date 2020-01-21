@@ -1,7 +1,7 @@
 '''
 Authentication module for the Voxel51 Platform API.
 
-| Copyright 2017-2019, Voxel51, Inc.
+| Copyright 2017-2020, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 |
 '''
@@ -187,6 +187,30 @@ class Token(object):
             a Token instance
         '''
         return cls(voxu.read_json(path))
+
+    @classmethod
+    def from_dict(cls, token_dict):
+        '''Loads a Token from a JSON dictionary.
+
+        Args:
+            token_dict (dict): a JSON dictionary defining the Token
+
+        Returns:
+            a Token instance
+        '''
+        return cls(token_dict)
+
+    @classmethod
+    def from_str(cls, json_str):
+        '''Loads a Token from a JSON string.
+
+        Args:
+            json_str (str): a string representation of the Token
+
+        Returns:
+            a Token instance
+        '''
+        return cls(voxu.load_json(json_str))
 
     @classmethod
     def from_private_key(cls, private_key, base_api_url=None):
