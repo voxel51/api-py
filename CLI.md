@@ -20,22 +20,18 @@ Platform, see the
 
 ## Quickstart
 
-To use the CLI, you must activate an API token. You can do so either by
-setting the `VOXEL51_API_TOKEN` environment variable in your shell to point
-to your API token file:
+To use the CLI, you must activate an API token. This can be done in a variety
+of ways; for a full description, see the
+[Authentication Documentation](https://voxel51.com/docs/api/#authentication).
+
+A simple approach is to set the `VOXEL51_API_TOKEN` environment variable in
+your shell to point to your API token file:
 
 ```shell
 export VOXEL51_API_TOKEN=/path/to/your/api-token.json
 ```
 
-Alternatively, you can directly set the `VOXEL51_API_PRIVATE_KEY` environment
-variable in your shell to the private key of your API token:
-
-```shell
-export VOXEL51_API_PRIVATE_KEY=XXXXXXXX
-```
-
-Finally, you can permanently activate a token by executing the following
+Alternatively, you can permanently activate a token by executing the following
 commands:
 
 ```shell
@@ -94,7 +90,7 @@ The following usage information was generated via `voxel51 --all-help`:
 *******************************************************************************
 usage: voxel51 [-h] [-v] [--all-help] {auth,data,jobs,analytics,status} ...
 
-Voxel51 Platform API command-line interface.
+Voxel51 Platform command-line interface.
 
 optional arguments:
   -h, --help            show this help message and exit

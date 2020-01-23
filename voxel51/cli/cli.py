@@ -1,6 +1,6 @@
 '''
 Core module that defines the functionality of the `voxel51` command-line
-interface (CLI) for the Voxel51 Platform API.
+interface (CLI) for the Voxel51 Platform.
 
 | Copyright 2017-2019, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
@@ -70,7 +70,7 @@ class Command(object):
 
 
 class Voxel51Command(Command):
-    '''Voxel51 Platform API command-line interface.'''
+    '''Voxel51 Platform command-line interface.'''
 
     @staticmethod
     def setup(parser):
@@ -1592,7 +1592,7 @@ class UploadAnalyticsCommand(Command):
         if args.print_id:
             print(metadata["id"])
         else:
-            _print_dict_as_table(metadata)
+            _print_upload_analytic_info(metadata)
 
 
 class UploadImageAnalyticsCommand(Command):
@@ -1807,16 +1807,28 @@ def _print_analytics_table(analytics, show_count=False, show_all_fields=False):
         print("\nFound %d analytic(s)\n" % len(analytics))
 
 
-def _print_dict_as_json(d):
-    s = json.dumps(d, indent=4)
-    print(s)
+def _print_upload_analytic_info(metadata):
+    render_fcns = {
+        "supports_cpu": bool,
+        "supports_gpu": bool,
+        "is_image_to_video": bool,
+        "description": _render_long_str,
+    }
+    _render_fields([metadata], render_fcns)
 
+    fields = [
+        "name", "version", "scope", "id", "supports_cpu", "supports_gpu",
+        "is_image_to_video", "description"]
+    contents = [(f, metadata[f]) for f in fields]
 
-def _print_dict_as_table(d):
-    contents = list(d.items())
     table_str = tabulate(
         contents, headers=["Analytic", ""], tablefmt=_TABLE_FORMAT)
     print(table_str)
+
+
+def _print_dict_as_json(d):
+    s = json.dumps(d, indent=4)
+    print(s)
 
 
 def _render_long_str(name):

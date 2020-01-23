@@ -10,4 +10,5 @@ __pycache__
 !/docs/source/index.rst
 !/docs/source/README.rst
 !/docs/source/CLI.rst
+!/docs/source/WALKTHROUGH.rst
 !/docs/source/APPLICATIONS.rst

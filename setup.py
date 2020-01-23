@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 setup(
     name="voxel51-api-py",
     version="0.1.0",
-    description="Python client library for the Voxel51 Platform API",
+    description="Python client library for the Voxel51 Platform",
     author="Voxel51, Inc.",
     contact="info@voxel51.com",
     url="https://github.com/voxel51/api-py",
