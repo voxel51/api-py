@@ -1764,6 +1764,7 @@ def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
         "start_date": _render_datetime,
         "completion_date": _render_datetime,
         "auto_start": bool,
+        "expired": bool,
     }
     _render_fields(jobs, render_fcns)
 
@@ -1772,7 +1773,7 @@ def _print_jobs_table(jobs, show_count=False, show_all_fields=False):
     else:
         fields = [
             "id", "name", "state", "archived", "upload_date",
-            "expiration_date"]
+            "expiration_date", "expired"]
 
     records = _render_records(jobs, fields)
     table_str = tabulate(records, headers=fields, tablefmt=_TABLE_FORMAT)
