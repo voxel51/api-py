@@ -463,14 +463,9 @@ class TTLDataCommand(Command):
         response = api.batch_update_data_ttl(
             data_ids, days=args.days, expiration_date=args.date)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Data TTL(s) updated")
-        else:
-            for data_id, message in iteritems(failures):
-                print(
-                    "Failed to update TTL of data '%s': %s" %
-                    (data_id, message))
+        _log_batch_response(
+            response, success_message="data TTL(s) updated",
+            failure_message="failed to update TTL of data")
 
 
 class DeleteDataCommand(Command):
@@ -525,12 +520,9 @@ class DeleteDataCommand(Command):
 
         response = api.batch_delete_data(data_ids)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Data deleted")
-        else:
-            for data_id, message in iteritems(failures):
-                print("Failed to delete data '%s': %s" % (data_id, message))
+        _log_batch_response(
+            response, success_message="data deleted",
+            failure_message="failed to delete data")
 
 
 class JobsCommand(Command):
@@ -857,12 +849,9 @@ class StartJobsCommand(Command):
 
         response = api.batch_start_jobs(job_ids)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Job(s) started")
-        else:
-            for job_id, message in iteritems(failures):
-                print("Failed to start job '%s': %s" % (job_id, message))
+        _log_batch_response(
+            response, success_message="job(s) started",
+            failure_message="failed to start job")
 
 
 class ArchiveJobsCommand(Command):
@@ -922,12 +911,9 @@ class ArchiveJobsCommand(Command):
 
         response = api.batch_archive_jobs(job_ids)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Job(s) archived")
-        else:
-            for job_id, message in iteritems(failures):
-                print("Failed to archive job '%s': %s" % (job_id, message))
+        _log_batch_response(
+            response, success_message="job(s) archived",
+            failure_message="failed to archive job")
 
 
 class UnarchiveJobsCommand(Command):
@@ -990,12 +976,9 @@ class UnarchiveJobsCommand(Command):
 
         response = api.batch_unarchive_jobs(job_ids)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Job(s) unarchived")
-        else:
-            for job_id, message in iteritems(failures):
-                print("Failed to unarchive job '%s': %s" % (job_id, message))
+        _log_batch_response(
+            response, success_message="job(s) unarchived",
+            failure_message="failed to unarchive job")
 
 
 class TTLJobsCommand(Command):
@@ -1066,13 +1049,9 @@ class TTLJobsCommand(Command):
         response = api.batch_update_jobs_ttl(
             job_ids, days=args.days, expiration_date=args.date)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Job TTL(s) updated")
-        else:
-            for job_id, message in iteritems(failures):
-                print(
-                    "Failed to update TTL of job '%s': %s" % (job_id, message))
+        _log_batch_response(
+            response, success_message="job TTL(s) updated",
+            failure_message="failed to update TTL of job")
 
 
 class RequestJobsCommand(Command):
@@ -1275,12 +1254,9 @@ class KillJobsCommand(Command):
 
         response = api.batch_kill_jobs(job_ids)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Job(s) killed")
-        else:
-            for job_id, message in iteritems(failures):
-                print("Failed to kill job '%s': %s" % (job_id, message))
+        _log_batch_response(
+            response, success_message="job(s) killed",
+            failure_message="failed to kill job")
 
 
 class DeleteJobsCommand(Command):
@@ -1341,12 +1317,9 @@ class DeleteJobsCommand(Command):
 
         response = api.batch_delete_jobs(job_ids)
 
-        failures = _get_batch_failures(response)
-        if not failures:
-            print("Job(s) deleted")
-        else:
-            for job_id, message in iteritems(failures):
-                print("Failed to delete job '%s': %s" % (job_id, message))
+        _log_batch_response(
+            response, success_message="job(s) deleted",
+            failure_message="failed to delete job")
 
 
 class AnalyticsCommand(Command):
@@ -1861,6 +1834,23 @@ def _render_records(d, fields):
     for di in d:
         records.append(tuple(di.get(f, "") for f in fields))
     return records
+
+
+def _log_batch_response(
+        response, success_message="item(s) processed",
+        failure_message="failed to process item"):
+    failures = _get_batch_failures(response)
+
+    num_items = len(response)
+    num_failures = len(failures)
+    num_successes = num_items - num_failures
+
+    if num_failures > 0:
+        for xid, message in iteritems(failures):
+            print("%s '%s': %s" % (failure_message.capitalize(), xid, message))
+
+    if success_message:
+        print("%d/%d %s" % (num_successes, num_items, success_message))
 
 
 def _get_batch_failures(response):
