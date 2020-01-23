@@ -303,7 +303,9 @@ class API(object):
             a dictionary mapping analytic IDs to dictionaries indicating
                 whether the analytic was successfully retrieved. The
                 ``success`` field will be set to ``True`` on success or
-                ``False`` on failure
+                ``False`` on failure, and the ``result`` field will contain
+                details in the same format as returned by
+                :func:`get_analytic_details`
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -537,7 +539,9 @@ class API(object):
         Returns:
             a dictionary mapping data IDs to dictionaries indicating whether
                 the data was successfully retrieved. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+                be set to ``True`` on success or ``False`` on failure, and the
+                ``result`` field will contain details in the same format as
+                returned by :func:`get_data_details`
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1014,7 +1018,9 @@ class API(object):
         Returns:
             a dictionary mapping job IDs to dictionaries indicating whether
                 the job was successfully retrieved. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+                be set to ``True`` on success or ``False`` on failure, and the
+                ``result`` field will contain details in the same format as
+                returned by :func:`get_job_details`
 
         Raises:
             :class:`APIError` if the request was unsuccessful
