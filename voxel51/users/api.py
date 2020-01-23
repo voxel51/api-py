@@ -301,11 +301,10 @@ class API(object):
 
         Returns:
             a dictionary mapping analytic IDs to dictionaries indicating
-                whether the analytic was successfully retrieved. The
-                ``success`` field will be set to ``True`` on success or
-                ``False`` on failure, and the ``result`` field will contain
-                details in the same format as returned by
-                :func:`get_analytic_details`
+            whether the analytic was successfully retrieved. The ``success``
+            field will be set to ``True`` on success or ``False`` on failure,
+            and the ``result`` field will contain details in the same format as
+            returned by :func:`get_analytic_details`
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -538,10 +537,10 @@ class API(object):
 
         Returns:
             a dictionary mapping data IDs to dictionaries indicating whether
-                the data was successfully retrieved. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure, and the
-                ``result`` field will contain details in the same format as
-                returned by :func:`get_data_details`
+            the data was successfully retrieved. The ``success`` field will be
+            set to ``True`` on success or ``False`` on failure, and the
+            ``result`` field will contain details in the same format as
+            returned by :func:`get_data_details`
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -568,8 +567,8 @@ class API(object):
 
         Returns:
             a dictionary mapping data IDs to dictionaries indicating whether
-                the data was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            the data was successfully processed. The ``success`` field will be
+            set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -592,8 +591,8 @@ class API(object):
 
         Returns:
             a dictionary mapping data IDs to dictionaries indicating whether
-                the data was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            the data was successfully processed. The ``success`` field will be
+            set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1016,11 +1015,11 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully retrieved. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure, and the
-                ``result`` field will contain details in the same format as
-                returned by :func:`get_job_details`
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully retrieved. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure, and the ``result``
+            field will contain details in the same format as returned by
+            :func:`get_job_details`
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1034,9 +1033,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1050,9 +1049,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1066,9 +1065,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1094,9 +1093,9 @@ class API(object):
                 is included in the datetime or string, it will be respected
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1120,9 +1119,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1138,9 +1137,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``success`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
