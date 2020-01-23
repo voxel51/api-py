@@ -41,8 +41,25 @@ class AnalyticType(object):
     IMAGE_TO_VIDEO = "IMAGE_TO_VIDEO"
 
 
+class AnalyticImageType(object):
+    '''Enum describing the possible types of analytic images.'''
+
+    CPU = "CPU"
+    GPU = "GPU"
+
+
 class API(object):
     '''Main class for managing a session with the Voxel51 Platform API.
+
+    Using this API requires a valid API token. The following strategy is used
+    to locate your active API token (in order of precedence):
+
+        (1) Use the :class:`voxel51.users.auth.Token` provided when
+            constructing the :class:`API` instance
+        (2) Use the ``VOXEL51_API_PRIVATE_KEY`` and ``VOXEL51_API_BASE_URL``
+            environment variables
+        (3) Use the ``VOXEL51_API_TOKEN`` environment variable
+        (4) Load the active token from ``~/.voxel51/api-token.json``
 
     Attributes:
         base_url (string): the base URL of the API
@@ -56,11 +73,10 @@ class API(object):
         '''Creates an API instance.
 
         Args:
-            token (voxel51.users.auth.Token, optional): a Token to use. If no
-                token is provided, the ``VOXEL51_API_TOKEN`` environment
-                variable is checked and, if set, the token is loaded from that
-                path. Otherwise, the token is loaded from
-                ``~/.voxel51/api-token.json``
+            token (voxel51.users.auth.Token, optional): a
+                :class:`voxel51.users.auth.Token` to use. If no token is
+                provided, the strategy described above is used to locate the
+                active token
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''
@@ -246,14 +262,14 @@ class API(object):
         Args:
             analytic_id (str): the analytic ID
             image_tar_path (str): the path to the image tarfile
-            image_type (str): the image computation type, "cpu" or "gpu"
+            image_type (AnalyticImageType): the type of analytic image
 
         Raises:
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(
             self.base_url, "analytics", analytic_id, "images")
-        params = {"type": image_type.lower()}
+        params = {"type": image_type}
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
         with open(image_tar_path, "rb") as df:
@@ -344,7 +360,8 @@ class API(object):
         return _parse_json_response(res)["data"]
 
     def post_data_as_url(
-            self, url, filename, mime_type, size, ttl, encoding=None):
+            self, url, filename, mime_type, size, expiration_date,
+            encoding=None):
         '''Posts data via URL.
 
         The data is not accessed nor uploaded at this time. Instead, the
@@ -352,17 +369,21 @@ class API(object):
 
         The URL must be accessible via an HTTP GET request.
 
+        The URL (typically a signed URL) should be accessible until the
+        expiration date that you specify. Note that the expiration date of data
+        posted via this route cannot be updated later.
+
         Args:
             url (str): a URL (typically a signed URL) that can be accessed
                 publicly via an HTTP GET request
             filename (str): the filename of the data
             mime_type (str): the MIME type of the data
             size (int): the size of the data, in bytes
-            ttl (datetime|str, optional): a TTL for the data. If none is
-                provided, the default TTL is used. If a string is provided, it
-                must be in ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ".
-                If a non-UTC timezone is included in the datetime or string, it
-                will be respected
+            expiration_date (datetime|str, optional): the expiration date for
+                the URL you provided. If a string is provided, it must be in
+                ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC
+                timezone is included in the datetime or string, it will be
+                respected
             encoding (str, optional): an optional encoding of the file
 
         Returns:
@@ -377,7 +398,7 @@ class API(object):
             "filename": filename,
             "mimetype": mime_type,
             "size": size,
-            "data_ttl": _parse_datetime(ttl),
+            "data_ttl": _parse_datetime(expiration_date),
         }
         if encoding:
             data["encoding"] = encoding
@@ -1094,12 +1115,11 @@ class API(object):
         body = {}
         if params is not None:
             body.update(**params)
+
         body.update(action=action, ids=list(ids))
         res = self._requests.post(endpoint, headers=self._header, json=body)
         _validate_response(res)
         statuses = _parse_json_response(res)["responses"]
-        for status in statuses.values():
-            status["success"] = ("error" not in status)
         return statuses
 
     def _stream_download(self, url, output_path):

@@ -35,6 +35,16 @@ class ApplicationAPI(API):
     platform users. In order to use these user-specific methods, however, you
     must first activate a user via :func:`ApplicationAPI.with_user`.
 
+    Using this API requires a valid application token. The following strategy
+    is used to locate your active application token (in order of precedence):
+
+        (1) Use the :class:`voxel51.apps.auth.ApplicationToken` provided when
+            constructing the :class:`ApplicationAPI` instance
+        (2) Use the ``VOXEL51_APP_PRIVATE_KEY`` and ``VOXEL51_APP_BASE_URL``
+            environment variables
+        (3) Use the ``VOXEL51_APP_TOKEN`` environment variable
+        (4) Load the active token from ``~/.voxel51/app-token.json``
+
     Attributes:
         base_url (str): the base URL of the API
         token (voxel51.apps.auth.ApplicationToken): the authentication token
@@ -50,10 +60,9 @@ class ApplicationAPI(API):
 
         Args:
             token (voxel51.apps.auth.ApplicationToken, optional): an optional
-                :class:`ApplicationToken` to use. If no token is provided, the
-                ``VOXEL51_APP_TOKEN`` environment variable is checked and, if
-                set, the token is loaded from that path. Otherwise, the token
-                is loaded from ``~/.voxel51/app-token.json``
+                :class:`voxel51.apps.auth.ApplicationToken` to use. If no
+                token is provided, the strategy described above is used to
+                locate the active token
             keep_alive (bool, optional): whether to keep the request session
                 alive between requests. By default, this is False
         '''
@@ -234,7 +243,7 @@ class ApplicationAPI(API):
         '''
         endpoint = voxu.urljoin(
             self.base_url, "apps", "analytics", analytic_id, "images")
-        params = {"type": image_type.lower()}
+        params = {"type": image_type}
         filename = os.path.basename(image_tar_path)
         mime_type = _get_mime_type(image_tar_path)
         with open(image_tar_path, "rb") as df:

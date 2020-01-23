@@ -1,8 +1,9 @@
-# Voxel51 Platform API Python Client Library
+# Voxel51 Platform Python Client Library
 
-A Python client library for interacting with the Voxel51 Platform.
+A Python client library for the Voxel51 Platform.
 
-Available at [https://github.com/voxel51/api-py](https://github.com/voxel51/api-py).
+Available at
+[https://github.com/voxel51/api-py](https://github.com/voxel51/api-py).
 
 <img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
 
@@ -13,13 +14,13 @@ To install the library, first clone it:
 
 ```shell
 git clone https://github.com/voxel51/api-py
-cd api-py
 ```
 
-and then run the install script:
+and then install via pip:
 
 ```shell
-bash install.bash
+cd api-py
+pip install -e .
 ```
 
 
@@ -32,25 +33,34 @@ To learn how to use this client library to create and run jobs that execute
 each of the analytics exposed on the Voxel51 Platform, see
 the [Analytics Documentation](https://voxel51.com/docs/analytics).
 
+For more information about using the `voxel51` command-line interface that is
+provided by this library see the [CLI Quickstart](CLI).
 
-## User Quickstart
+For more information about using this client library to operate an application
+on the Voxel51 Platform, see the [Applications Quickstart](APPLICATIONS).
 
-This section provides a brief guide to using the Platform API with your user
-account.
 
-### Sign-up and Authentication
+## Quickstart
+
+This section provides a brief guide to using the Platform API with this client
+library.
+
+### Authentication
 
 To use the API, you must first create an account at https://console.voxel51.com
 and download an API token.
 
 > Keep your API token private; it is your access key to the API.
 
-Each API request you make must be authenticated by your token. To activate your
-token, set the `VOXEL51_API_TOKEN` environment variable in your shell to point
-to your API token file:
+Each API request you make must be authenticated by your token. There are a
+variety of ways to activate your token; for a full description, see the
+[Authentication Documentation](https://voxel51.com/docs/api/#authentication).
+
+A simple approach is to set the `VOXEL51_API_TOKEN` environment variable in
+your shell to point to your API token file:
 
 ```shell
-export VOXEL51_API_TOKEN="/path/to/your/api-token.json"
+export VOXEL51_API_TOKEN=/path/to/your/api-token.json
 ```
 
 Alternatively, you can permanently activate a token by executing the following
@@ -68,7 +78,7 @@ automatically used in all future sessions. A token can be deactivated via the
 
 After you have activated an API token, you have full access to the API.
 
-### Creating an API Session
+### API Sessions
 
 To initialize an API session, issue the following commands:
 
@@ -97,6 +107,12 @@ doc = api.get_analytic_doc(analytic_id)
 
 ### Data
 
+List uploaded data:
+
+```py
+data = api.list_data()
+```
+
 Upload data to the cloud storage:
 
 ```py
@@ -104,12 +120,6 @@ Upload data to the cloud storage:
 data_path = "/path/to/video.mp4"
 
 api.upload_data(data_path)
-```
-
-List uploaded data:
-
-```py
-data = api.list_data()
 ```
 
 ### Jobs
@@ -122,14 +132,14 @@ jobs = api.list_jobs()
 
 Create a job request to perform an analytic on a data, where `<analytic>` is
 the name of the analytic to run, `<data-id>` is the ID of the data to process,
-and any `<param>` values are set as necessary to configre the analytic:
+and any `<parameter>` values are set as necessary to configre the analytic:
 
 ```py
 from voxel51.users.jobs import JobRequest
 
 job_request = JobRequest("<analytic>")
 job_request.set_input("<input>", data_id="<data-id>")
-job_request.set_parameter("<param>", val)
+job_request.set_parameter("<parameter>", val)
 
 print(job_request)
 ```
@@ -137,26 +147,14 @@ print(job_request)
 Upload a job request:
 
 ```py
-api.upload_job_request(job_request, "<job-name>")
+metadata = api.upload_job_request(job_request, "<job-name>")
+job_id = metadata["id"]
 ```
 
 Start a job:
 
 ```py
-# ID of the job
-job_id = "XXXXXXXX"
-
 api.start_job(job_id)
-```
-
-Wait until a job is complete and then download its output:
-
-```py
-# Local path to which to download the output
-output_path = "/path/to/output.zip"
-
-api.wait_until_job_completes(job_id)
-api.download_job_output(job_id, output_path)
 ```
 
 Get the status of a job:
@@ -165,102 +163,13 @@ Get the status of a job:
 status = api.get_job_status(job_id)
 ```
 
-
-## Application Quickstart
-
-This section provides a brief guide to using the Platform API with your
-application.
-
-### Sign-up and Authentication
-
-To use the API with your application, you must first login to your application
-admin account at https://console.voxel51.com/admin and create an API token
-for your application.
-
-> Keep your application API token private; it is your access key to the API.
-
-Each API request you make must be authenticated by your application token. To
-activate your application token, set the `VOXEL51_APP_TOKEN` environment
-variable in your shell to point to your API token file:
-
-```shell
-export VOXEL51_APP_TOKEN="/path/to/your/app-token.json"
-```
-
-Alternatively, you can permanently activate an application token by executing
-the following commands:
+Download the output of a completed job:
 
 ```py
-from voxel51.apps.auth import activate_application_token
+# Local path to which to download the output
+output_path = "/path/to/labels.json"
 
-activate_application_token("/path/to/your/app-token.json")
-```
-
-In the latter case, your token is copied to `~/.voxel51/` and will be
-automatically used in all future sessions. An application token can be
-deactivated via the `voxel51.apps.auth.deactivate_application_token()` method.
-
-After you have activated an application API token, you have full access to the
-API.
-
-### Creating an Application API Session
-
-To initialize an API session for your application, issue the following
-commands:
-
-```py
-from voxel51.apps.api import ApplicationAPI
-
-api = ApplicationAPI()
-```
-
-### User Management
-
-The application API provides methods to manage the users of your application.
-
-For example, you can list the current users of your application:
-
-```py
-usernames = api.list_users()
-```
-
-and create a new user:
-
-```py
-api.create_user("<username>")
-```
-
-### Performing User Actions
-
-To perform actions for a user of your application, you must first activate the
-user:
-
-```py
-# Activate an application user
-api.with_user("<username>")
-```
-
-With a user activated, all subsequent API requests will be applied to that
-user. To deactivate the user, use the `api.exit_user()` method.
-
-For example, you can upload data for the user:
-
-```py
-# Local path to the data
-data_path = "/path/to/video.mp4"
-
-api.upload_data(data_path)
-```
-
-And run a job on the user's data:
-
-```py
-from voxel51.users.jobs import JobRequest
-
-job_request = JobRequest("<analytic>")
-job_request.set_input("<input>", data_id="<data-id>")
-job_request.set_parameter("<param>", val)
-api.upload_job_request(job_request, "<job-name>", auto_start=True)
+api.download_job_output(job_id, output_path=output_path)
 ```
 
 
@@ -324,7 +233,14 @@ This project uses
 [Sphinx-Napoleon](https://pypi.python.org/pypi/sphinxcontrib-napoleon)
 to generate its documentation from source.
 
-To generate the documentation, run:
+To generate the documentation, you must have installed the `dev` dependencies
+for the package:
+
+```shell
+pip install -e .[dev]
+```
+
+Then you can generate the docs by running:
 
 ```shell
 bash docs/generate_docs.bash
