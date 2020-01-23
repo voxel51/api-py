@@ -274,7 +274,13 @@ class InfoDataCommand(Command):
     def run(parser, args):
         api = API()
 
-        data = [api.get_data_details(data_id) for data_id in args.ids]
+        response = api.batch_get_data_details(args.ids)
+
+        _log_batch_response(
+            response, success_message=None,
+            failure_message="failed to get data details")
+
+        data = [r["result"] for r in response if r["success"]]
         _print_data_table(data, show_all_fields=args.all_fields)
 
 
@@ -745,7 +751,13 @@ class InfoJobsCommand(Command):
     def run(parser, args):
         api = API()
 
-        jobs = [api.get_job_details(job_id) for job_id in args.ids]
+        response = api.batch_get_job_details(args.ids)
+
+        _log_batch_response(
+            response, success_message=None,
+            failure_message="failed to get job details")
+
+        jobs = [r["result"] for r in response if r["success"]]
         _print_jobs_table(jobs, show_all_fields=args.all_fields)
 
 
@@ -1503,8 +1515,13 @@ class InfoAnalyticsCommand(Command):
     def run(parser, args):
         api = API()
 
-        analytics = [
-            api.get_analytic_details(analytic_id) for analytic_id in args.ids]
+        response = api.batch_get_analytic_details(args.ids)
+
+        _log_batch_response(
+            response, success_message=None,
+            failure_message="failed to get analytic details")
+
+        analytics = [r["result"] for r in response if r["success"]]
         _print_analytics_table(analytics, show_all_fields=args.all_fields)
 
 
