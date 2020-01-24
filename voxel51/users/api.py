@@ -302,7 +302,7 @@ class API(object):
         Returns:
             a dictionary mapping analytic IDs to response dictionaries. The
             ``success`` field of each response will be set to ``True`` on
-            success or ``False`` on failure, and the ``result`` field will
+            success or ``False`` on failure, and the ``response`` field will
             contain the analytic details in the same format as returned by
             :func:`get_analytic_details`
 
@@ -538,7 +538,7 @@ class API(object):
         Returns:
             a dictionary mapping data IDs to response dictionaries. The
             ``success`` field of each response will be set to ``True`` on
-            success or ``False`` on failure, and the ``result`` field will
+            success or ``False`` on failure, and the ``response`` field will
             contain the data details in the same format as returned by
             :func:`get_data_details`
 
@@ -1017,7 +1017,7 @@ class API(object):
         Returns:
             a dictionary mapping job IDs to response dictionaries. The
             ``success`` field of each response will be set to ``True`` on
-            success or ``False`` on failure, and the ``result`` field will
+            success or ``False`` on failure, and the ``response`` field will
             contain the job details in the same format as returned by
             :func:`get_job_details`
 

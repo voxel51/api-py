@@ -280,7 +280,7 @@ class InfoDataCommand(Command):
             response, success_message=None,
             failure_message="failed to get data details")
 
-        data = [r["result"] for r in response if r["success"]]
+        data = _get_batch_responses(response)
         _print_data_table(data, show_all_fields=args.all_fields)
 
 
@@ -757,7 +757,7 @@ class InfoJobsCommand(Command):
             response, success_message=None,
             failure_message="failed to get job details")
 
-        jobs = [r["result"] for r in response if r["success"]]
+        jobs = _get_batch_responses(response)
         _print_jobs_table(jobs, show_all_fields=args.all_fields)
 
 
@@ -1521,7 +1521,7 @@ class InfoAnalyticsCommand(Command):
             response, success_message=None,
             failure_message="failed to get analytic details")
 
-        analytics = [r["result"] for r in response if r["success"]]
+        analytics = _get_batch_responses(response)
         _print_analytics_table(analytics, show_all_fields=args.all_fields)
 
 
@@ -1868,6 +1868,10 @@ def _log_batch_response(
 
     if success_message:
         print("%d/%d %s" % (num_successes, num_items, success_message))
+
+
+def _get_batch_responses(response):
+    return [r["response"] for r in itervalues(response) if r["success"]]
 
 
 def _get_batch_failures(response):
