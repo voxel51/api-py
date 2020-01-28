@@ -22,8 +22,6 @@ try:
 except ImportError:
     from urllib import urlencode  # Python 2
 
-from voxel51.users.api import APIError
-
 
 class BaseQuery(object):
     '''Base class for API queries.
@@ -102,7 +100,8 @@ class BaseQuery(object):
             the updated query instance
         '''
         if not self._is_supported_field(field):
-            raise APIError("Invalid search parameter %s" % field, 400)
+            raise ValueError("Invalid search parameter %s" % field)
+
         self.search.append("%s:%s" % (field, search_str))
         return self
 
