@@ -28,6 +28,7 @@ import requests
 
 import voxel51.users.auth as voxa
 import voxel51.users.jobs as voxj
+import voxel51.users.query as voxq
 import voxel51.users.utils as voxu
 
 
@@ -184,6 +185,45 @@ class API(object):
             endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
+
+    def get_analytic_id(self, name, version=None):
+        '''Gets the ID of the analytic with the given name (and optional
+        version).
+
+        Under the hood, this method uses an
+        :class:`voxel51.users.query.AnalyticsQuery` to search for the analytic
+        on the Platform. Thus, technically, `name` and `version` can be
+        substrings of the full analytic name and version. However, this method
+        raises an error if multiple analytics are found to match the search.
+
+        Args:
+            name (str): the analytic name
+            version (str, optional): the analytic version. By default, the
+                latest version of the analytic is used
+
+        Returns:
+            the ID of the analytic
+
+        Raises:
+            ValueError if the specified analytic was not (uniquely) found
+        '''
+        analytics_query = voxq.AnalyticsQuery()
+        analytics_query.add_field("id")
+        analytics_query.add_search("name", name)
+
+        if version is not None:
+            analytics_query.add_search("version", version)
+            analytics_query.set_all_versions(True)
+
+        analytics = self.query_analytics(analytics_query)["analytics"]
+
+        if len(analytics) != 1:
+            pretty_name = _render_pretty_analytic_name(name, version=version)
+            raise ValueError(
+                "Expected one match for analytic '%s'; found %d"
+                % (pretty_name, len(analytics)))
+
+        return analytics[0]["id"]
 
     def get_analytic_details(self, analytic_id):
         '''Gets details about the analytic with the given ID.
@@ -1165,6 +1205,10 @@ class APIError(Exception):
             message = '%s for URL: %s' % (res.reason, res.url)
 
         return cls(message, res.status_code)
+
+
+def _render_pretty_analytic_name(name, version=None):
+    return "%s v%s" % (name, version) if version else name
 
 
 def _parse_datetime(datetime_or_str):
