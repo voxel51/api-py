@@ -291,9 +291,9 @@ class JobsQuery(BaseQuery):
     Attributes:
         fields (list): the list of fields to include in the returned records.
             The supported query fields are `id`, `name`, `state`, `archived`,
-            `upload_date`, `expiration_date`, `analytic_id`, `compute_mode`,
-            `auto_start`, `start_date`, `completion_date`, `fail_date`, and
-            `failure_type`
+            `upload_date`, `expiration_date`, `expired`, `analytic_id`,
+            `compute_mode`, `auto_start`, `start_date`, `completion_date`,
+            `fail_date`, and `failure_type`
 
         search (list): a list of `field:search_str` search strings to apply
         sort (str): a `field:asc/desc` string describing a sorting scheme
@@ -303,5 +303,5 @@ class JobsQuery(BaseQuery):
 
     SUPPORTED_FIELDS = [
         "id", "name", "state", "archived", "upload_date", "expiration_date",
-        "analytic_id", "compute_mode", "auto_start", "start_date",
-        "completion_date", "fail_date", "failure_type", "expired"]
+        "expired", "analytic_id", "compute_mode", "auto_start", "start_date",
+        "completion_date", "fail_date", "failure_type"]
