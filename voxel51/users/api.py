@@ -28,6 +28,7 @@ import requests
 
 import voxel51.users.auth as voxa
 import voxel51.users.jobs as voxj
+import voxel51.users.query as voxq
 import voxel51.users.utils as voxu
 
 
@@ -184,6 +185,43 @@ class API(object):
             endpoint, headers=self._header, params=analytics_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
+
+    def get_analytic_id(self, name, version=None):
+        '''Gets the ID of the analytic with the given name (and optional
+        version).
+
+        Args:
+            name (str): the analytic name
+            version (str, optional): the analytic version. By default, the
+                latest version of the analytic is returned
+
+        Returns:
+            the ID of the analytic
+
+        Raises:
+            ValueError if the specified analytic was not found
+        '''
+        analytics_query = voxq.AnalyticsQuery()
+        analytics_query.add_fields(["id", "name", "version"])
+        analytics_query.add_search("name", name)
+
+        if version is not None:
+            analytics_query.add_search("version", version)
+            analytics_query.set_all_versions(True)
+
+        analytics = self.query_analytics(analytics_query)["analytics"]
+
+        # Queries match substrings, so we must enforce exact matching manually
+        analytics = [
+            a for a in analytics
+            if a["name"] == name and (
+                version is None or a["version"] == version)]
+
+        if not analytics:
+            pretty_name = _render_pretty_analytic_name(name, version=version)
+            raise ValueError("Analytic '%s' not found" % pretty_name)
+
+        return analytics[0]["id"]
 
     def get_analytic_details(self, analytic_id):
         '''Gets details about the analytic with the given ID.
@@ -1165,6 +1203,10 @@ class APIError(Exception):
             message = '%s for URL: %s' % (res.reason, res.url)
 
         return cls(message, res.status_code)
+
+
+def _render_pretty_analytic_name(name, version=None):
+    return "%s v%s" % (name, version) if version else name
 
 
 def _parse_datetime(datetime_or_str):
