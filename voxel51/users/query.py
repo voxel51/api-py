@@ -99,9 +99,6 @@ class BaseQuery(object):
         Returns:
             the updated query instance
         '''
-        if not self._is_supported_field(field):
-            raise ValueError("Invalid search parameter %s" % field)
-
         self.search.append("%s:%s" % (field, search_str))
         return self
 
