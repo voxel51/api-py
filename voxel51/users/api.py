@@ -208,14 +208,18 @@ class API(object):
             ValueError if the specified analytic was not (uniquely) found
         '''
         analytics_query = voxq.AnalyticsQuery()
-        analytics_query.add_field("id")
+        analytics_query.add_fields(["id", "name", "version"])
         analytics_query.add_search("name", name)
 
         if version is not None:
             analytics_query.add_search("version", version)
             analytics_query.set_all_versions(True)
 
-        analytics = self.query_analytics(analytics_query)["analytics"]
+        analytics = [
+            a for a in self.query_analytics(analytics_query)["analytics"]
+            if a["name"].lower() == name.lower() and (
+                version is None or a["version"].lower() == version.lower())
+        ]
 
         if len(analytics) != 1:
             pretty_name = _render_pretty_analytic_name(name, version=version)
