@@ -190,22 +190,16 @@ class API(object):
         '''Gets the ID of the analytic with the given name (and optional
         version).
 
-        Under the hood, this method uses an
-        :class:`voxel51.users.query.AnalyticsQuery` to search for the analytic
-        on the Platform. Thus, technically, `name` and `version` can be
-        substrings of the full analytic name and version. However, this method
-        raises an error if multiple analytics are found to match the search.
-
         Args:
             name (str): the analytic name
             version (str, optional): the analytic version. By default, the
-                latest version of the analytic is used
+                latest version of the analytic is returned
 
         Returns:
             the ID of the analytic
 
         Raises:
-            ValueError if the specified analytic was not (uniquely) found
+            ValueError if the specified analytic was not found
         '''
         analytics_query = voxq.AnalyticsQuery()
         analytics_query.add_fields(["id", "name", "version"])
@@ -215,17 +209,17 @@ class API(object):
             analytics_query.add_search("version", version)
             analytics_query.set_all_versions(True)
 
-        analytics = [
-            a for a in self.query_analytics(analytics_query)["analytics"]
-            if a["name"].lower() == name.lower() and (
-                version is None or a["version"].lower() == version.lower())
-        ]
+        analytics = self.query_analytics(analytics_query)["analytics"]
 
-        if len(analytics) != 1:
+        # Queries match substrings, so we must enforce exact matching manually
+        analytics = [
+            a for a in analytics
+            if a["name"] == name and (
+                version is None or a["version"] == version)]
+
+        if not analytics:
             pretty_name = _render_pretty_analytic_name(name, version=version)
-            raise ValueError(
-                "Expected one match for analytic '%s'; found %d"
-                % (pretty_name, len(analytics)))
+            raise ValueError("Analytic '%s' not found" % pretty_name)
 
         return analytics[0]["id"]
 
