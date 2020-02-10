@@ -152,7 +152,7 @@ class Token(object):
     '''
 
     def __init__(self, token_dict):
-        '''Creates a token object with the given contents
+        '''Creates a Token instance.
 
         Args:
             token_dict (dict): a JSON dictionary defining an API token
