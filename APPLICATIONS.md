@@ -11,7 +11,7 @@ of jobs, etc.
 This document provides a brief overview of using this client library to
 operate your application on the Voxel51 Platform.
 
-<img src="https://drive.google.com/uc?id=1j0S8pLsopAqF1Ik3rf-CdyAIU4kA0sOP" alt="voxel51-logo.png" width="40%"/>
+<img src="https://user-images.githubusercontent.com/3719547/74191434-8fe4f500-4c21-11ea-8d73-555edfce0854.png" alt="voxel51-logo.png" width="40%"/>
 
 
 ## Documentation
