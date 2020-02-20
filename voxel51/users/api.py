@@ -182,7 +182,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "analytics")
         res = self._requests.get(
-            endpoint, headers=self._header, params=analytics_query.to_dict())
+            endpoint, headers=self._header, json=analytics_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -331,6 +331,24 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    def batch_get_analytic_details(self, analytic_ids):
+        '''Gets details about the analytics with the given IDs.
+
+        Args:
+            analytic_ids (list): the analytic IDs
+
+        Returns:
+            a dictionary mapping analytic IDs to response dictionaries. The
+            ``success`` field of each response will be set to ``True`` on
+            success or ``False`` on failure, and the ``response`` field will
+            contain the analytic details in the same format as returned by
+            :func:`get_analytic_details`
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("analytics", "details", analytic_ids)
+
     # DATA ####################################################################
 
     def list_data(self):
@@ -363,7 +381,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "data")
         res = self._requests.get(
-            endpoint, headers=self._header, params=data_query.to_dict())
+            endpoint, headers=self._header, json=data_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -549,6 +567,24 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+    def batch_get_data_details(self, data_ids):
+        '''Gets details about the data with the given IDs.
+
+        Args:
+            data_ids (list): the data IDs
+
+        Returns:
+            a dictionary mapping data IDs to response dictionaries. The
+            ``success`` field of each response will be set to ``True`` on
+            success or ``False`` on failure, and the ``response`` field will
+            contain the data details in the same format as returned by
+            :func:`get_data_details`
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("data", "details", data_ids)
+
     def batch_update_data_ttl(self, data_ids, days=None, expiration_date=None):
         '''Updates the expiration dates of the data with the given IDs.
 
@@ -569,8 +605,8 @@ class API(object):
 
         Returns:
             a dictionary mapping data IDs to dictionaries indicating whether
-                the data was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            the data was successfully processed. The ``success`` field will be
+            set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -593,8 +629,8 @@ class API(object):
 
         Returns:
             a dictionary mapping data IDs to dictionaries indicating whether
-                the data was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            the data was successfully processed. The ``success`` field will be
+            set to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -633,7 +669,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs")
         res = self._requests.get(
-            endpoint, headers=self._header, params=jobs_query.to_dict())
+            endpoint, headers=self._header, json=jobs_query.to_dict())
         _validate_response(res)
         return _parse_json_response(res)
 
@@ -866,13 +902,15 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         if job_id is not None:
-            expiration_date = self.get_job_details(job_id)["expiration_date"]
-        elif job is not None:
-            expiration_date = job["expiration_date"]
-        else:
+            return self.get_job_details(job_id)["expired"]
+
+        if job is None:
             raise APIError("Either `job_id` or `job` must be provided", 400)
 
-        expiration = dateutil.parser.parse(expiration_date)
+        # Note that we could just return `job.expired` here, but we are
+        # computing this value dynamically from `job.expiration_date` in case
+        # the job metadata was generated awhile ago...
+        expiration = dateutil.parser.parse(job["expiration_date"])
         now = datetime.utcnow()
         return now >= expiration.replace(tzinfo=None)
 
@@ -1010,6 +1048,24 @@ class API(object):
         res = self._requests.put(endpoint, headers=self._header)
         _validate_response(res)
 
+    def batch_get_job_details(self, job_ids):
+        '''Gets details about the jobs with the given IDs.
+
+        Args:
+            job_ids (list): the job IDs
+
+        Returns:
+            a dictionary mapping job IDs to response dictionaries. The
+            ``success`` field of each response will be set to ``True`` on
+            success or ``False`` on failure, and the ``response`` field will
+            contain the job details in the same format as returned by
+            :func:`get_job_details`
+
+        Raises:
+            :class:`APIError` if the request was unsuccessful
+        '''
+        return self._batch_request("jobs", "details", job_ids)
+
     def batch_start_jobs(self, job_ids):
         '''Starts the jobs with the given IDs.
 
@@ -1017,9 +1073,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1033,9 +1089,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1049,9 +1105,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1077,9 +1133,9 @@ class API(object):
                 is included in the datetime or string, it will be respected
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1103,9 +1159,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
@@ -1121,9 +1177,9 @@ class API(object):
             job_ids (list): the job IDs
 
         Returns:
-            a dictionary mapping job IDs to dictionaries indicating whether
-                the job was successfully processed. The ``status`` field will
-                be set to ``True`` on success or ``False`` on failure
+            a dictionary mapping job IDs to dictionaries indicating whether the
+            job was successfully processed. The ``success`` field will be set
+            to ``True`` on success or ``False`` on failure
 
         Raises:
             :class:`APIError` if the request was unsuccessful
