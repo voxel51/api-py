@@ -2,7 +2,7 @@
 '''
 Installs the voxel51-api-py package.
 
-| Copyright 2017-2019, Voxel51, Inc.
+| Copyright 2017-2020, Voxel51, Inc.
 | `voxel51.com <https://voxel51.com/>`_
 |
 '''
@@ -28,7 +28,7 @@ setup(
     install_requires=[
         "argcomplete",
         "future",
-        "python-dateutil",
+        "python-dateutil>=2.7.0",
         "requests",
         "requests-toolbelt",
         "six",
