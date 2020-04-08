@@ -1209,7 +1209,7 @@ class API(object):
                 for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
                     f.write(chunk)
 
-    @retry(wait_exponential_multiplier=100, 10000)
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=10000)
     def _request_get(self, *args, **kwargs):
         res = self._requests.get(*args, **kwargs)
         _validate_response(res)
