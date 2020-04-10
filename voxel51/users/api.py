@@ -435,11 +435,10 @@ class API(object):
             filename (str): the filename of the data
             mime_type (str): the MIME type of the data
             size (int): the size of the data, in bytes
-            expiration_date (datetime|str, optional): the expiration date for
-                the URL you provided. If a string is provided, it must be in
-                ISO 8601 format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC
-                timezone is included in the datetime or string, it will be
-                respected
+            expiration_date (datetime|str): the expiration date for the URL you
+                provided. If a string is provided, it must be in ISO 8601
+                format, e.g., "YYYY-MM-DDThh:mm:ss.sssZ". If a non-UTC timezone
+                is included in the datetime or string, it will be respected
             encoding (str, optional): an optional encoding of the file
 
         Returns:
