@@ -1920,7 +1920,7 @@ class _RecursiveHelpAction(argparse._HelpAction):
             _RecursiveHelpAction._recurse(subparser)
 
 
-def _register_main_command(command, version=None):
+def _register_main_command(command, version=None, recursive_help=True):
     parser = argparse.ArgumentParser(description=command.__doc__.rstrip())
 
     parser.set_defaults(execute=lambda args: command.execute(parser, args))
@@ -1931,7 +1931,7 @@ def _register_main_command(command, version=None):
             "-v", "--version", action="version", version=version,
             help="show version info")
 
-    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+    if recursive_help and _has_subparsers(parser):
         parser.add_argument(
             "--all-help", action=_RecursiveHelpAction,
             help="show help recurisvely and exit")
@@ -1940,7 +1940,7 @@ def _register_main_command(command, version=None):
     return parser
 
 
-def _register_command(parent, name, command):
+def _register_command(parent, name, command, recursive_help=True):
     parser = parent.add_parser(
         name, help=command.__doc__.splitlines()[0],
         description=command.__doc__.rstrip(),
@@ -1949,19 +1949,12 @@ def _register_command(parent, name, command):
     parser.set_defaults(execute=lambda args: command.execute(parser, args))
     command.setup(parser)
 
-    if _ADD_RECURSIVE_HELP_FLAGS and _has_subparsers(parser):
+    if recursive_help and _has_subparsers(parser):
         parser.add_argument(
             "--all-help", action=_RecursiveHelpAction,
             help="show help recurisvely and exit")
 
     return parser
-
-
-#
-# Whether to add a flag to that recursively prints help for all parsers that
-# have subparsers
-#
-_ADD_RECURSIVE_HELP_FLAGS = True
 
 
 def main():
