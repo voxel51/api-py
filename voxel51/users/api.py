@@ -25,6 +25,7 @@ import time
 import dateutil.parser
 import mimetypes
 import requests
+from retrying import retry
 
 import voxel51.users.auth as voxa
 import voxel51.users.jobs as voxj
@@ -161,8 +162,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "analytics", "list")
         data = {"all_versions": all_versions}
-        res = self._requests.get(endpoint, headers=self._header, json=data)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header, json=data)
         return _parse_json_response(res)["analytics"]
 
     def query_analytics(self, analytics_query):
@@ -181,9 +181,8 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "analytics")
-        res = self._requests.get(
+        res = self._request_get(
             endpoint, headers=self._header, json=analytics_query.to_dict())
-        _validate_response(res)
         return _parse_json_response(res)
 
     def get_analytic_id(self, name, version=None):
@@ -236,8 +235,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "analytics", analytic_id)
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["analytic"]
 
     def get_analytic_doc(self, analytic_id):
@@ -253,8 +251,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "analytics", analytic_id, "doc")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)
 
     def upload_analytic(self, doc_json_path, analytic_type=None):
@@ -331,6 +328,7 @@ class API(object):
         res = self._requests.delete(endpoint, headers=self._header)
         _validate_response(res)
 
+
     def batch_get_analytic_details(self, analytic_ids):
         '''Gets details about the analytics with the given IDs.
 
@@ -361,8 +359,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "data", "list")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["data"]
 
     def query_data(self, data_query):
@@ -380,9 +377,8 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "data")
-        res = self._requests.get(
+        res = self._request_get(
             endpoint, headers=self._header, json=data_query.to_dict())
-        _validate_response(res)
         return _parse_json_response(res)
 
     def upload_data(self, path, ttl=None):
@@ -475,8 +471,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "data", data_id)
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["data"]
 
     def download_data(self, data_id, output_path=None):
@@ -514,8 +509,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "data", data_id, "download-url")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["url"]
 
     def update_data_ttl(self, data_id, days=None, expiration_date=None):
@@ -648,8 +642,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", "list")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["jobs"]
 
     def query_jobs(self, jobs_query):
@@ -667,9 +660,8 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs")
-        res = self._requests.get(
+        res = self._request_get(
             endpoint, headers=self._header, json=jobs_query.to_dict())
-        _validate_response(res)
         return _parse_json_response(res)
 
     def upload_job_request(
@@ -719,8 +711,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id)
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["job"]
 
     def get_job_request(self, job_id):
@@ -737,8 +728,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "request")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return voxj.JobRequest.from_dict(_parse_json_response(res))
 
     def start_job(self, job_id):
@@ -926,8 +916,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "status")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)
 
     def download_job_output(self, job_id, output_path=None):
@@ -966,8 +955,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "output-url")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["url"]
 
     def download_job_logfile(self, job_id, output_path=None):
@@ -989,8 +977,7 @@ class API(object):
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "log")
         if output_path is None:
-            res = self._requests.get(endpoint, headers=self._header)
-            _validate_response(res)
+            res = self._request_get(endpoint, headers=self._header)
             return res.content.decode()
 
         self._stream_download(endpoint, output_path)
@@ -1013,8 +1000,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "jobs", job_id, "log-url")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["url"]
 
     def delete_job(self, job_id):
@@ -1197,8 +1183,7 @@ class API(object):
             :class:`APIError` if the request was unsuccessful
         '''
         endpoint = voxu.urljoin(self.base_url, "status", "all")
-        res = self._requests.get(endpoint, headers=self._header)
-        _validate_response(res)
+        res = self._request_get(endpoint, headers=self._header)
         return _parse_json_response(res)["statuses"]
 
     # PRIVATE METHODS #########################################################
@@ -1223,6 +1208,11 @@ class API(object):
                 for chunk in res.iter_content(chunk_size=_CHUNK_SIZE):
                     f.write(chunk)
 
+    @retry(wait_exponential_multiplier=100, wait_exponential_max=10000)
+    def _request_get(self, *args, **kwargs):
+        res = self._requests.get(*args, **kwargs)
+        _validate_response(res)
+        return res
 
 class APIError(Exception):
     '''Exception raised when an :class:`API` request fails.'''
