@@ -1,12 +1,23 @@
 # Voxel51 Platform Python Client Library
 
+<div align="center">
+
+<img src="https://user-images.githubusercontent.com/3719547/74191434-8fe4f500-4c21-11ea-8d73-555edfce0854.png" alt="voxel51-logo.png" width="40%"/>
+
+[![Discord](https://img.shields.io/badge/Discord-7289DA?logo=discord&logoColor=white)](https://discord.gg/fiftyone-community)
+[![Hugging Face](https://img.shields.io/badge/Hugging_Face-purple?style=flat&logo=huggingface)](https://huggingface.co/Voxel51)
+[![Voxel51 Blog](https://img.shields.io/badge/Voxel51_Blog-ff6d04?style=flat)](https://voxel51.com/blog)
+[![Newsletter](https://img.shields.io/badge/Newsletter-BE5B25?logo=mail.ru&logoColor=white)](https://share.hsforms.com/1zpJ60ggaQtOoVeBqIZdaaA2ykyk)
+[![LinkedIn](https://img.shields.io/badge/In-white?style=flat&label=Linked&labelColor=blue)](https://www.linkedin.com/company/voxel51)
+[![Twitter](https://img.shields.io/badge/Twitter-000000?logo=x&logoColor=white)](https://x.com/voxel51)
+[![Medium](https://img.shields.io/badge/Medium-12100E?logo=medium&logoColor=white)](https://medium.com/voxel51)
+
+</div>
+
 A Python client library for the Voxel51 Platform.
 
 Available at
 [https://github.com/voxel51/api-py](https://github.com/voxel51/api-py).
-
-<img src="https://user-images.githubusercontent.com/3719547/74191434-8fe4f500-4c21-11ea-8d73-555edfce0854.png" alt="voxel51-logo.png" width="40%"/>
-
 
 ## Installation
 
@@ -23,7 +34,6 @@ cd api-py
 pip install -e .
 ```
 
-
 ## Documentation
 
 For full documentation of the Voxel51 Platform API, including usage of this
@@ -38,7 +48,6 @@ provided by this library see the [CLI Quickstart](CLI).
 
 For more information about using this client library to operate an application
 on the Voxel51 Platform, see the [Applications Quickstart](APPLICATIONS).
-
 
 ## Quickstart
 
@@ -172,7 +181,6 @@ output_path = "/path/to/labels.json"
 api.download_job_output(job_id, output_path=output_path)
 ```
 
-
 ## Improving Request Efficiency
 
 A common pattern when interacting with the platform is to perform an operation
@@ -226,7 +234,6 @@ api.thread_map(start_job_if_necessary, jobs, max_workers=16)
 
 See `voxel51.users.api.API.thread_map()` for details.
 
-
 ## Generating Documentation
 
 This project uses
@@ -248,7 +255,6 @@ bash docs/generate_docs.bash
 
 To view the documentation, open the `docs/build/html/index.html` file in
 your browser.
-
 
 ## Copyright
 
